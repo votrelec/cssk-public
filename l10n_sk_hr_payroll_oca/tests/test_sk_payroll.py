@@ -2332,6 +2332,33 @@ class TestSkPayroll(TransactionCase):
         )
         self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 5.01)
 
+    def test_sickness_manual_missing_basis_is_a_plain_business_error(self):
+        contract, employee = self._make_plain_worker(1500)
+        for daily_base in (None, 0):
+            with self.subTest(daily_base=daily_base):
+                inputs = [("PN_DAYS", 1)]
+                if daily_base is not None:
+                    inputs.append(("PN_DVZ", daily_base))
+                with self.assertRaises(UserError) as caught:
+                    self._payslip_with_inputs(
+                        contract, employee, date(2026, 6, 1), date(2026, 6, 30), inputs
+                    )
+                self.assertEqual(
+                    str(caught.exception),
+                    "Record the reviewed daily base and its evidence for each PN medical case.",
+                )
+
+    def test_sickness_zero_manual_days_do_not_require_an_unused_daily_base(self):
+        contract, employee = self._make_plain_worker(1500)
+        slip = self._payslip_with_inputs(
+            contract,
+            employee,
+            date(2026, 6, 1),
+            date(2026, 6, 30),
+            [("PN_DAYS", 0), ("PN_DVZ", 0)],
+        )
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 0)
+
     def test_sickness_calendar_month_boundary_does_not_restart_first_tier(self):
         contract, employee, _calendar = self._abs_setup(wage=1500)
         leave = self._make_leave(

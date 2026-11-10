@@ -129,8 +129,26 @@ class Payslip(models.Model):
                 daily_input = slip.input_line_ids.filtered(
                     lambda row: row.code == "PN_DVZ"
                 )[-1:]
-                slip._l10n_sk_pn_episodes(daily_input.amount if daily_input else None)
+                daily_base = daily_input.amount if daily_input else None
+                episodes = slip._l10n_sk_pn_episodes(daily_base)
+                manual_days = slip.worked_days_line_ids.filtered(
+                    lambda row: row.code == "PN" and row.number_of_days
+                ) or slip.input_line_ids.filtered(
+                    lambda row: row.code == "PN_DAYS" and row.amount
+                )
+                if not episodes and manual_days:
+                    slip._l10n_sk_pn_checked_manual_base(daily_base)
         return super().compute_sheet()
+
+    def _l10n_sk_pn_checked_manual_base(self, daily_base):
+        """An unfilled zero is not a reviewed basis for manual compensation."""
+        if daily_base is None or not isfinite(daily_base) or daily_base <= 0:
+            raise UserError(
+                _(
+                    "Record the reviewed daily base and its evidence for each PN medical case."
+                )
+            )
+        return daily_base
 
     def _l10n_sk_pn_episodes(self, fallback_daily_base=None):
         """Separate new illnesses; join explicitly identified continuations."""
@@ -208,6 +226,7 @@ class Payslip(models.Model):
                 daily_base = bases.pop()
             elif (
                 fallback_daily_base is not None
+                and isfinite(fallback_daily_base)
                 and fallback_daily_base > 0
                 and len(groups) == 1
             ):
@@ -272,12 +291,7 @@ class Payslip(models.Model):
         )
         if not days:
             return 0.0
-        if daily_base is None or daily_base <= 0:
-            raise UserError(
-                _(
-                    "Record the reviewed daily base and its evidence for each PN medical case."
-                )
-            )
+        daily_base = self._l10n_sk_pn_checked_manual_base(daily_base)
         parameter = self.rule_parameter
         paid = min(days, parameter("l10n_sk_pn_employer_days"))
         tier1 = min(paid, parameter("l10n_sk_pn_tier1_days"))
