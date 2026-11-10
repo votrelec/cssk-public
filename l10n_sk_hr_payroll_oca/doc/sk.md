@@ -184,3 +184,10 @@ pásku, nasledujúcu prepočítajte a potom ju potvrďte. Neúspešný pokus pon
 pôvodné návrhy nezmenené. Aj zmena dátumov, vstupov alebo mzdových riadkov musí
 pred potvrdením prejsť overením zdrojov. Opakované potvrdenie už potvrdenej alebo
 vyplatenej mzdy neprepočítava jej historické sumy.
+## Medicínske prípady PN a overené základy {#sickness-cases}
+
+Na pôvodnej schválenej absencii zadajte identifikátor medicínskeho prípadu, overený denný základ a podklad jeho výpočtu. Pokračovanie má rovnaký identifikátor, nové ochorenie odlišný. Pri susediacich záznamoch bez jednoznačnej identity sa výpočet zastaví zrozumiteľnou správou pred spustením mzdového pravidla. Samostatné ochorenia majú vlastné zákonné pásma aj rôzne DVZ. Pokračovanie musí mať zhodný základ a nesmie obsahovať nevysvetlené medzery. Jeden starší prípad môže použiť kladný vstup PN_DVZ; viac prípadov vyžaduje osobitne overené základy. Výslovne overená nula sa odlišuje od predvolenej nuly nevyplneného vstupu.
+
+PN je kalendárna udalosť aj počas samotného víkendu. Táto výnimka nepovoľuje bežnú dovolenku bez plánovaného pracovného času. Medicínske záznamy aj pôvodné vstupy používajú jedinú metódu výpočtu náhrady. Polia uchovávajú overené zákonné fakty; samy neurčujú DVZ z neoverenej mzdy ani každý osobitný nárok podľa §4–8 zákona462/2003.
+
+Ak je nainštalované rozšírenie uchovaných mesačných podkladov, medicínske záznamy dopĺňajú presné vstupy jeho spolupracujúcim hookom. Vytvorenie, zmena aj vymazanie absencie koordinujú súbeh zamestnaneckým zámkom. Potvrdenie bez prepočtu odmietne zastaraný návrh, kým potvrdená mzda zachová pôvodné podklady a sumy aj po neskoršej zmene HR údajov. Nevzniká druhá mzdová ani dochádzková kniha. Pracovník zadávajúci medicínske podklady potrebuje aj štandardnú rolu Time Off Officer; samotná rola Payroll Officer nesprístupňuje cudzie absencie.

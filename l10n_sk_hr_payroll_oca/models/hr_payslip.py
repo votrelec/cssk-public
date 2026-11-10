@@ -341,7 +341,18 @@ class HrPayslip(models.Model):
     def _l10n_sk_pn_spans(self):
         """Keep the actual incapacity onset, including its preceding month."""
         self.ensure_one()
-        leaves = (
+        leaves = self._l10n_sk_pn_leaves()
+        spans = [(x.request_date_from, x.request_date_to) for x in leaves]
+        if not any(
+            start <= self.date_to and end >= self.date_from for start, end in spans
+        ):
+            return False
+        return merge_spans(spans)
+
+    def _l10n_sk_pn_leaves(self):
+        """Native approved absence records supporting this month's PN."""
+        self.ensure_one()
+        return (
             self.env["hr.leave"]
             .sudo()
             .search(
@@ -355,13 +366,6 @@ class HrPayslip(models.Model):
                 ]
             )
         )
-        spans = [(x.request_date_from, x.request_date_to) for x in leaves]
-        if not any(
-            start <= self.date_to and end >= self.date_from for start, end in spans
-        ):
-            return False
-        return merge_spans(spans)
-
     def _l10n_sk_pn_payment_period(self):
         """The employer stops paying when its insured relationship ends."""
         version = self._l10n_sk_version()
@@ -371,36 +375,6 @@ class HrPayslip(models.Model):
         if version.contract_date_end:
             last = min(last, version.contract_date_end)
         return first, last
-
-    def l10n_sk_pn_compensation(self, daily_base):
-        """Value native PN episodes using each episode's dated statutory terms.
-
-        A claim beginning in 2025 retains its ten-day employer limit in 2026.
-        Clipping the payable window must not restart the illness-day count.
-        ``False`` means no native episode; zero is an actual native result.
-        """
-        spans = self._l10n_sk_pn_spans()
-        if spans is False:
-            return False
-        first, last = self._l10n_sk_pn_payment_period()
-        total = 0
-        for start, end in spans:
-            if start > last or end < first:
-                continue
-
-            def parameter(code):
-                return self.env["hr.rule.parameter"]._get_parameter_value(code, start)
-
-            tier1_days = parameter("l10n_sk_pn_tier1_days")
-            employer_days = parameter("l10n_sk_pn_employer_days")
-            tier1, tier2, _calendar_days = split_sick_days(
-                [(start, end)], first, last, tier1_days, employer_days
-            )
-            capped_base = min(daily_base, parameter("l10n_sk_pn_max_dvz"))
-            rate1 = parameter("l10n_sk_pn_rate_tier1") / 100.0
-            rate2 = parameter("l10n_sk_pn_rate_tier2") / 100.0
-            total += sick_pay_amount(capped_base, tier1, tier2, rate1, rate2)
-        return round_sick_pay(total)
 
     def l10n_sk_pn_manual_compensation(self, daily_base, tier1, tier2, rate1, rate2):
         """Keep the existing manual fallback on the same statutory rounding."""

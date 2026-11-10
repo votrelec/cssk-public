@@ -25,6 +25,7 @@
         "data/hr_salary_rule_data.xml",
         "data/hr_payroll_structure_data.xml",
         "views/hr_contract_views.xml",
+        "views/hr_leave_views.xml",
         "views/hr_rule_parameter_views.xml",
         "views/hr_payslip_monthly_views.xml",
         "views/l10n_sk_tax_reconciliation_views.xml",

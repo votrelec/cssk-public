@@ -6,6 +6,7 @@ from . import hr_employee
 from . import hr_leave_type
 from . import hr_leave_accrual_plan
 from . import hr_payslip
+from . import sickness_cases
 from . import l10n_sk_tax_reconciliation
 from . import fund_capture
 from . import health_exemption

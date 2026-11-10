@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 from psycopg2 import IntegrityError
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
 from odoo.tools import mute_logger
 from odoo.tools.convert import convert_file
@@ -1618,7 +1618,7 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._tiny_part_timer()
         p = self._payslip_with_inputs(
             contract, employee, date(2026, 6, 1), date(2026, 6, 30),
-            [("PN_DAYS", 10.0)],
+            [("PN_DAYS", 10.0), ("PN_DVZ", 20)],
         )
         self.assertAlmostEqual(
             p.get_salary_line_total("HEALTHDOPLATOK"), -14.30, 2)
@@ -2132,6 +2132,130 @@ class TestSkPayroll(TransactionCase):
         )
         # Fri-Sun 3 x25%, Mon-Tue 2 x55%; calendar days, not three workdays.
         self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 37)
+
+    def _reviewed_pn_case(self, employee, start, end, reference, daily_base):
+        leave = self._make_leave(employee, "l10n_sk_leave_type_pn", start, end)
+        leave.write(
+            {
+                "l10n_sk_pn_case_reference": reference,
+                "l10n_sk_pn_daily_base": daily_base,
+                "l10n_sk_pn_base_reference": "Synthetic reviewed statutory DVZ calculation",
+                "l10n_sk_pn_base_reviewed": True,
+            }
+        )
+        return leave
+
+    def test_pn_cases_adjoining_distinct_illnesses_use_separate_bases_and_tiers(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 5), date(2026, 6, 9), "CASE-A", 20
+        )
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 10), date(2026, 6, 12), "CASE-B", 40
+        )
+        slip = self._worked_payslip(
+            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 67)
+
+    def test_pn_cases_explicit_continuation_does_not_restart_first_tier(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 5), date(2026, 6, 9), "CASE-A", 20
+        )
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 10), date(2026, 6, 12), "CASE-A", 20
+        )
+        slip = self._worked_payslip(
+            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 70)
+
+    def test_pn_cases_adjoining_without_medical_identity_are_not_guessed(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(employee, date(2026, 6, 5), date(2026, 6, 9), False, 20)
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 10), date(2026, 6, 12), False, 40
+        )
+        with self.assertRaisesRegex(UserError, "Identify adjoining") as caught:
+            self._worked_payslip(
+                contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+            )
+        self.assertEqual(
+            str(caught.exception),
+            "Identify adjoining PN records as continuation of one medical case or as separate illnesses.",
+        )
+
+    def test_pn_cases_distinct_illnesses_cannot_share_one_unreviewed_global_base(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._make_leave(
+            employee, "l10n_sk_leave_type_pn", date(2026, 6, 1), date(2026, 6, 2)
+        )
+        self._make_leave(
+            employee, "l10n_sk_leave_type_pn", date(2026, 6, 8), date(2026, 6, 9)
+        )
+        with self.assertRaisesRegex(UserError, "each PN medical case"):
+            self._worked_payslip(
+                contract,
+                employee,
+                date(2026, 6, 1),
+                date(2026, 6, 30),
+                inputs=[("PN_DVZ", 20)],
+            )
+
+    def test_pn_cases_weekend_only_still_has_calendar_compensation(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 6), date(2026, 6, 7), "CASE-WEEKEND", 20
+        )
+        slip = self._worked_payslip(
+            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 10)
+
+    def test_pn_cases_rest_day_exception_does_not_apply_to_ordinary_holiday(self):
+        _contract, employee, _calendar = self._abs_setup(wage=1500)
+        with self.assertRaisesRegex(ValidationError, "not supposed to work"):
+            self._make_leave(
+                employee,
+                "l10n_sk_leave_type_dovolenka",
+                date(2026, 6, 6),
+                date(2026, 6, 7),
+            )
+
+    def test_pn_cases_continuation_with_conflicting_bases_is_refused(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 5), date(2026, 6, 9), "CASE-A", 20
+        )
+        self._reviewed_pn_case(
+            employee, date(2026, 6, 10), date(2026, 6, 12), "CASE-A", 40
+        )
+        with self.assertRaisesRegex(UserError, "one consistent"):
+            self._worked_payslip(
+                contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+            )
+
+    def test_pn_cases_zero_default_input_is_not_reviewed_daily_base(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._make_leave(
+            employee, "l10n_sk_leave_type_pn", date(2026, 6, 1), date(2026, 6, 2)
+        )
+        with self.assertRaisesRegex(UserError, "each PN medical case"):
+            self._worked_payslip(
+                contract,
+                employee,
+                date(2026, 6, 1),
+                date(2026, 6, 30),
+                inputs=[("PN_DVZ", 0)],
+            )
+
+    def test_pn_cases_blank_medical_references_are_not_distinct_identifiers(self):
+        contract, employee, _calendar = self._abs_setup(wage=1500)
+        self._reviewed_pn_case(employee, date(2026, 6, 5), date(2026, 6, 9), " ", 20)
+        self._reviewed_pn_case(employee, date(2026, 6, 10), date(2026, 6, 12), "\t", 40)
+        with self.assertRaisesRegex(UserError, "Identify adjoining"):
+            self._worked_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
 
     def test_sickness_calendar_employer_stops_at_employment_end(self):
         contract, employee, _calendar = self._abs_setup(wage=1500)

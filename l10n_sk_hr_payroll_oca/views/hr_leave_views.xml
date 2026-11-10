@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_leave_form_pn_case" model="ir.ui.view">
+        <field name="name">hr.leave.form.sk.pn.case</field>
+        <field name="model">hr.leave</field>
+        <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <field name="l10n_sk_leave_payroll_code" invisible="1"/>
+                <group string="Slovak PN evidence" invisible="l10n_sk_leave_payroll_code != 'PN'">
+                    <field name="l10n_sk_pn_case_reference"/>
+                    <field name="l10n_sk_pn_daily_base"/>
+                    <field name="l10n_sk_pn_base_reference"/>
+                    <field name="l10n_sk_pn_base_reviewed"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

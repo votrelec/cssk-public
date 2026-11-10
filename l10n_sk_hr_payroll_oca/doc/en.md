@@ -190,3 +190,10 @@ Confirm the first payslip, recalculate the next one and then confirm it. A faile
 batch leaves the original drafts unchanged. Changes to dates, inputs or salary
 lines must also pass source validation before confirmation. Retrying an already
 confirmed or paid payroll does not recalculate its historical amounts.
+## Medical PN cases and reviewed bases {#sickness-cases}
+
+Record the medical case reference, reviewed daily base and its calculation evidence on the native approved time-off record. Continuation uses the same reference; a different illness uses a different reference. Adjacent records without a clear identity are refused before salary-rule evaluation. Distinct illnesses restart their own statutory tiers and may have different daily bases. Continuation must retain a consistent base and may not contain unexplained gaps. A single legacy case can still use a positive PN_DVZ input; multiple cases need their individually reviewed bases. An explicitly reviewed zero is different from the default zero of an unfilled input.
+
+PN is a calendar event and may occupy only rest days. This exception does not authorize ordinary holiday on a day without planned work. Payroll uses one compensation method for both medical records and the legacy input path. These fields record reviewed statutory facts; they do not themselves calculate DVZ from an unverified wage or determine every special entitlement under sections4–8 of Act462/2003.
+
+Where the retained monthly-source extension is installed, the native medical records contribute their exact inputs through its cooperative evidence hook. Concurrent leave creation, editing and deletion coordinate with the employee source lock. Confirmation without recomputation rejects a stale draft source, while confirmed payroll retains the original evidence and amounts after later HR changes. No second payroll or absence ledger is introduced. Staff entering medical evidence also need the standard Time Off Officer role; Payroll Officer alone does not grant access to other employees' leave.
