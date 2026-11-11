@@ -96,7 +96,24 @@ class HealthAssessments(models.Model):
                 # Coverage is a required source fact, but its absence must not
                 # discard valid historical monetary assessments or profiles.
                 missing |= slip
+        missing |= self._health_multiple_card_monthly_sources(slips, records)
         return records, missing
+
+    def _health_multiple_card_monthly_sources(self, slips, records):
+        """The form owns personal identity; arithmetic does not guess allocation."""
+        groups = {}
+        for slip in slips:
+            number = (slip.employee_id.identification_id or "").replace("/", "").strip()
+            if number and any(
+                row["fund"] == "health" and row["facts"].get("monthly_health")
+                for row in records[slip.id] or []
+            ):
+                groups[number] = groups.get(number, slips.browse()) | slip
+        result = slips.browse()
+        for group in groups.values():
+            if len(group.employee_id) > 1:
+                result |= group
+        return result
 
     @staticmethod
     def _health_recorded_contract_period(profile):
@@ -115,20 +132,31 @@ class HealthAssessments(models.Model):
     def _missing_fund_evidence_warning(self, missing):
         profiles = self._payslip_fund_profiles(missing)
         records, _without_evidence = self._payslip_fund_records(missing)
+        cards = self._health_multiple_card_monthly_sources(missing, records)
         coverage = missing.filtered(
             lambda slip: records[slip.id] and self._complete_health_profile(profiles[slip.id])
             and not self._health_recorded_contract_period(profiles[slip.id])
         )
-        if not coverage:
+        if not coverage and not cards:
             return super()._missing_fund_evidence_warning(missing)
-        warning = _(
-            "Historical contract coverage was not recorded for: %(slips)s. "
-            "Review the original contract periods. Recorded amounts are preserved; "
-            "the legacy coverage fallback uses only the payslip dates.",
-            slips=", ".join(coverage.mapped("display_name")),
-        )
-        other = missing - coverage
-        return warning + "\n" + super()._missing_fund_evidence_warning(other) if other else warning
+        warnings = []
+        if cards:
+            warnings.append(_(
+                "Monthly health allocation across multiple HR cards requires review for: %(slips)s. "
+                "Recorded actual amounts are preserved; no shared OP or minimum is guessed.",
+                slips=", ".join(cards.mapped("display_name")),
+            ))
+        if coverage:
+            warnings.append(_(
+                "Historical contract coverage was not recorded for: %(slips)s. "
+                "Review the original contract periods. Recorded amounts are preserved; "
+                "the legacy coverage fallback uses only the payslip dates.",
+                slips=", ".join(coverage.mapped("display_name")),
+            ))
+        other = missing - coverage - cards
+        if other:
+            warnings.append(super()._missing_fund_evidence_warning(other))
+        return "\n".join(warnings)
 
     def _health_source_coverage_dates(self, slip, profile):
         """Use the frozen source contract, not a later HR version's interval."""

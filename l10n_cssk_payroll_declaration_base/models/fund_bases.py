@@ -276,7 +276,11 @@ class DeclarationFundBases(models.AbstractModel):
             ):
                 records = False
             result[slip.id] = records or False
-            if callable(reader) and not records:
+            if callable(reader) and (not records or any(
+                row["facts"].get("monthly_unverified") for row in records
+            )):
+                # Unknown monthly arithmetic does not invalidate checked
+                # actual charges. Retain them and require the shared review.
                 missing |= slip
         return result, missing
 
@@ -337,11 +341,25 @@ class DeclarationFundBases(models.AbstractModel):
 
     def _missing_fund_evidence_warning(self, missing):
         """Forms may name an absent profile fact without discarding known sums."""
-        return _(
+        records, _missing = self._payslip_fund_records(missing)
+        monthly = missing.filtered(lambda slip: any(
+            row["facts"].get("monthly_unverified") for row in records[slip.id] or []
+        ))
+        warning = _(
+            "Monthly fund sources could not be reconciled for: %(slips)s. "
+            "Recorded actual bases and charges are preserved. Review the original "
+            "sources before claiming an exact monthly allocation.",
+            slips=", ".join(monthly.mapped("display_name")),
+        ) if monthly else False
+        other = missing - monthly
+        if not other:
+            return warning
+        fallback = _(
             "Legacy gross-based fallback was used because recorded fund bases "
             "are missing for: %(slips)s",
-            slips=", ".join(missing.mapped("display_name")),
+            slips=", ".join(other.mapped("display_name")),
         )
+        return warning + "\n" + fallback if warning else fallback
 
     def _payslip_fund_profiles(self, slips):
         """Optional batch profile adapter, with bridge-owned refund semantics.

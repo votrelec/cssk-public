@@ -77,15 +77,6 @@ class MonthlyFundPayslip(models.Model):
                          "rate": prior["rate"], "amount": prior["amount"]})
         return rows, missing
 
-    def _cssk_recorded_fund_bases(self):
-        records = super()._cssk_recorded_fund_bases()
-        if records and any(row["facts"].get("monthly_unverified") for row in records):
-            # Keep the shared original warning / correction-review policy.
-            # An unverified arithmetic result must not become exact evidence.
-            return False
-        return records
-
-
 class MonthlyFundSalaryRule(models.Model):
     _inherit = "hr.salary.rule"
 

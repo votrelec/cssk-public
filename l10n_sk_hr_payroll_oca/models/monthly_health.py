@@ -91,7 +91,7 @@ class MonthlyHealthPayslip(models.Model):
                 missing.append(peer.id)
                 continue
             sources = [row["facts"].get("monthly_health") for row in (ee, er)]
-            if any(
+            if any(row["facts"].get("monthly_unverified") for row in (ee, er)) or any(
                 not isinstance(source, dict) or source.get("schema") != 1
                 or source.get("policy") != policy for source in sources
             ):

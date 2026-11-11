@@ -33,6 +33,9 @@ fragment sa neprepočítajú odhadom: ostávajú skutočné natívne sumy a pož
 na preskúmanie podľa spoločnej politiky pôvodného/opravného výkazu.
 
 Rozdelenie medzi iných zamestnávateľov, viac HR kariet či odlišné pracovné vzťahy
-je samostatnou hranicou. Tento balík neuzatvára účtovnú hlavnú knihu ani mesačnú
+je samostatnou hranicou. Výkaz viac HR kariet výslovne pomenuje na preskúmanie.
+Overené skutočné sumy pri neoverenom mesačnom rozdelení ostávajú zachované;
+pôvodný výkaz upozorní a oprava vyžaduje existujúce výslovné potvrdenie s auditom.
+Nevymenia sa za sumu odvodenú z hrubej mzdy. Tento balík neuzatvára účtovnú hlavnú knihu ani mesačnú
 daň, bonus a čistú mzdu. Právne zdroje a technický kontrakt sú v
 [anglickej dokumentácii](monthly_health.md).

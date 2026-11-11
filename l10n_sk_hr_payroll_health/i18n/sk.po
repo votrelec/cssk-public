@@ -828,3 +828,9 @@ msgstr ""
 #: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
 msgid "dávka 514 XML is missing the <%s> block."
 msgstr "V XML dávky 514 chýba blok <%s>."
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid "Monthly health allocation across multiple HR cards requires review for: %(slips)s. Recorded actual amounts are preserved; no shared OP or minimum is guessed."
+msgstr "Mesačné rozdelenie zdravotných odvodov medzi viac HR kariet vyžaduje preskúmanie pre: %(slips)s. Zaznamenané skutočné sumy ostávajú zachované; spoločná OP ani minimum sa neodhadujú."

@@ -296,6 +296,59 @@ class TestHealth514(TransactionCase):
         self.assertEqual(first.l10n_sk_fund_assessment, frozen)
         self.assertEqual(set(first.line_ids.ids), salary_ids)
 
+    def test_unverified_monthly_source_preserves_actual_money_and_requires_correction_review(self):
+        if self.engine != "oca":
+            self.skipTest("OCA monthly recorder contract")
+        rule = self.structure.rule_ids.filtered(lambda row: row.code == "HEALTH")
+        rule.amount_python_compute += (
+            "\nresult -= 1\n"
+            "if payslip._l10n_sk_is_recording_funds():\n"
+            "    l10n_sk_fund_record['amount'] = str(-result)\n"
+        )
+        _employee, slip = self._employee_payslip(
+            200, version_values={"l10n_sk_health_oop_claim": True},
+        )
+        statement = self._new_health_statement()
+        records, missing = statement._payslip_fund_records(slip)
+        self.assertTrue(records[slip.id])
+        self.assertEqual(missing, slip)
+        root = self._generated_tree(statement)
+        self.assertIn("Monthly fund sources", statement.fund_bases_warning)
+        self.assertIn(slip.display_name, statement.fund_bases_warning)
+        row = root.find("PersonData")
+        self.assertEqual(row.findtext("BaseOfAssessOfEmployee"), "0.00")
+        self.assertEqual(row.findtext("DepositOfEmployee"), "1.00")
+        self.assertEqual(row.findtext("DepositOffEmployeeAdd"), "22.45")
+        statement.action_submit()
+        filed = statement.submitted_attachment_id
+        original_bytes = filed.datas
+        correction = statement.copy({"state": "draft", "correction_type": "corrective"})
+        with self.assertRaisesRegex(UserError, "Precise recorded fund bases"):
+            correction.action_generate()
+        correction.fund_bases_fallback_reason = "Synthetic review of actual custom charge"
+        correction.action_confirm_legacy_fund_bases()
+        self.assertTrue(correction.fund_bases_confirmed_by)
+        self.assertTrue(correction.fund_bases_confirmed_at)
+        revised = self._generated_tree(correction)
+        self.assertEqual(revised.findtext("PersonData/DepositOfEmployee"), "1.00")
+        self.assertEqual(filed.datas, original_bytes)
+
+    def test_multiple_hr_cards_are_named_for_monthly_allocation_review(self):
+        if self.engine != "oca":
+            self.skipTest("OCA monthly recorder contract")
+        _employee, first = self._employee_payslip(
+            200, version_values={"l10n_sk_health_oop_claim": True},
+        )
+        _other, second = self._employee_payslip(
+            200, version_values={"l10n_sk_health_oop_claim": True},
+        )
+        statement = self._new_health_statement()
+        records, missing = statement._payslip_fund_records(first | second)
+        self.assertTrue(all(records.values()))
+        self.assertEqual(missing, first | second)
+        self._generated_tree(statement)
+        self.assertIn("multiple HR cards", statement.fund_bases_warning)
+
     def test_recorded_disability_group_is_not_inferred_from_a_rounded_rate(self):
         self._employee_payslip(2000, version_values={"l10n_sk_ztp": True})
         root = self._generated_tree(self._new_health_statement())

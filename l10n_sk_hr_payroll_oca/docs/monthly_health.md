@@ -46,6 +46,10 @@ and mark the source as unverified for the shared original/corrective review
 policy. Allocation across other employers, multiple HR cards and different
 engagement profiles is a separate boundary; this calculation does not claim
 such an allocation or a complete GL, income tax, bonus or NET settlement.
+The form names multiple HR cards for review. Checked actual records marked
+`monthly_unverified` remain monetary evidence: originals carry a named warning,
+corrections require the existing explicit review and audit identity. They do not
+silently switch to a gross-derived amount or alter filed attachments.
 
 Legal basis: Act 580/2004, [section 16(16–18) and section 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20260701.print.html),
 [OP rounding](https://www.dovera.sk/platitel/zamestnavatel/tema-legislativne-informacie/odpocitatelna-polozka),

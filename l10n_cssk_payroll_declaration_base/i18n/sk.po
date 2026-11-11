@@ -721,3 +721,9 @@ msgstr "ČSSZ (sociálne zabezpečenie)"
 #: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_res_company__l10n_cz_ossz_vs
 msgid "ČSSZ variable symbol (VS)"
 msgstr "Variabilný symbol ČSSZ (VS)"
+
+#. module: l10n_cssk_payroll_declaration_base
+#. odoo-python
+#: code:addons/l10n_cssk_payroll_declaration_base/models/fund_bases.py:0
+msgid "Monthly fund sources could not be reconciled for: %(slips)s. Recorded actual bases and charges are preserved. Review the original sources before claiming an exact monthly allocation."
+msgstr "Mesačné odvodové zdroje sa nepodarilo zosúladiť pre: %(slips)s. Zaznamenané skutočné základy a odvody ostávajú zachované. Pred použitím presného mesačného rozdelenia preskúmajte pôvodné zdroje."
