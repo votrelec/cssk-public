@@ -168,3 +168,14 @@ and correction review remain applicable.
 ## Meal allowance from December 2026
 
 [Notice 255/2026 Z. z.](https://employment.gov.sk/showdoc.do?docid=60223) raises the 5–12 hour domestic meal allowance to EUR 9.80 from 1 December 2026. The dated payroll parameter also applies in January 2027 until a later rate takes effect. With 20 meal days and the default 55% contribution, payroll records EUR 107.80 employer contribution; a minimum 75% voucher leaves EUR 39.20 employee share. November 2026 still uses EUR 9.30 and EUR 102.40 employer contribution. Explicit contractual contributions retain their existing priority. Travel rates are supplied by the travel module separately.
+
+## Reviewing monthly tax warnings {#monthly-tax-warning}
+
+The monthly tax warning remains visible when a customised insurance rule has
+no optional recorded fund information. Review the allowance, advance and child
+bonus for every payment in that month before using the calculation. The native
+amounts remain available while those sources need review.
+
+Calculate a new copy before using it. Recalculation refreshes its warning from
+its actual sources; a full refund of an earlier payment can change which
+sources remain relevant. Previously confirmed payroll remains historical.

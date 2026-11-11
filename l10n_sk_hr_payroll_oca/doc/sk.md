@@ -162,3 +162,14 @@ naďalej vypočítať a potvrdiť. Výkaz použije existujúce upozornenie na ch
 ## Stravné od decembra 2026
 
 [Oznámenie 255/2026 Z. z.](https://employment.gov.sk/showdoc.do?docid=60223) zvyšuje stravné pre pásmo 5–12 hodín na 9,80 EUR od 1. 12. 2026. Dátumový mzdový parameter platí aj v januári 2027 až do ďalšej účinnej zmeny. Pri 20 dňoch a predvolenom 55% príspevku je náklad zamestnávateľa 107,80 EUR; pri minimálnom 75% lístku je podiel zamestnanca 39,20 EUR. November 2026 zachová 9,30 EUR a príspevok 102,40 EUR. Výslovné zmluvné príspevky majú pôvodnú prioritu. Cestovné sadzby samostatne dodáva modul pracovných ciest.
+
+## Overenie mesačných daňových podkladov {#monthly-tax-warning}
+
+Upozornenie na mesačné daňové podklady zostáva viditeľné aj vtedy, keď vlastné
+pravidlo poistného neposkytuje voliteľné uchované údaje o fondoch. Pred použitím
+výpočtu overte nezdaniteľnú časť, preddavok a daňový bonus pri každej výplate v
+rovnakom mesiaci. Natívne sumy zostávajú dostupné aj počas overovania podkladov.
+
+Novú kópiu pásky pred použitím vypočítajte. Prepočet obnoví upozornenie podľa
+jej skutočných zdrojov; úplné storno skoršej výplaty môže zmeniť relevantné
+podklady. Už potvrdená mzda zostáva historickým záznamom.

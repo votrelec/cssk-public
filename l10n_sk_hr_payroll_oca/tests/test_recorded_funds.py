@@ -440,6 +440,58 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertTrue(second.l10n_sk_monthly_tax_warning)
         self.assertEqual(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["missing"], [first.id])
 
+    def test_missing_optional_fund_metadata_keeps_monthly_tax_warning_visible(self):
+        self.version.write({"l10n_sk_tax_declaration_signed": True,
+                            "l10n_sk_health_oop_claim": False})
+        health = self.structure.get_all_rules().filtered(lambda rule: rule.code == "HEALTH")
+        health.amount_python_compute = "result = -categories.GROSS * 0.05"
+        first = self._slip(wage=0, clawback=600)
+        first.with_context(without_compute_sheet=True).action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        self.assertFalse(first.l10n_sk_fund_assessment)
+        self.assertFalse(first.l10n_sk_monthly_tax_warning)
+        second = self._slip(wage=0, clawback=600)
+        self.assertFalse(second.l10n_sk_fund_assessment)
+        self.assertEqual(second._monthly_tax_preflight()["missing"], [first.id])
+        self.assertTrue(second.l10n_sk_monthly_tax_warning)
+        self.assertAlmostEqual(second.line_ids.filtered(lambda line: line.code == "INCOMETAX").total, -3.11, places=2)
+        second.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertTrue(second.l10n_sk_monthly_tax_warning)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_monthly_tax_warning_status_cannot_be_forged_or_copied(self):
+        slip = self._slip(wage=600)
+        for value in (True, False):
+            with self.subTest(value=value):
+                with self.assertRaises(UserError):
+                    slip.write({"l10n_sk_monthly_tax_unverified": value})
+                with self.assertRaises(UserError):
+                    slip.copy({"l10n_sk_monthly_tax_unverified": value})
+                with self.assertRaises(UserError):
+                    slip.with_context(default_l10n_sk_monthly_tax_unverified=value).copy()
+        self.assertFalse(slip.l10n_sk_monthly_tax_unverified)
+
+    def test_tax_warning_recomputes_after_native_refund_and_copy(self):
+        self.version.l10n_sk_tax_declaration_signed = True
+        health = self.structure.get_all_rules().filtered(lambda rule: rule.code == "HEALTH")
+        health.amount_python_compute = "result = -categories.GROSS * 0.05"
+        first = self._slip(wage=0, clawback=600)
+        first.with_context(without_compute_sheet=True).action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        second = self._slip(wage=0, clawback=600)
+        self.assertTrue(second.l10n_sk_monthly_tax_unverified)
+        clone = second.copy()
+        self.assertFalse(clone.l10n_sk_monthly_tax_unverified)
+        clone.compute_sheet()
+        self.assertTrue(clone.l10n_sk_monthly_tax_warning)
+        first.refund_sheet()
+        second.compute_sheet()
+        self.assertFalse(second.l10n_sk_monthly_tax_unverified)
+        self.assertFalse(second.l10n_sk_monthly_tax_warning)
+        second.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertFalse(second.l10n_sk_monthly_tax_warning)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
     def test_tax_rounds_each_progressive_band_mathematically(self):
         # FS section47 example has 6000.00 ->1328.63. Two extra cents expose
         # the difference between separately rounded bands and final-only round.

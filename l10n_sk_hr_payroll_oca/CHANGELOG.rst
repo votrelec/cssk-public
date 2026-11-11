@@ -79,6 +79,16 @@ Carry-over to 18.0
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
 
+[19.0.1.30.0] — 2026-11-11
+==========================
+
+Fixed
+~~~~~
+
+* Retain the monthly tax-source warning when a customised insurance rule
+  provides no optional fund records. Refresh it only through calculation;
+  copies and public context defaults cannot forge a review status.
+
 [19.0.1.29.0] — 2026-11-11
 ==========================
 

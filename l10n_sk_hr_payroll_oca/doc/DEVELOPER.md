@@ -63,3 +63,15 @@ The structure hook _l10n_sk_fund_parameter_codes() supplies parameter dependenci
 to both capture and source writers. Extend it for rules using helper methods
 or dynamic codes; merely hashing the resulting profile cannot prevent a stale
 REPEATABLE READ transaction from missing a newly inserted dated value.
+
+## Monthly tax warning without optional fund evidence
+
+`l10n_sk_monthly_tax_unverified` is a generated readonly/copy-false status bit,
+not a second tax ledger. The typed calculation context evaluates profile tax
+completeness after native calculation even if an unrelated custom fund rule
+leaves the optional fund collection absent. The existing warning ORs this bit
+with the retained JSON profile warning. A new copy clears the bit; its next
+calculation refreshes it. Public create/write and context defaults reject both
+true and false values. Only the private writer can store the calculation's
+status, inside the same savepoint as native compute. Retained fund JSON and
+missing-record declaration policies are unchanged.
