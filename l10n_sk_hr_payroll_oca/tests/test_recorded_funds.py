@@ -342,6 +342,72 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertTrue(second.l10n_sk_monthly_fund_warning)
         self.assertFalse(second._cssk_recorded_fund_bases())
 
+    def _split_regular_tax_case(self, *, children=0):
+        self.version.write({"l10n_sk_tax_declaration_signed": True,
+                            "l10n_sk_children_under_15": children})
+        reference = self._slip(wage=0, clawback=1200)
+        expected = {line.code: line.total for line in reference.line_ids}
+        first = self._slip(wage=0, clawback=600)
+        first.action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        second = self._slip(wage=0, clawback=600)
+        return first, second, expected, frozen
+
+    def test_monthly_tax_allowance_and_progressive_bands_are_used_once(self):
+        first, second, expected, frozen = self._split_regular_tax_case()
+        for code in ("TAXBASE", "INCOMETAX", "NET"):
+            with self.subTest(code=code):
+                observed = sum(line.total for line in (first | second).line_ids if line.code == code)
+                self.assertAlmostEqual(observed, expected[code], places=2)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_monthly_child_bonus_is_not_paid_twice(self):
+        first, second, expected, frozen = self._split_regular_tax_case(children=1)
+        for code in ("CHILD_BONUS", "INCOMETAX", "NET"):
+            with self.subTest(code=code):
+                observed = sum(line.total for line in (first | second).line_ids if line.code == code)
+                self.assertAlmostEqual(observed, expected[code], places=2)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_monthly_tax_progressive_bands_and_bonus_taper_three_payments(self):
+        self.version.write({"l10n_sk_tax_declaration_signed": True,
+                            "l10n_sk_children_under_15": 1})
+        reference = self._slip(wage=0, clawback=12000)
+        expected = {line.code: line.total for line in reference.line_ids}
+        first = self._slip(wage=0, clawback=1200)
+        first.action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        second = self._slip(wage=0, clawback=6000)
+        second.action_payslip_done()
+        third = self._slip(wage=0, clawback=4800)
+        for code in ("TAXBASE", "CHILD_BONUS", "INCOMETAX", "NET"):
+            with self.subTest(code=code):
+                observed = sum(line.total for line in (first | second | third).line_ids if line.code == code)
+                self.assertAlmostEqual(observed, expected[code], places=2)
+        self.assertLess(second.line_ids.filtered(lambda line: line.code == "CHILD_BONUS").total, 0)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_custom_tax_rule_keeps_native_amount_and_named_warning(self):
+        first, second, unused, frozen = self._split_regular_tax_case()
+        rule = self.structure.get_all_rules().filtered(lambda row: row.code == "INCOMETAX")
+        rule.amount_python_compute += "\nresult = -42.0\n"
+        second.compute_sheet()
+        self.assertEqual(second.line_ids.filtered(lambda line: line.code == "INCOMETAX").total, -42)
+        self.assertTrue(second.l10n_sk_monthly_tax_warning)
+        self.assertFalse(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["complete"])
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_missing_monthly_tax_profile_preserves_native_with_warning(self):
+        first, second, unused, frozen = self._split_regular_tax_case()
+        evidence = deepcopy(first.l10n_sk_fund_assessment)
+        evidence["profile"].pop("monthly_tax")
+        self.env.cr.execute("UPDATE hr_payslip SET l10n_sk_fund_assessment=%s WHERE id=%s",
+                            (json.dumps(evidence), first.id))
+        first.invalidate_recordset(["l10n_sk_fund_assessment"])
+        second.compute_sheet()
+        self.assertTrue(second.l10n_sk_monthly_tax_warning)
+        self.assertEqual(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["missing"], [first.id])
+
     def test_all_five_eligible_funds_reduce_income_before_the_cap(self):
         self._student_agreement()
         for income in (200, 16763.995, 16764, 16900, 17100):

@@ -7,8 +7,12 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="before">
                 <field name="l10n_sk_monthly_fund_warning" invisible="1"/>
+                <field name="l10n_sk_monthly_tax_warning" invisible="1"/>
                 <div class="alert alert-warning" invisible="not l10n_sk_monthly_fund_warning">
                     Earlier monthly fund sources could not be verified. The native calculation was retained; review the monthly assessments before using this payroll for a filing.
+                </div>
+                <div class="alert alert-warning" invisible="not l10n_sk_monthly_tax_warning">
+                    Monthly tax sources or rules could not be verified. The native calculation was retained; review the allowance, tax advance and child bonus for all payments in this month.
                 </div>
             </xpath>
         </field>

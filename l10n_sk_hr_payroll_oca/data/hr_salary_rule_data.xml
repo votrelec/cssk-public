@@ -607,7 +607,7 @@ result = max(0.0, categories.GROSS + categories.SOCIALEMPLOYEE)
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-base = result_rules.TAXBASE.total
+base = payslip._l10n_sk_monthly_tax_base(result_rules.TAXBASE.total)
 
 # --- NČZD (non-taxable part per taxpayer) ---
 # The annual high-income taper remains an RZD matter. January pension
@@ -626,7 +626,7 @@ for rate, ceiling in bands:
         tax += amt * rate
     prev = ceiling
 
-result = -tax
+result = payslip._l10n_sk_monthly_tax_amount(-tax, 'INCOMETAX')
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -655,7 +655,7 @@ if n &lt;= 0 or not contract.l10n_sk_tax_declaration_signed:
 else:
     young = payslip.rule_parameter('l10n_sk_child_bonus_under_15')
     teen = payslip.rule_parameter('l10n_sk_child_bonus_15_18')
-    base = result_rules.TAXBASE.total
+    base = payslip._l10n_sk_monthly_tax_base(result_rules.TAXBASE.total)
 
     # § 33 ods. 11 ZDP: above the threshold the bonus "na každé jedno
     # vyživované dieťa sa znižuje o 1/10 rozdielu" — the reduction is
@@ -676,6 +676,7 @@ else:
     amount = min(amount, base * cap_pct / 100.0)
 
     result = max(0.0, amount)
+result = payslip._l10n_sk_monthly_tax_amount(result, 'CHILD_BONUS')
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>

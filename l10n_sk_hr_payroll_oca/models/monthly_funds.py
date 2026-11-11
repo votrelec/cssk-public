@@ -33,6 +33,21 @@ class MonthlyFundPayslip(models.Model):
                 and row["facts"].get("monthly_unverified") for row in records
             )
 
+    def _monthly_confirmed_candidates(self):
+        """Raw sources; consumers decide effective pairs and eligible profiles."""
+        self.ensure_one()
+        reader = getattr(self, "_l10n_sk_monthly_predecessors", None)
+        if reader:
+            return reader()
+        first = self.date_from.replace(day=1)
+        last = first.replace(day=monthrange(first.year, first.month)[1])
+        return self.search([
+            ("id", "!=", self.id), ("company_id", "=", self.company_id.id),
+            ("employee_id", "=", self.employee_id.id),
+            ("date_to", ">=", first), ("date_to", "<=", last),
+            ("state", "in", ("done", "paid")),
+        ], order="id")
+
     def _monthly_social_sources(self, record):
         """Exact same native relationship only; broader allocation is separate.
 
@@ -40,14 +55,7 @@ class MonthlyFundPayslip(models.Model):
         from premiums. Native complete refund pairs are removed by the engine.
         """
         self.ensure_one()
-        first = self.date_from.replace(day=1)
-        last = first.replace(day=monthrange(first.year, first.month)[1])
-        peers = self.search([
-            ("id", "!=", self.id), ("company_id", "=", self.company_id.id),
-            ("employee_id", "=", self.employee_id.id),
-            ("date_to", ">=", first), ("date_to", "<=", last),
-            ("state", "in", ("done", "paid")),
-        ])._cssk_effective_fund_payslips()
+        peers = self._monthly_confirmed_candidates()._cssk_effective_fund_payslips()
         rows, missing = [], []
         current_profile = self._l10n_sk_fund_profile()
         keys = ("agreement", "pension", "regular", "oop", "guarantee_exempt")
@@ -94,6 +102,8 @@ class MonthlyFundSalaryRule(models.Model):
             # missing-metadata policy; never turn it into a monthly opt-in.
             return values
         if (record.get("fund"), record.get("side")) not in SOCIAL_FUNDS.values():
+            return values
+        if not self._l10n_sk_is_canonical_fund_rule():
             return values
         source = record["facts"].get("monthly")
         if not isinstance(source, dict) or set(source) != {"income", "maximum", "deduction"}:
