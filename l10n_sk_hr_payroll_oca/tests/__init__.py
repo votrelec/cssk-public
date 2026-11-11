@@ -12,3 +12,4 @@ from . import test_fund_source_concurrency
 from . import test_health_agreement_exemption
 
 from . import test_health_calendar_profile
+from . import test_monthly_health

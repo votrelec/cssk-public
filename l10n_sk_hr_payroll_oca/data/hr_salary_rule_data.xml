@@ -478,7 +478,7 @@ if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'health', 'employee', 0.0 if contract.l10n_sk_health_is_exempt() else base, rate, -result,
         facts={"rule_code": 'HEALTH', "income": categories.GROSS,
-               "op": oop})
+               "op": oop, "monthly_health": payslip.l10n_sk_monthly_health_facts(contract, inputs, worked_days)})
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -503,7 +503,8 @@ if contract.l10n_sk_health_is_exempt():
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'health', 'employer', 0.0 if contract.l10n_sk_health_is_exempt() else categories.GROSS, rate, result,
-        facts={"rule_code": 'HEALTHEMPLOYER'})
+        facts={"rule_code": 'HEALTHEMPLOYER', "income": categories.GROSS,
+               "monthly_health": payslip.l10n_sk_monthly_health_facts(contract, inputs, worked_days)})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -535,6 +536,7 @@ if payslip._l10n_sk_is_recording_funds():
 #   * PN days and days outside the contract shrink it proportionally.
 # The annual true-up is the insurer's (§ 13b, § 19); this is the monthly
 # advance only. A concurrent-employment opt-out (ods. 5) is not modelled.
+min_combined = 0.0
 if contract.l10n_sk_health_minimum_is_exempt():
     result = 0.0
 else:
@@ -572,7 +574,13 @@ else:
   elif days &lt; period_days:
     min_combined = int(round(min_combined * days / period_days * 100.0, 4)) / 100.0
   actual_combined = abs(result_rules.HEALTH.total) + result_rules.HEALTHEMPLOYER.total
+  if payslip._l10n_sk_is_recording_funds():
+    actual_combined = l10n_sk_health_native_employee + l10n_sk_health_native_employer
   result = -max(0.0, round(min_combined - actual_combined, 2))
+if payslip._l10n_sk_is_recording_funds():
+    l10n_sk_health_minimum_record = {"facts": {"income": categories.GROSS,
+        "monthly_health": payslip.l10n_sk_monthly_health_facts(contract, inputs, worked_days)},
+        "minimum": min_combined}
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>

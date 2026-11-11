@@ -259,6 +259,43 @@ class TestHealth514(TransactionCase):
         self.assertEqual(root.findtext("InsuranceBody/DepositOfInsurance3"), "0.00")
         self.assertFalse(statement.fund_bases_warning)
 
+    @freeze_time("2026-04-15")
+    def test_monthly_health_signed_fragments_equal_combined_xml_and_text(self):
+        if self.engine != "oca":
+            self.skipTest("The monthly health recorder is owned by the OCA engine")
+        _employee, first = self._employee_payslip(
+            200, version_values={"l10n_sk_health_oop_claim": True},
+        )
+        second = first.copy({"name": "Synthetic second remuneration"})
+        second.compute_sheet()
+        confirm_payslips(second)
+        frozen = deepcopy(first.l10n_sk_fund_assessment)
+        salary_ids = set(first.line_ids.ids)
+        split = []
+        for statement in (self._new_health_statement(), self._text_statement()):
+            statement.action_generate()
+            self.assertFalse(statement.fund_bases_warning)
+            split.append(base64.b64decode(statement.xml_attachment_id.datas))
+        company = self.company
+        self.company = self.env["res.company"].create({
+            "name": "Synthetic combined health reference", "country_id": company.country_id.id,
+            "company_registry": company.company_registry, "l10n_sk_dic": company.l10n_sk_dic,
+            "l10n_sk_health_insurer_code": "24", "l10n_sk_health_payer_number": "9900112233",
+        })
+        self.env.user.company_ids |= self.company
+        self.calendar = self.calendar.copy({"company_id": self.company.id})
+        self._employee_payslip(400, version_values={"l10n_sk_health_oop_claim": True})
+        combined = []
+        for statement in (self._new_health_statement(), self._text_statement()):
+            statement.action_generate()
+            self.assertFalse(statement.fund_bases_warning)
+            combined.append(base64.b64decode(statement.xml_attachment_id.datas).replace(
+                self.company.name.encode(), company.name.encode(),
+            ))
+        self.assertEqual(split, combined)
+        self.assertEqual(first.l10n_sk_fund_assessment, frozen)
+        self.assertEqual(set(first.line_ids.ids), salary_ids)
+
     def test_recorded_disability_group_is_not_inferred_from_a_rounded_rate(self):
         self._employee_payslip(2000, version_values={"l10n_sk_ztp": True})
         root = self._generated_tree(self._new_health_statement())
