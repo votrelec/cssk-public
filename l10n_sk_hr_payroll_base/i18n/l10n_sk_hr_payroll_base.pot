@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20261102\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 19:59+0000\n"
-"PO-Revision-Date: 2026-11-11 19:59+0000\n"
+"POT-Creation-Date: 2026-11-11 21:33+0000\n"
+"PO-Revision-Date: 2026-11-11 21:33+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -246,6 +246,23 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_sk_hr_payroll_base/models/health_calendar.py:0
 msgid "Only a draft health calendar can be reviewed."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/fund_source.py:0
+msgid "Payroll fund source coordination is internal."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_base
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_base.field_hr_employee__l10n_sk_fund_source_epoch
+msgid "Payroll source version"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/payslip_fund_mixin.py:0
+msgid "Payroll sources changed. Recalculate the unconfirmed payslip."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_base

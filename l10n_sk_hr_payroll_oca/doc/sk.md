@@ -150,10 +150,10 @@ mzda za rovnaký mesiac môže zmeniť podklady už vypočítaného návrhu.
 Potvrdená páska vrátane mzdových riadkov, vstupov a odpracovaných dní zostáva
 historickým záznamom aj po zrušení. Použite príslušnú opravu mzdy. Natívne úplné
 storno kopíruje pôvodné riadky a sumy; nepočíta ich z dnešnej karty zamestnanca.
-Adaptér vyžaduje natívny hook kopírovania storna z príspevku OCA/payroll 332.
-Starší engine nevie pripraviť väzbu na pôvodný podklad pred potvrdením a odmietne
-nevypočítanú kópiu storna. Storno mzdy automaticky nevracia platbu ani nemení
-podaný výkaz; tieto kroky posúďte samostatne.
+Ak staršia inštalácia odmietne kópiu storna pred potvrdením, požiadajte správcu
+o aktualizáciu mzdového enginu. Pôvodnú historickú pásku ponechajte uchovanú.
+Storno mzdy automaticky nevracia platbu ani nemení podaný výkaz; tieto kroky
+posúďte samostatne.
 
 Vlastné mzdové pravidlo bez voliteľných uchovaných údajov o fondoch možno
 naďalej vypočítať a potvrdiť. Výkaz použije existujúce upozornenie na chýbajúce

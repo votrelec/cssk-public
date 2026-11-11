@@ -498,3 +498,20 @@ msgstr "Neznámy alebo neúplný interval zdravotného kalendára"
 #: code:addons/l10n_sk_hr_payroll_base/models/health_calendar.py:0
 msgid "Use the health-calendar review and revision actions."
 msgstr "Použite úkony kontroly a revízie poistného kalendára."
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/fund_source.py:0
+msgid "Payroll fund source coordination is internal."
+msgstr "Koordináciu mzdových podkladov riadi systém."
+
+#. module: l10n_sk_hr_payroll_base
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_base.field_hr_employee__l10n_sk_fund_source_epoch
+msgid "Payroll source version"
+msgstr "Verzia mzdových podkladov"
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/payslip_fund_mixin.py:0
+msgid "Payroll sources changed. Recalculate the unconfirmed payslip."
+msgstr "Mzdové podklady sa zmenili. Prepočítajte nepotvrdenú pásku."
