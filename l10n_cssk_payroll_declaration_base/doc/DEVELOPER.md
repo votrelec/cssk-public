@@ -24,3 +24,36 @@ The action uses a private Python super-write for its own generated audit fields,
 while preserving other mixins' write chain. No RPC/context capability can grant
 the fallback. MVP/VPP/health/ELDP expose the reason/action and warning banner;
 their inherited field labels need their own native translation references.
+
+## Declaration extension hooks
+
+Keep the shared generation, attachment and submission workflow in
+`cssk.payroll.declaration.mixin`. An HR-event form can use the same workflow
+without installing a payroll engine. Existing payslip declarations keep the
+default implementation.
+
+- `_declaration_source_data()` returns the mapping consumed by the form's
+  renderer. The default reads period payslips and collects their totals. An
+  HR-event form overrides this hook with its reviewed event source; it must
+  preserve company scope, source validation and any required concurrency locks.
+- `_declaration_write(values)` performs internal workflow writes through the
+  ordinary ORM/access chain by default. A form with protected generated fields
+  can override it to reach its next cooperative `super()` implementation. It
+  is a private method, never an RPC method or a caller-controlled context bypass.
+- `_declaration_attachment_metadata()` returns `name` and `mimetype` for the
+  generated payload. The default is an XML filename and `application/xml`.
+  Attachment creation, bytes and `res_model`/`res_id` ownership remain with the
+  shared mixin. This hook does not authorize replacing a retained filing.
+- `_declaration_generated_message()` returns the translated success message.
+  Override it when the form validates a different published interface, so a
+  text export does not incorrectly claim XML schema validation.
+
+Generation calls source collection, employee-row preparation, rendering,
+validation and attachment creation before changing the state. Submission keeps
+the exact generated attachment and records the filed snapshot in one workflow
+write. An override must preserve this order and the shared filing history;
+calling `super()` is required whenever the override extends existing behavior.
+
+See the health registration module for HR events and a form-specific retained
+source snapshot. The UI action records submission performed elsewhere; it does
+not itself send a file or establish acceptance by an authority.
