@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy
 summary: Celá skupina modulov slovenských miezd na jednom mieste — mesačná výplatná páska pre pracovný pomer a tri dohody v Odoo Enterprise Payroll alebo v aplikácii OCA payroll, s datovanými zákonnými sadzbami, voľnom, ročným zúčtovaním dane a zaúčtovaním do hlavnej knihy.
-verified: 19.0.1.3.0
+verified: 19.0.1.4.0
 ---
 
 ## Na čo slúži {#purpose}
@@ -440,3 +440,33 @@ pri starších mzdách môžete porovnať pôvodné mzdy a podanie, zapísať d�
 a výslovne potvrdiť pôvodný postup. Formulár zaznamená kto a kedy ho potvrdil.
 Už podané mzdy neprepočítavajte iba kvôli doplneniu údajov. V systémoch,
 ktoré tieto údaje ešte neuchovávajú, pokračuje doterajší postup.
+
+## Overené zdravotné kalendáre {#health-calendars}
+
+HR manažér otvorí kartu zamestnanca **Zdravotné kalendáre**, vytvorí mesiac,
+zadá dátumové intervaly a odkaz na uchované podklady. Celý mesiac označí za
+skontrolovaný až po zahrnutí všetkých dní a výnimiek. Prázdny overený kalendár
+výslovne znamená žiadne poistené dni. Intervaly zostávajú v danom mesiaci;
+2Y označuje jeden skutočný deň. Dni dohody vrátane príslušných dní odpočinku
+sú preukázané vstupy, neodvodzujú sa iba z trvania zmluvy či pracovných hodín.
+
+Potvrdený podklad je nemenný. Pri zmene vytvorte revíziu a znova overte celý
+mesiac. Pôvodné riadky zostanú uchované a nová rozpracovaná revízia ešte nie je
+účinným podkladom výpočtu. Kalendár nepreukazuje odoslanie ani prijatie oznámenia.
+
+2P rozlišuje pracovný pomer a iný dôvod zamestnania u toho istého zamestnávateľa.
+Neznamená súbeh viacerých zamestnávateľov pre neuplatnenie minimálneho doplatku
+podľa §16a(5). Táto voľba potrebuje písomné oznámenie aj skutočný súbeh s iným
+zamestnávateľom. Poistenec štátu a zdravotné postihnutie sú samostatné fakty.
+Vznik postihnutia počas mesiaca sa zachová; výslovne zadaný postihnutý profil
+sa však nesmie bez upozornenia zmeniť na celý mesiac bez postihnutia.
+
+2S zachová účasť na štrajku s príslušným intervalom pracovného pomeru.
+Samotné oznámenie štrajku nepreukazuje neprítomnosť všetkých príjmov či dávok
+podľa §11(3). Prípadné preukázané dni bez príjmu 2N a dávkové obdobia sa zadajú
+osobitne; nesmú sa vymyslieť iba z kódu štrajku.
+
+Táto časť dodáva fakty a dni, nemení poistné vzorce ani výstupné formáty.
+Ich mzdové a deklaračné adaptéry nadviažu samostatne na tie isté údaje.
+Podklady: [580/2004 §11,13a,16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html),
+[ÚDZS1/2026, MU12/14/2014 body5d/e](https://www.udzs-sk.sk/wp-content/uploads/2026/01/VE_1_2026_sv.pdf).

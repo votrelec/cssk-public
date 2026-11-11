@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll
 summary: The Slovak payroll family in one place — the monthly payslip for a pracovný pomer and the three dohody on either Odoo Enterprise Payroll or the OCA payroll app, with dated statutory rates, leave, the annual tax reconciliation and posting to the general ledger.
-verified: 19.0.1.3.0
+verified: 19.0.1.4.0
 ---
 
 ## What it is for {#purpose}
@@ -430,3 +430,37 @@ payroll you can review the archived payroll, enter a reason and explicitly
 confirm the previous calculation on the correction. The form records who
 confirmed it and when. Do not recalculate filed payroll just to create records.
 Systems that do not yet keep these records continue their existing workflow.
+
+## Reviewed health calendars {#health-calendars}
+
+An HR manager opens an employee's **Health calendars** tab, creates a month,
+records the dated source intervals and retains their documentary reference.
+Confirm **Entire month reviewed** only when all days and relevant exceptions
+are covered. A reviewed empty calendar explicitly records no insured days.
+Intervals stay inside that month; 2Y identifies one actual day. Actual agreement
+work/rest-day registration facts must be supplied, rather than inferred from
+contract duration or a working-hours schedule.
+
+Confirm review to freeze the source. Use **Create revision** for a change:
+the original rows remain, while the new draft needs a complete new review.
+The shared reader refuses that unfinished replacement. A calendar is a factual
+source, not proof that a registration notice was sent or accepted.
+
+2P records the employment relationship with another employment reason at the
+same employer. It does not prove concurrent employers for the section 16a(5)
+minimum opt-out. That opt-out needs both the employee's written notice and
+reviewed facts about another employer. State-insured status and disability
+are separate facts. A partial-month disability fact is retained even if the
+employment version was not marked disabled at the start of the month; an
+explicit disabled profile cannot silently become a wholly non-disabled month.
+
+2S retains strike participation and requires a corresponding employment span.
+It does not by itself establish absence of all income/benefit under section
+11(3). Record any reviewed no-income 2N and benefit periods separately; consumers
+must not manufacture those day effects merely from the strike notification.
+
+This contribution provides factual day counts and sources. It changes neither
+premium formulas nor monthly/registration wire formats. Their adapters use the
+same reviewed facts in separate contributions. References: [580/2004 sections
+11, 13a and 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html),
+[UDZS 1/2026, guidance 12/14/2014 points 5d/e](https://www.udzs-sk.sk/wp-content/uploads/2026/01/VE_1_2026_sv.pdf).
