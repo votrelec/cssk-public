@@ -12,9 +12,10 @@ from . import health_exemption
 from . import health_calculation
 from . import monthly_funds
 from . import canonical_rules
-from . import monthly_tax
 from . import fund_lifecycle
 from . import fund_children
 from . import fund_sources
 from . import monthly_health
 from . import source_lock_order
+# Cooperative consumers follow the concrete source providers they extend.
+from . import monthly_tax

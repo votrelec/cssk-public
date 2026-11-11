@@ -393,6 +393,34 @@ class TestRecordedFundPayroll(TransactionCase):
                 self.assertAlmostEqual(observed, expected[code], places=2)
         self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
 
+    def test_changed_helper_only_allowance_parameter_cannot_confirm_stale_tax(self):
+        self.version.l10n_sk_tax_declaration_signed = True
+        slip = self._slip(wage=0, clawback=1200)
+        value = self.env.ref("l10n_sk_hr_payroll_oca.rule_parameter_nczd_monthly_2026")
+        value.parameter_value = "100.00"
+        self.assertEqual(slip.rule_parameter("l10n_sk_nczd_monthly"), 100)
+        with self.assertRaises(UserError):
+            slip.with_context(without_compute_sheet=True).action_payslip_done()
+        slip.compute_sheet()
+        slip.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertAlmostEqual(slip.get_salary_line_total("INCOMETAX"), -176.17, places=2)
+
+    def test_changed_january_tax_version_cannot_confirm_stale_current_version(self):
+        self.version.l10n_sk_tax_declaration_signed = True
+        january = self.version
+        self.employee.create_version({"date_version": "2026-06-01"})
+        self.version = self.employee._get_version("2026-06-01")
+        self.assertNotEqual(self.version, january)
+        slip = self._slip(wage=0, clawback=1200)
+        january.l10n_sk_tax_pensioner = True
+        self.assertFalse(self.version.l10n_sk_tax_pensioner)
+        self.assertEqual(slip.l10n_sk_monthly_nczd(self.version), 0)
+        with self.assertRaises(UserError):
+            slip.with_context(without_compute_sheet=True).action_payslip_done()
+        slip.compute_sheet()
+        slip.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertAlmostEqual(slip.get_salary_line_total("INCOMETAX"), -195.17, places=2)
+
     def test_monthly_child_bonus_is_not_paid_twice(self):
         first, second, expected, frozen = self._split_regular_tax_case(children=1)
         for code in ("CHILD_BONUS", "INCOMETAX", "NET"):

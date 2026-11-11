@@ -64,6 +64,15 @@ to both capture and source writers. Extend it for rules using helper methods
 or dynamic codes; merely hashing the resulting profile cannot prevent a stale
 REPEATABLE READ transaction from missing a newly inserted dated value.
 
+The monthly tax extension is imported after the concrete lifecycle and
+parameter-code providers. Otherwise the providers' initial implementations
+shadow its cooperative overrides even though all classes are present. Test the
+executed composition: a changed helper-only allowance parameter and a changed
+January pension version must both reject a stale current-version confirmation.
+Recalculation must then use the new values. Current source facts include the
+live tax configuration, while derived context-only monthly tax output is removed
+from the profile used for that fingerprint.
+
 ## Monthly tax warning without optional fund evidence
 
 `l10n_sk_monthly_tax_unverified` is a generated readonly/copy-false status bit,
