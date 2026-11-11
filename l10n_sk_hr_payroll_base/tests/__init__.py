@@ -9,3 +9,4 @@ from . import test_health_calendar_source
 from . import test_health_calendar_concurrency
 from . import test_health_calculation
 from . import test_monthly_assessment
+from . import test_fund_source_scope

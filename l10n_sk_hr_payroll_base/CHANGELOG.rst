@@ -17,6 +17,9 @@ Unreleased
 Carry-over to 18.0
 ~~~~~~~~~~~~~~~~~~
 
+* Not yet ported: scoped payroll-source coordination and current-source
+  validation at confirmation. Adapt version ownership to contracts.
+
 * Not yet ported: health514 profile/format integration. Adapt version ownership
   to contracts and rerun profile, insurer, source, refund and retained-file cases.
 
@@ -29,6 +32,15 @@ Carry-over to 18.0
   eligibility predicates in both engine rules; rerun the profile/output matrix.
 * Not yet ported. Adapt version helpers to contracts; mirror engine rules and
   rerun calendar, cent-boundary, access and retained-fund cases.
+
+[19.0.1.8.0] — 2026-11-11
+-------------------------
+
+Added
+~~~~~
+
+* Engine-neutral current-source signature validation and scoped Slovak
+  employment/calendar coordination with transaction retry semantics.
 
 [19.0.1.6.0] — 2026-11-11
 -------------------------

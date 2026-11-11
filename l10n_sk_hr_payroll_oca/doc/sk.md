@@ -138,3 +138,23 @@ Príklady nenahrádzajú skutočný daňový profil zamestnanca.
 Nemenia sa sadzby, zaokrúhľovanie, záznamy parametrov ani zdravotné pravidlá. Zaúčtovaná
 suma potrebuje príslušný opravný postup; zmena spätne neprepočítava mzdy ani
 nepredstavuje vyriešenú kumuláciu nezávislých pások.
+
+## Potvrdenie mzdy {#confirming-payroll}
+
+Po overení zamestnanca, pracovných podmienok, odpracovaných dní a ostatných
+podkladov vypočítajte pásku. Potvrďte ju, keď sú podklady pripravené. Ak sa medzi
+výpočtom a potvrdením zmenia, Odoo vyžiada nový výpočet nepotvrdenej pásky.
+Platí to aj pri vypnutom automatickom prepočte pri potvrdení. Ďalšia potvrdená
+mzda za rovnaký mesiac môže zmeniť podklady už vypočítaného návrhu.
+
+Potvrdená páska vrátane mzdových riadkov, vstupov a odpracovaných dní zostáva
+historickým záznamom aj po zrušení. Použite príslušnú opravu mzdy. Natívne úplné
+storno kopíruje pôvodné riadky a sumy; nepočíta ich z dnešnej karty zamestnanca.
+Adaptér vyžaduje natívny hook kopírovania storna z príspevku OCA/payroll 332.
+Starší engine nevie pripraviť väzbu na pôvodný podklad pred potvrdením a odmietne
+nevypočítanú kópiu storna. Storno mzdy automaticky nevracia platbu ani nemení
+podaný výkaz; tieto kroky posúďte samostatne.
+
+Vlastné mzdové pravidlo bez voliteľných uchovaných údajov o fondoch možno
+naďalej vypočítať a potvrdiť. Výkaz použije existujúce upozornenie na chýbajúce
+údaje a postup výslovného overenia historickej opravy.

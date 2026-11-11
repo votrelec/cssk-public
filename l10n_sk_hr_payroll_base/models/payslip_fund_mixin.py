@@ -16,6 +16,7 @@ from odoo import _, models
 from odoo.exceptions import UserError
 
 from ..fund_assessment import fund_assessment, index_assessments
+from ..fund_sources import source_fingerprint
 
 
 class FundEvidenceError(UserError):
@@ -25,6 +26,23 @@ class FundEvidenceError(UserError):
 class PayslipFundMixin(models.AbstractModel):
     _name = "l10n.sk.payslip.fund.mixin"
     _description = "Recorded payroll fund evidence"
+
+    def _l10n_sk_check_current_fund_sources(self):
+        """Confirmation only: compare current facts with an engine-owned stamp.
+
+        Retained declaration reads deliberately never call this method: today's
+        HR facts must not reinterpret a confirmed or filed historical record.
+        Missing optional fund metadata does not invalidate a native calculation.
+        """
+        self.ensure_one()
+        if self._l10n_sk_recorded_source_signature() != source_fingerprint(
+            self._l10n_sk_fund_source_facts()
+        ):
+            raise UserError(
+                self.env._(
+                    "Payroll sources changed. Recalculate the unconfirmed payslip."
+                )
+            )
 
     def l10n_sk_fund_record(self, fund, side, base, rate, amount, facts=None):
         """Rule helper returning data only; RPC cannot write generated evidence."""

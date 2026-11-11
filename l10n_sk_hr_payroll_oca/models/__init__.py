@@ -13,3 +13,6 @@ from . import health_calculation
 from . import monthly_funds
 from . import canonical_rules
 from . import monthly_tax
+from . import fund_lifecycle
+from . import fund_children
+from . import fund_sources

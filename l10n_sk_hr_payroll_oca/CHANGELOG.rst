@@ -14,6 +14,9 @@ Unreleased
 Carry-over to 18.0
 ~~~~~~~~~~~~~~~~~~
 
+* Not yet ported: immutable confirmed payroll, source validation and the
+  cooperative native full-refund adapter. Rerun actual transaction retries.
+
 * Not yet ported: health514 profile/format integration. Adapt version ownership
   to contracts and rerun profile, insurer, source, refund and retained-file cases.
 
@@ -70,6 +73,17 @@ Carry-over to 18.0
   ``tests/test_parameters_2027.py``. Data only; the 18.0 parameters carry the
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
+
+[19.0.1.29.0] — 2026-11-11
+==========================
+
+Added
+~~~~~
+
+* Validate current payroll sources at confirmation and retain compact monthly
+  predecessor fingerprints in the existing fund collection.
+* Preserve confirmed lines, generated stamps and full-refund source identity
+  through the native cooperative refund-copy hook.
 
 [19.0.1.27.0] — 2026-11-11
 ==========================

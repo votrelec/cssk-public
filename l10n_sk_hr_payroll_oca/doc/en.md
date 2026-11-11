@@ -142,3 +142,25 @@ unchanged. These examples do not replace the employee's actual tax profile.
 No rates, rounding methods, dated parameter records or health rules are changed.
 An existing posted amount needs its applicable correction workflow; this change
 does not recalculate historical payroll or claim cumulative independent payslips.
+
+## Confirming payroll {#confirming-payroll}
+
+Calculate the payslip after reviewing the employee, employment terms, worked
+days and other payroll sources. Confirm it when those sources are ready. If
+they change between calculation and confirmation, Odoo asks you to recalculate
+the unconfirmed payslip. This also applies when automatic recalculation at
+confirmation is disabled. A separately confirmed wage for the same month can
+change the sources of a later draft.
+
+Confirmed payroll and its salary, input and worked-day lines remain historical
+records, including after cancellation. Use the applicable payroll correction.
+The native full-refund action preserves the original lines and amounts; it does
+not calculate a new refund from today's employee settings. This adapter needs
+the native OCA refund-copy hook (OCA/payroll contribution 332). An older engine
+cannot prepare that source identity before confirmation and an uncalculated
+refund copy is refused. A full refund does not automatically reverse a payment
+or a filed declaration; review those separately.
+
+A customised salary rule without optional recorded fund information can still
+be calculated and confirmed. The declaration's existing missing-record warning
+and correction review remain applicable.

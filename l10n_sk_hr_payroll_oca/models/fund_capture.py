@@ -202,17 +202,23 @@ class FundCapturePayslip(models.Model):
                         "salary": slip._l10n_sk_fund_salary_facts(),
                         "profile": slip._l10n_sk_fund_profile(),
                     }
+                    evidence.update(slip._l10n_sk_fund_capture_metadata())
                     super(FundCapturePayslip, slip).write(
                         {"l10n_sk_fund_assessment": evidence}
                     )
             return result
+
+    def _l10n_sk_fund_capture_metadata(self):
+        """Cooperative generated metadata, written by this recorder only."""
+        self.ensure_one()
+        return {}
 
     def _l10n_sk_refund_original(self):
         self.ensure_one()
         if not self.credit_note:
             return self.browse()
         original = self.search([("refunded_id", "=", self.id)])
-        if len(original) != 1 or original.state not in {"done", "cancel"}:
+        if len(original) != 1 or original.credit_note or original.state not in {"done", "paid", "cancel"}:
             return self.browse()
         names = (
             "company_id",

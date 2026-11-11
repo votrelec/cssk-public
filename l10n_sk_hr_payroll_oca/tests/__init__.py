@@ -7,6 +7,8 @@ from . import test_rules_shared
 from . import test_rzd_sources
 from . import test_recorded_funds
 from . import test_canonical_rules
+from . import test_fund_lifecycle
+from . import test_fund_source_concurrency
 from . import test_health_agreement_exemption
 
 from . import test_health_calendar_profile
