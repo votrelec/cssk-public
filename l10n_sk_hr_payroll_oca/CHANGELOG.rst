@@ -9,11 +9,6 @@ Unreleased
   profile capture; freeze the source contract period independently of later
   wage versions and later changes to the employee card.
 
-- **19.0.1.24.6 (2026-11-11):** date payroll stravne at EUR 9.80 from
-  1 December 2026 (notice 255/2026), matching the existing domestic travel
-  rate. Financial and voucher contributions retain historical November
-  amounts and use the new rate in December 2026 and January 2027.
-
 - **19.0.1.22.0 (2026-11-09), DISCHARGED on 18.0 by 997c7bbb:** the employee social insurance cap is prorated for a part-month (§ 138 ods. 13, employer cap untouched); sick pay and the § 16a minimum count calendar days from the start of the incapacity (§ 8 zákona 462/2003); the health allowance is reduced for a part-month (§ 16 ods. 18).
 
 Carry-over to 18.0
@@ -35,6 +30,9 @@ Carry-over to 18.0
   This contribution does not change OP rounding, premium rates or social OOP.
 * Not yet ported. Adapt hr.version to hr.contract and mirror the same base API
   in both engines; rerun native profile/calendar/OP and ordinary-user scenarios.
+
+- **19.0.1.24.6 (2026-11-11), not yet on 18.0:** the 9.80 € stravné from
+  1. 12. 2026. Data only; the parameter code is the same on 18.0.
 
 - **19.0.1.24.4 and 19.0.1.24.5 (2026-11-10), not yet on 18.0:** employer
   sick pay clipped to the employment and on the onset's terms
@@ -79,7 +77,9 @@ Carry-over to 18.0
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
 
-[19.0.1.30.0] — 2026-11-11
+[19.0.1.31.0] — 2026-11-11
+
+[19.0.1.24.6] — 2026-11-11
 ==========================
 
 Fixed
@@ -185,6 +185,13 @@ Added
   and optional recording for custom structures that emit fund values.
 * Frozen original-formula references and reference fixtures independent of the
   optional minimum-wage top-up, alongside native signed/subcent/credit cases.
+
+- **Payroll kept the 9.30 € stravné after 1 December 2026.** The 5–12 hour
+  domestic stravné is 9.80 € from that date (oznámenie MPSVR SR
+  č. 255/2026 Z. z.), the rate the travel orders already use. The meal
+  contribution and the meal voucher now read it from December 2026 payroll;
+  November keeps 9.30 €. Explicit contractual amounts still take priority.
+  Contributed by votrelec (cssk-public#44).
 
 [19.0.1.24.5] — 2026-11-10
 ==========================
