@@ -76,11 +76,14 @@ class MonthlyHealthPayslip(models.Model):
     def _monthly_health_sources(self, policy):
         self.ensure_one()
         profile = self._l10n_sk_fund_profile()
+        keys = ("version", "contract_period", "agreement", "pension", "regular",
+                "oop", "guarantee_exempt", "health")
         previous, missing, ids = [], [], []
         for peer in self._l10n_sk_monthly_predecessors()._cssk_effective_fund_payslips():
             retained = peer._cssk_recorded_fund_profile()
             records = peer._cssk_recorded_fund_bases()
-            if (not retained or not records or retained != profile
+            if (not retained or not records or any(
+                    retained.get(key) != profile.get(key) for key in keys)
                     or not profile.get("version") or peer.credit_note):
                 missing.append(peer.id)
                 continue

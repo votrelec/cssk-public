@@ -322,7 +322,7 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertFalse(prior.l10n_sk_fund_assessment)
         current = self._slip(wage=0, clawback=200)
         self.assertTrue(current.l10n_sk_monthly_fund_warning)
-        self.assertFalse(current._cssk_recorded_fund_bases())
+        self.assertTrue(current._cssk_recorded_fund_bases())
 
     def test_unknown_monthly_metadata_keeps_native_calculation_with_warning(self):
         first = self._slip(wage=0, clawback=200)
@@ -341,7 +341,7 @@ class TestRecordedFundPayroll(TransactionCase):
         second = self._slip(wage=0, clawback=200)
         self.assertTrue(second.line_ids)
         self.assertTrue(second.l10n_sk_monthly_fund_warning)
-        self.assertFalse(second._cssk_recorded_fund_bases())
+        self.assertTrue(second._cssk_recorded_fund_bases())
 
     def _split_regular_tax_case(self, *, children=0):
         self.version.write({"l10n_sk_tax_declaration_signed": True,
@@ -434,6 +434,23 @@ class TestRecordedFundPayroll(TransactionCase):
                 self.assertTrue(second.l10n_sk_monthly_tax_warning)
                 self.assertEqual(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["missing"], [first.id])
 
+    def test_monthly_health_tax_and_bonus_share_inputs_not_derived_profiles(self):
+        self.version.write({"l10n_sk_tax_declaration_signed": True,
+                            "l10n_sk_children_under_15": 1})
+        reference = self._slip(wage=0, clawback=400)
+        expected = {line.code: line.total for line in reference.line_ids}
+        first = self._slip(wage=0, clawback=200)
+        first.action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        second = self._slip(wage=0, clawback=200)
+        self.assertFalse(second.l10n_sk_monthly_fund_warning)
+        self.assertFalse(second.l10n_sk_monthly_tax_warning)
+        for code in ("HEALTH", "HEALTHEMPLOYER", "HEALTHDOPLATOK", "TAXBASE", "INCOMETAX", "CHILD_BONUS", "NET"):
+            with self.subTest(code=code):
+                observed = sum(line.total for line in (first | second).line_ids if line.code == code)
+                self.assertAlmostEqual(observed, expected[code], places=2)
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
     def test_all_five_eligible_funds_reduce_income_before_the_cap(self):
         self._student_agreement()
         for income in (200, 16763.995, 16764, 16900, 17100):
@@ -498,7 +515,7 @@ class TestRecordedFundPayroll(TransactionCase):
             all(
                 set(row["facts"])
                 <= (
-                    {"rule_code", "topup", "income", "op"}
+                    {"rule_code", "topup", "income", "op", "monthly_health", "monthly_unverified"}
                     if row["fund"] == "health"
                     else {"rule_code", "monthly", "monthly_unverified"}
                 )

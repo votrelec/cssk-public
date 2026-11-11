@@ -70,7 +70,8 @@ class MonthlyFundPayslip(models.Model):
             indexed = index_assessments(records)
             prior = indexed.get((record["fund"], record["side"]))
             source = prior.get("facts", {}).get("monthly") if prior else None
-            if not isinstance(source, dict) or source.get("income") is None or peer.credit_note:
+            if (not isinstance(source, dict) or source.get("income") is None
+                    or prior["facts"].get("monthly_unverified") or peer.credit_note):
                 missing.append(peer.id)
                 continue
             rows.append({"income": source["income"], "base": prior["base"],
