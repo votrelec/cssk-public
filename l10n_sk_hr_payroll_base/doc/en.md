@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll
 summary: The Slovak payroll family in one place — the monthly payslip for a pracovný pomer and the three dohody on either Odoo Enterprise Payroll or the OCA payroll app, with dated statutory rates, leave, the annual tax reconciliation and posting to the general ledger.
-verified: 19.0.1.4.0
+verified: 19.0.1.5.0
 ---
 
 ## What it is for {#purpose}
@@ -491,3 +491,28 @@ The shared base supplies these eligibility decisions to both engines. The
 OCA rules apply them without changing OP rounding, premium rates, social OOP
 or calendar proration. Other day exceptions and output formats remain separate
 contributions. [Act 580/2004 sections 10b, 11 and 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html).
+
+## Reviewed monthly calculation {#health-calculation}
+
+The payroll rules use the reviewed calendar for OP employment days, concurrent
+employer/SZCO facts, monthly disability rates and minimum days. Benefit days do
+not shorten OP employment; no-income 2N days do. A written minimum opt-out needs
+reviewed concurrent-employer dates. Without a calendar, the existing native PN
+minimum workflow remains in use. Disability recognised on one day changes both
+monthly rates and removes that month's minimum; recognised pension invalidity
+is checked against the calendar just like a manually recorded disability.
+
+The shared OP helper caps the allowance by eligible income, prorates once and
+rounds upward to cents, following the insurer's published guidance. Other
+same-employer income can affect phase-out without receiving OP. The current
+native single-source hook passes its employment income; consolidating separate
+remunerations/versions needs their explicit income allocation. It must not
+silently treat an executive fee as OP-eligible employment income. This is not
+an implementation of those additional multi-source workflows.
+
+The existing premium rounding and other twelve fund formulas remain unchanged.
+The charging rule retains actual OP/base facts and the bridge retains one
+shared health/calendar profile without birth numbers. Declaration consumers
+must use the same facts; this contribution does not implement the 514/601 codec.
+References: [Act 580/2004 sections 16 and 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html),
+[Dôvera OP, including upward rounding](https://www.dovera.sk/platitel/zamestnavatel/tema-legislativne-informacie/odpocitatelna-polozka).

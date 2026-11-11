@@ -253,7 +253,10 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertNotIn(self.employee.identification_id, serialized)
         self.assertTrue(
             all(
-                set(row["facts"]) <= {"rule_code", "topup"}
+                set(row["facts"]) <= (
+                    {"rule_code", "topup", "income", "op"}
+                    if row["fund"] == "health" else {"rule_code"}
+                )
                 for row in evidence["records"]
             )
         )

@@ -101,6 +101,170 @@ class TestHealthAgreementExemption(TransactionCase):
             for code in ("HEALTH", "HEALTHEMPLOYER", "HEALTHDOPLATOK")
         }
 
+    def health_calendar(self, *extra, kind="2", start="2026-06-01", end="2026-06-30"):
+        intervals = [(kind, start, end), *extra]
+        result = (
+            self.env["l10n.sk.health.calendar"]
+            .with_company(self.company)
+            .create(
+                {
+                    "employee_id": self.employee.id,
+                    "company_id": self.company.id,
+                    "month": "2026-06-01",
+                    "complete": True,
+                    "evidence": "Synthetic reviewed health calculation facts",
+                    "interval_ids": [
+                        Command.create(
+                            {
+                                "kind": code,
+                                "date_start": lo,
+                                "date_end": hi,
+                            }
+                        )
+                        for code, lo, hi in intervals
+                    ],
+                }
+            )
+        )
+        result.action_review()
+        return result
+
+    def test_calendar_benefits_leave_op_intact_but_reduce_minimum(self):
+        self.version.l10n_sk_health_oop_claim = True
+        self.health_calendar(("benefit", "2026-06-01", "2026-06-15"))
+        slip = self.slip("none")
+        self.assertEqual(
+            self.health(slip),
+            {
+                "HEALTH": 0,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": -0.72,
+            },
+        )
+
+    def test_no_income_days_reduce_op_and_minimum_independently(self):
+        self.version.l10n_sk_health_oop_claim = True
+        self.health_calendar(("2N", "2026-06-16", "2026-06-30"))
+        slip = self.slip("none")
+        self.assertEqual(
+            self.health(slip),
+            {
+                "HEALTH": -5,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": 0,
+            },
+        )
+        facts = {
+            (row["fund"], row["side"]): row for row in slip._cssk_recorded_fund_bases()
+        }
+        self.assertEqual(float(facts[("health", "employee")]["base"]), 100)
+        self.assertEqual(float(facts[("health", "employee")]["facts"]["op"]), 100)
+
+    def test_last_day_disability_changes_both_rates_and_whole_month_minimum(self):
+        calendar = self.health_calendar(("disabled", "2026-06-30", "2026-06-30"))
+        slip = self.slip("none")
+        self.assertFalse(self.version.l10n_sk_ztp)
+        self.assertEqual(
+            self.health(slip),
+            {
+                "HEALTH": -5,
+                "HEALTHEMPLOYER": 11,
+                "HEALTHDOPLATOK": 0,
+            },
+        )
+        profile = slip.l10n_sk_fund_assessment["profile"]["health"]
+        self.assertTrue(profile["disabled"])
+        self.assertEqual(profile["calendar"]["calendar_id"], calendar.id)
+        self.assertEqual(profile["calendar"]["minimum_days"], 0)
+
+    def test_recognised_invalidity_conflict_is_readable_before_salary_rules(self):
+        self.health_calendar()
+        with self.assertRaisesRegex(UserError, "disability disagreement") as raised:
+            self.slip("none", "disability")
+        self.assertNotIn("Wrong python code", str(raised.exception))
+
+    def test_concurrent_other_employer_disables_monthly_op_without_opt_out(self):
+        self.version.l10n_sk_health_oop_claim = True
+        self.health_calendar(("other_employment", "2026-06-30", "2026-06-30"))
+        self.assertEqual(
+            self.health(self.slip("none")),
+            {
+                "HEALTH": -10,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": -13.45,
+            },
+        )
+
+    def test_self_employment_disables_op_and_reduces_minimum_by_actual_day(self):
+        self.version.l10n_sk_health_oop_claim = True
+        self.health_calendar(("self_employed", "2026-06-30", "2026-06-30"))
+        self.assertEqual(
+            self.health(self.slip("none")),
+            {
+                "HEALTH": -10,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": -11.93,
+            },
+        )
+
+    def test_written_concurrent_opt_out_removes_only_the_minimum(self):
+        self.version.write(
+            {
+                "l10n_sk_health_oop_claim": True,
+                "l10n_sk_health_minimum_opt_out": True,
+                "l10n_sk_health_minimum_evidence": "Synthetic written notice",
+            }
+        )
+        self.health_calendar(("other_employment", "2026-06-30", "2026-06-30"))
+        self.assertEqual(
+            self.health(self.slip("none")),
+            {
+                "HEALTH": -10,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": 0,
+            },
+        )
+
+    def test_opt_out_without_reviewed_concurrent_dates_is_rejected(self):
+        self.version.write(
+            {
+                "l10n_sk_health_minimum_opt_out": True,
+                "l10n_sk_health_minimum_evidence": "Synthetic written notice",
+            }
+        )
+        with self.assertRaisesRegex(UserError, "proving concurrent employers"):
+            self.slip("none")
+
+    def test_partial_state_insured_days_do_not_exclude_actual_premiums(self):
+        self.health_calendar(("state", "2026-06-16", "2026-06-30"))
+        self.assertEqual(
+            self.health(self.slip("none")),
+            {
+                "HEALTH": -10,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": 0,
+            },
+        )
+
+    def test_op_rounds_up_after_calendar_proration_and_records_its_actual_base(self):
+        self.version.l10n_sk_health_oop_claim = True
+        self.health_calendar(start="2026-06-30")
+        slip = self.slip("none")
+        records = {
+            (row["fund"], row["side"]): row for row in slip._cssk_recorded_fund_bases()
+        }
+        employee = records[("health", "employee")]
+        self.assertAlmostEqual(float(employee["base"]), 193.33, places=6)
+        self.assertAlmostEqual(float(employee["facts"]["op"]), 6.67, places=6)
+        self.assertEqual(
+            self.health(slip),
+            {
+                "HEALTH": -9.66,
+                "HEALTHEMPLOYER": 22,
+                "HEALTHDOPLATOK": 0,
+            },
+        )
+
     def assert_excluded(self, slip):
         self.assertEqual(
             self.health(slip), {"HEALTH": 0, "HEALTHEMPLOYER": 0, "HEALTHDOPLATOK": 0}
