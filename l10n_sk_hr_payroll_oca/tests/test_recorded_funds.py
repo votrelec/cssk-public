@@ -14,6 +14,7 @@ from unittest.mock import patch
 from odoo import Command
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
+from odoo.addons.l10n_sk_hr_payroll_base.fund_codes import SOCIAL_FUNDS
 
 from ..models.fund_capture import FundCapturePayslip
 
@@ -285,6 +286,34 @@ class TestRecordedFundPayroll(TransactionCase):
                              if line.code == code)
                 self.assertAlmostEqual(actual, expected[code], places=2)
         self.assertEqual(self._lines(first), before)
+
+    def _assert_high_monthly_split(self, instalment):
+        reference = self._slip(wage=0, clawback=2 * instalment)
+        expected = {line.code: line.total for line in reference.line_ids}
+        first = self._slip(wage=0, clawback=instalment)
+        first.action_payslip_done()
+        frozen = deepcopy(first.l10n_sk_fund_assessment), self._lines(first)
+        second = self._slip(wage=0, clawback=instalment)
+        self.assertFalse(second.l10n_sk_monthly_fund_warning)
+        for code in tuple(SOCIAL_FUNDS) + ("HEALTH", "HEALTHEMPLOYER", "HEALTHDOPLATOK",
+                                           "TAXBASE", "INCOMETAX", "NET"):
+            with self.subTest(code=code):
+                observed = sum(line.total for line in (first | second).line_ids if line.code == code)
+                self.assertAlmostEqual(observed, expected.get(code, 0), places=2)
+        total_pension_base = sum(Decimal(self._funds(slip)[("pension", "employee")]["base"])
+                                 for slip in (first, second))
+        self.assertEqual(total_pension_base, Decimal("16764"))
+        accident_base = sum(Decimal(self._funds(slip)[("accident", "employer")]["base"])
+                            for slip in (first, second))
+        self.assertEqual(accident_base, Decimal(2 * instalment))
+        self.assertEqual((first.l10n_sk_fund_assessment, self._lines(first)), frozen)
+
+    def test_monthly_social_cap_is_used_once_and_accident_is_uncapped(self):
+        self._assert_high_monthly_split(10000)
+
+    def test_monthly_student_oop_precedes_the_single_monthly_cap(self):
+        self._student_agreement()
+        self._assert_high_monthly_split(9000)
 
     def test_monthly_adapter_does_not_overwrite_a_custom_charged_amount(self):
         self.version.struct_id = self.env.ref(
