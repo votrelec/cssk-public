@@ -194,6 +194,35 @@ class TestFundLifecycle(TransactionCase):
         self._confirm(slip)
         self.assertEqual(slip.state, "done")
 
+    def test_parameter_used_in_native_quantity_invalidates_custom_calculation(self):
+        parameter = self.env["hr.rule.parameter"].create(
+            {
+                "name": "Native quantity source",
+                "code": "source_controls_quantity",
+                "country_id": self.env.ref("base.sk").id,
+            }
+        )
+        value = self.env["hr.rule.parameter.value"].create(
+            {
+                "rule_parameter_id": parameter.id,
+                "date_from": "2026-01-01",
+                "parameter_value": "2",
+            }
+        )
+        rule = self.structure.get_all_rules().filtered(
+            lambda line: line.code == "HEALTH"
+        )
+        rule.write({"amount_select": "fix", "amount_fix": -100,
+                    "quantity": "payslip.rule_parameter('source_controls_quantity')"})
+        slip = self._slip()
+        self.assertFalse(slip.l10n_sk_fund_assessment)
+        value.parameter_value = "3"
+        with self.assertRaises(UserError):
+            self._confirm(slip)
+        slip.compute_sheet()
+        self._confirm(slip)
+        self.assertEqual(slip.state, "done")
+
     def test_changed_rule_invalidates_but_confirmed_history_stays_readable(self):
         first = self._slip()
         self._confirm(first)

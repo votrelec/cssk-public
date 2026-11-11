@@ -68,7 +68,16 @@ class TestFundSourceConcurrency(TransactionCase):
                     cr.execute(
                         "DELETE FROM hr_payslip WHERE employee_id = %s", [employee_id]
                     )
+                    versions = (
+                        env["hr.version"]
+                        .with_context(active_test=False)
+                        .search([("employee_id", "=", employee_id)])
+                    )
                     env["hr.employee"].browse(employee_id).exists().unlink()
+                    # Native employee unlink can detach historical versions.
+                    # These are committed synthetic fixtures, not real history.
+                    versions.exists().unlink()
+                    self.assertFalse(versions.exists())
                     env["res.company"].browse(company_id).exists().unlink()
                     env = env(
                         context=dict(

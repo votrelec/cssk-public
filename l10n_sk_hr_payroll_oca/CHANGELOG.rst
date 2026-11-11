@@ -84,6 +84,8 @@ Added
   predecessor fingerprints in the existing fund collection.
 * Preserve confirmed lines, generated stamps and full-refund source identity
   through the native cooperative refund-copy hook.
+* Include literal parameters used by fixed-rule quantities, range conditions
+  and percentage bases in calculation-source validation.
 
 [19.0.1.27.0] — 2026-11-11
 ==========================

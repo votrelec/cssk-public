@@ -123,8 +123,15 @@ class FundStructure(models.Model):
         """
         rules = self.get_structure_with_parents().get_all_rules()
         source = "\n".join(
-            (rule.amount_python_compute or "") + "\n" + (rule.condition_python or "")
+            rule[name] or ""
             for rule in rules
+            for name in (
+                "amount_python_compute",
+                "condition_python",
+                "quantity",
+                "condition_range",
+                "amount_percentage_base",
+            )
         )
         # Literal references are dependencies even before a parameter exists;
         # searching only current parameter rows would miss insertion phantoms.
