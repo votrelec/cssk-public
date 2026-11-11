@@ -3,6 +3,7 @@
 """Apply retained monthly assessments before the native category/NET pipeline."""
 from calendar import monthrange
 from copy import deepcopy
+from decimal import Decimal, InvalidOperation
 
 from odoo import api, fields, models
 
@@ -71,6 +72,8 @@ class MonthlyFundPayslip(models.Model):
             prior = indexed.get((record["fund"], record["side"]))
             source = prior.get("facts", {}).get("monthly") if prior else None
             if (not isinstance(source, dict) or source.get("income") is None
+                    or any(source.get(key) != record["facts"]["monthly"].get(key)
+                           for key in ("maximum", "deduction"))
                     or prior["facts"].get("monthly_unverified") or peer.credit_note):
                 missing.append(peer.id)
                 continue
@@ -108,12 +111,21 @@ class MonthlyFundSalaryRule(models.Model):
             # values and metadata would hide a custom charge from the recorder.
             return values
         previous, missing = slip._monthly_social_sources(record)
-        if not previous and not missing:
-            return values
         facts = deepcopy(record["facts"])
+        if not missing and source["deduction"]:
+            try:
+                income = Decimal(str(source["income"]))
+                prior_income = sum((Decimal(str(row["income"])) for row in previous), Decimal(0))
+                deduction = Decimal(str(source["deduction"]))
+                if income >= 0 and prior_income >= 0 and deduction >= 0:
+                    facts["monthly"]["used"] = str(
+                        min(prior_income + income, deduction) - min(prior_income, deduction)
+                    )
+            except (InvalidOperation, ValueError, TypeError):
+                missing = True
         if missing:
             facts["monthly_unverified"] = missing
-        else:
+        elif previous:
             try:
                 assessed = monthly_assessment(
                     income=source["income"], rate=record["rate"],

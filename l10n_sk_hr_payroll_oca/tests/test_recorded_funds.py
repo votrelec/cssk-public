@@ -280,6 +280,8 @@ class TestRecordedFundPayroll(TransactionCase):
         funds = self._funds(second)
         self.assertEqual(funds[("pension", "employee")]["base"], "200")
         self.assertEqual(funds[("pension", "employee")]["amount"], "8")
+        self.assertEqual(first.get_salary_line_total("OOP_PENSION"), 200)
+        self.assertEqual(second.get_salary_line_total("OOP_PENSION"), 0)
         for code in ("TAXBASE", "INCOMETAX", "NET"):
             with self.subTest(code=code):
                 actual = sum(line.total for line in (first | second).line_ids

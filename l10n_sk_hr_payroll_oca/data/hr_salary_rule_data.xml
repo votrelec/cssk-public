@@ -1001,6 +1001,12 @@ else:
 # guarantee insurance. Only one such agreement per month may claim it.
 base = min(categories.GROSS, payslip.rule_parameter('l10n_sk_monthly_taxable_max'))
 result = min(base, payslip.rule_parameter('l10n_sk_dohoda_oop'))
+if payslip._l10n_sk_is_recording_funds():
+    pension = l10n_sk_fund_records.get(('pension', 'employee'))
+    if pension and not pension['facts'].get('monthly_unverified'):
+        used = pension['facts'].get('monthly', {}).get('used')
+        if used is not None:
+            result = float(used)
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
