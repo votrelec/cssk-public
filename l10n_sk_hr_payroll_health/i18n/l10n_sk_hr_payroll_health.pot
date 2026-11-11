@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20261102\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:40+0000\n"
-"PO-Revision-Date: 2026-11-11 14:40+0000\n"
+"POT-Creation-Date: 2026-11-11 17:55+0000\n"
+"PO-Revision-Date: 2026-11-11 17:55+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -80,6 +80,14 @@ msgid ""
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Complete payroll, including zero-premium months, for '%(name)s' before "
+"filing the 514."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_health.fund_bases_review_form
 msgid "Confirm original gross-based calculation"
 msgstr ""
@@ -136,13 +144,22 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_employee__display_name
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_version__display_name
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__display_name
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__display_name
 msgid "Display Name"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_employee__l10n_sk_health_insurer_code__24
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+msgid ""
+"Dávka 514 generated and format-validated. Retain the insurer's receipt "
+"separately."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_version__l10n_sk_health_insurer_code__24
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__res_company__l10n_sk_health_insurer_code__24
 msgid "Dôvera (24)"
 msgstr ""
@@ -158,6 +175,11 @@ msgstr ""
 msgid ""
 "Employee '%(name)s' needs a 9-10 digit birth number in the Identification "
 "No. field for the dávka 514 employee row."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model,name:l10n_sk_hr_payroll_health.model_hr_version
+msgid "Employee Contract / Version"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -179,6 +201,11 @@ msgid ""
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__export_format
+msgid "Export format"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__submitted_attachment_id
 msgid "Filed XML"
 msgstr ""
@@ -186,6 +213,12 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__filed_history_ids
 msgid "Filed history"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid "Finish reviewing monthly health calendars before filing the 514."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -206,6 +239,11 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_health
 #: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_health.view_l10n_sk_health_form
 msgid "Generate"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_health.view_l10n_sk_health_form
+msgid "Generated file"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -232,6 +270,7 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_employee__l10n_sk_health_insurer_code
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_version__l10n_sk_health_insurer_code
 msgid "Health insurer (SK)"
 msgstr ""
 
@@ -248,6 +287,7 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_employee__id
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_version__id
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__id
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__id
 msgid "ID"
@@ -272,6 +312,15 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__message_has_error
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_hr_employee__l10n_sk_health_insurer_code
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_hr_version__l10n_sk_health_insurer_code
+msgid ""
+"Insurer applicable to this employment version. A new employee uses the "
+"company's configured insurer as its initial value. Review historical "
+"versions separately; changing today's insurer does not change them."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -401,11 +450,10 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
-#: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
 msgid ""
-"Payslip '%(name)s': the pension type and health-exempt setting disagree for "
-"this agreement. Review the historical version and recalculate payroll before"
-" generating the 514."
+"Payslip '%(name)s' has nonzero health assessments for excluded income. "
+"Review its historical profile and the payroll correction before filing."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -432,6 +480,12 @@ msgid "Report Code"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+msgid "Reset the declaration to draft before changing its export format."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_health.view_l10n_sk_health_form
 msgid "Reset to Draft"
 msgstr ""
@@ -439,6 +493,52 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__activity_user_id
 msgid "Responsible User"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+msgid ""
+"Review the employer identification, bank account and recorded health rows "
+"against the published 514 text format before generating the batch."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid "Review the historical health insurer for: %(slips)s"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review the historical insurer and identification number for all insured "
+"payroll sources before generating the 514 counts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review the inconsistent monthly health profile across payroll sources for "
+"'%(name)s'."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review the inconsistent monthly health profile across records of the same "
+"insured person."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review the recorded health assessments and monthly profile for '%(name)s' "
+"before generating the 514."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -510,6 +610,17 @@ msgid "Technical: true for anything that amends an earlier filing."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__l10n_sk_health__export_format__text514
+msgid "Text batch 514"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+msgid "The 514 text batch must be valid UTF-8."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__correction_reference
 msgid ""
 "The authority's reference for the filing being amended, where the receiving "
@@ -517,11 +628,9 @@ msgid ""
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_hr_employee__l10n_sk_health_insurer_code
-msgid ""
-"The health insurance company the employee is insured with. Each insurer gets"
-" its own monthly dávka 514 listing only its insurees. Leave empty when the "
-"employee is insured with the company's default insurer."
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+msgid "The generated 514 text batch has an invalid record structure."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -530,7 +639,7 @@ msgid "Type of the exception activity on record."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_employee__l10n_sk_health_insurer_code__27
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_version__l10n_sk_health_insurer_code__27
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__res_company__l10n_sk_health_insurer_code__27
 msgid "Union (27)"
 msgstr ""
@@ -546,7 +655,7 @@ msgid "Version"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_employee__l10n_sk_health_insurer_code__25
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_version__l10n_sk_health_insurer_code__25
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__res_company__l10n_sk_health_insurer_code__25
 msgid "VšZP (25)"
 msgstr ""
@@ -567,6 +676,11 @@ msgid ""
 "Whether this is the ordinary filing for the period or an amendment to one "
 "already sent. The choices are limited to what this particular authority "
 "accepts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__l10n_sk_health__export_format__xml
+msgid "XML"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health

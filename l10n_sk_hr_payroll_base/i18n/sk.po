@@ -463,6 +463,12 @@ msgstr ""
 "páske."
 
 #. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/payslip_fund_mixin.py:0
+msgid "The recorded payroll profile is missing or invalid."
+msgstr "Uložený mzdový profil chýba alebo je neplatný."
+
+#. module: l10n_sk_hr_payroll_base
 #: model:ir.model.constraint,message:l10n_sk_hr_payroll_base.constraint_l10n_sk_health_calendar_one_current_month
 msgid ""
 "There is already a current health calendar for this employee and month."
@@ -479,8 +485,3 @@ msgstr "Neznámy alebo neúplný interval zdravotného kalendára"
 #: code:addons/l10n_sk_hr_payroll_base/models/health_calendar.py:0
 msgid "Use the health-calendar review and revision actions."
 msgstr "Použite úkony kontroly a revízie poistného kalendára."
-
-#. module: l10n_sk_hr_payroll_base
-#: model:ir.model,name:l10n_sk_hr_payroll_base.model_hr_version
-msgid "Employee Contract"
-msgstr "Pracovná zmluva zamestnanca"

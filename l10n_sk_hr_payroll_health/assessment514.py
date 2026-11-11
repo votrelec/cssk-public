@@ -90,6 +90,7 @@ def row_from_assessments(records, health, *, op_eligible, days, direction=1):
         "rate_employer": number(er["rate"]),
         "income": income,
         "base": base,
+        "employer_base": employer_base,
         "employee": employee,
         "employer": employer,
         "topup": topup,
@@ -103,9 +104,33 @@ def row_from_assessments(records, health, *, op_eligible, days, direction=1):
         "premium_assessed": bool(base or employer_base or employee or employer or topup),
     }
     for key in (
-        "income", "base", "employee", "employer", "topup", "total", "op_income",
+        "income", "base", "employer_base", "employee", "employer", "topup", "total", "op_income",
         "other_income", "op", "exempt_income", "shorttime_base",
     ):
         if row[key] is not None:
             row[key] *= direction
     return row
+
+
+def merge_assessment_rows(rows):
+    """Consolidate actual amounts and distinct days, without guessing a rate."""
+    if not rows:
+        raise ValueError("Supply at least one health assessment row")
+    result = dict(rows[0])
+    for row in rows[1:]:
+        if any(row[key] != result[key] for key in (
+            "disabled", "rate_employee", "rate_employer", "minimum_opt_out",
+        )):
+            raise ValueError("Inconsistent monthly health profiles across payroll sources")
+        for key in (
+            "income", "base", "employer_base", "employee", "employer", "topup", "total",
+            "op_income", "other_income", "op", "exempt_income",
+        ):
+            result[key] += row[key]
+        result["premium_assessed"] |= row["premium_assessed"]
+    if any(row["shorttime_base"] is not None for row in rows):
+        result["shorttime_base"] = result["employer_base"]
+    dates = set().union(*(row.get("_insured_dates", set()) for row in rows))
+    result["_insured_dates"] = dates
+    result["days"] = len(dates) if dates else max(row["days"] for row in rows)
+    return result

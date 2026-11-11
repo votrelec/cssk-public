@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from odoo.tests import BaseCase, tagged
 
-from ..assessment514 import row_from_assessments
+from ..assessment514 import merge_assessment_rows, row_from_assessments
 
 
 @tagged("post_install", "-at_install")
@@ -61,7 +61,7 @@ class TestHealthAssessment514(BaseCase):
     def test_native_refund_direction_is_applied_exactly_once(self):
         positive = self.row()
         negative = self.row(direction=-1)
-        for key in ("income", "base", "employee", "employer", "topup", "op", "total"):
+        for key in ("income", "base", "employer_base", "employee", "employer", "topup", "op", "total"):
             self.assertEqual(negative[key], -positive[key])
         self.assertEqual(negative["rate_employee"], positive["rate_employee"])
 
@@ -116,3 +116,15 @@ class TestHealthAssessment514(BaseCase):
         self.records[1]["facts"]["shorttime_base"] = "149"
         with self.assertRaisesRegex(ValueError, "disagrees"):
             self.row()
+
+    def test_consolidation_unions_days_and_sums_actual_amounts_once(self):
+        first, second = self.row(), self.row()
+        first["_insured_dates"] = {"2026-06-01", "2026-06-02"}
+        second["_insured_dates"] = {"2026-06-02", "2026-06-03"}
+        merged = merge_assessment_rows([first, second])
+        self.assertEqual(merged["days"], 3)
+        self.assertEqual(merged["income"], 400)
+        self.assertEqual(merged["total"], Decimal("67.46"))
+        second["rate_employee"] = Decimal("2.5")
+        with self.assertRaisesRegex(ValueError, "Inconsistent monthly"):
+            merge_assessment_rows([first, second])

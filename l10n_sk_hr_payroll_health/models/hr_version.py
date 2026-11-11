@@ -65,7 +65,8 @@ class HrVersion(models.Model):
             return 0
         self.env.cr.execute(
             "SELECT id, l10n_sk_health_insurer_code FROM hr_employee "
-            "WHERE l10n_sk_health_insurer_code IN %s",
+            "WHERE l10n_sk_health_insurer_code IS NULL "
+            "OR l10n_sk_health_insurer_code IN %s",
             [tuple(code for code, _label in HEALTH_INSURER_CODES)],
         )
         changed = 0
@@ -74,7 +75,8 @@ class HrVersion(models.Model):
                 employee_id
             )
             version = employee.version_id
-            if version and not version.l10n_sk_health_insurer_code:
-                version.l10n_sk_health_insurer_code = insurer
+            effective_insurer = insurer or employee.company_id.l10n_sk_health_insurer_code
+            if version and not version.l10n_sk_health_insurer_code and effective_insurer:
+                version.l10n_sk_health_insurer_code = effective_insurer
                 changed += 1
         return changed

@@ -40,6 +40,8 @@
                         <group>
                             <field name="company_id"/>
                             <field name="insurer_code"/>
+                            <field name="export_format" readonly="state != 'draft'"/>
+                            <field name="correction_type" readonly="state != 'draft'"/>
                             <field name="payer_number"/>
                             <field name="year"/>
                             <field name="month"/>
@@ -49,7 +51,7 @@
                             <field name="version_id"/>
                             <field name="date_from"/>
                             <field name="date_to"/>
-                            <field name="xml_attachment_id"/>
+                            <field name="xml_attachment_id" string="Generated file"/>
                         </group>
                     </group>
                     <field name="line_ids">

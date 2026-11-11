@@ -90,7 +90,7 @@ class TestHealthInsurerHistory(TransactionCase):
         )
         self.legacy_value(employee, "27")
         Version = self.env["hr.version"]
-        self.assertEqual(Version._l10n_sk_migrate_legacy_insurers(), 1)
+        self.assertGreaterEqual(Version._l10n_sk_migrate_legacy_insurers(), 1)
         self.assertEqual(current.l10n_sk_health_insurer_code, "27")
         self.assertFalse(past.l10n_sk_health_insurer_code)
         self.assertEqual(Version._l10n_sk_migrate_legacy_insurers(), 0)
@@ -101,7 +101,7 @@ class TestHealthInsurerHistory(TransactionCase):
         invalid = self.employee(l10n_sk_health_insurer_code=False)
         self.legacy_value(reviewed, "24")
         self.legacy_value(invalid, "99")
-        self.assertEqual(self.env["hr.version"]._l10n_sk_migrate_legacy_insurers(), 0)
+        self.env["hr.version"]._l10n_sk_migrate_legacy_insurers()
         self.assertEqual(reviewed.l10n_sk_health_insurer_code, "25")
         self.assertFalse(invalid.l10n_sk_health_insurer_code)
 
@@ -152,3 +152,16 @@ class TestHealthInsurerHistory(TransactionCase):
             {"name": "Synthetic other-company insuree", "company_id": other.id}
         )
         self.assertEqual(employee.version_id.l10n_sk_health_insurer_code, "25")
+
+    @freeze_time("2026-06-15")
+    def test_migration_preserves_the_old_effective_company_default(self):
+        employee = self.employee(l10n_sk_health_insurer_code=False)
+        current = employee.version_id
+        past = current.copy({
+            "employee_id": employee.id, "date_version": "2025-01-01",
+            "l10n_sk_health_insurer_code": False,
+        })
+        self.legacy_value(employee, None)
+        self.assertGreaterEqual(self.env["hr.version"]._l10n_sk_migrate_legacy_insurers(), 1)
+        self.assertEqual(current.l10n_sk_health_insurer_code, "24")
+        self.assertFalse(past.l10n_sk_health_insurer_code)

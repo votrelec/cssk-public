@@ -251,6 +251,10 @@ class DeclarationFundBases(models.AbstractModel):
         records, _missing = self._payslip_fund_records(slip)
         return records[slip.id]
 
+    def _required_recorded_fund_keys(self):
+        """Optional form-owned minimum, also used by legacy review actions."""
+        return None
+
     def _payslip_fund_records(self, slips):
         """Return records by payslip ID and the payslips without any records.
 
@@ -260,10 +264,15 @@ class DeclarationFundBases(models.AbstractModel):
         failures must still propagate. Recorded zero is not missing evidence.
         """
         result, missing = {}, slips.browse()
+        required = self._required_recorded_fund_keys()
         for slip in slips:
             slip.check_access("read")
             reader = getattr(slip, "_cssk_recorded_fund_bases", None)
             records = reader() if callable(reader) else False
+            if records and required is not None and not set(required).issubset(
+                (row["fund"], row["side"]) for row in records
+            ):
+                records = False
             result[slip.id] = records or False
             if callable(reader) and not records:
                 missing |= slip
@@ -341,7 +350,7 @@ class DeclarationFundBases(models.AbstractModel):
             if slip.company_id != self.company_id:
                 raise UserError(_("Use payslips from the declaration company."))
             reader = getattr(slip, "_cssk_recorded_fund_profile", None)
-            result[slip.id] = reader() if reader else False
+            result[slip.id] = reader() if callable(reader) else False
         return result
 
     def _collect_payslip_totals(self, payslips):

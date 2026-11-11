@@ -677,8 +677,11 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         self._validate_against_schema(xml_bytes)
         self._attach_xml(xml_bytes)
         self.state = "generated"
-        self.message_post(body=_("Declaration generated and XSD-validated."))
+        self.message_post(body=self._declaration_generated_message())
         return True
+
+    def _declaration_generated_message(self):
+        return _("Declaration generated and XSD-validated.")
 
     def _preflight(self):
         """Master-data checks the XML template relies on. Concrete reports
@@ -820,12 +823,18 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
     def _attach_xml(self, xml_bytes):
         self.ensure_one()
         self.xml_attachment_id = self.env["ir.attachment"].create({
-            "name": "%s.xml" % (self.name or self._xml_name_fallback),
+            "name": self._declaration_attachment_name(),
             "datas": base64.b64encode(xml_bytes),
             "res_model": self._name,
             "res_id": self.id,
-            "mimetype": "application/xml",
+            "mimetype": self._declaration_attachment_mimetype(),
         })
+
+    def _declaration_attachment_name(self):
+        return "%s.xml" % (self.name or self._xml_name_fallback)
+
+    def _declaration_attachment_mimetype(self):
+        return "application/xml"
 
     # ------------------------------------------------------------------
     # State machine / retention

@@ -119,18 +119,7 @@ class L10nSkHealth(models.Model):
                     "514."))
             # Inspect the unfiltered set: excluded agreements must not hide a
             # disagreement between the statutory fact and the payroll switch.
-            for slip in super(L10nSkHealth, rec)._get_period_payslips():
-                if slip.employee_id._l10n_sk_health_insurer() != rec.insurer_code:
-                    continue
-                version = rec._payslip_version(slip)
-                if not version or version.l10n_sk_agreement_type not in ("dopc", "dovp"):
-                    continue
-                if rec._pension_agreement(slip) and not version.l10n_sk_health_exempt:
-                    raise UserError(_(
-                        "Payslip '%(name)s': the pension type and health-exempt "
-                        "setting disagree for this agreement. Review the historical "
-                        "version and recalculate payroll before generating the 514.",
-                        name=slip.display_name))
+            rec._health_check_excluded(super(L10nSkHealth, rec)._get_period_payslips())
             # <CompanyIDTaxCode> was the one identification element nothing
             # checked. _digits() turns a missing DIČ into "", so the dávka went
             # to the insurer with an empty tax code and no error anywhere —
@@ -156,9 +145,7 @@ class L10nSkHealth(models.Model):
         slips = super()._get_period_payslips()
         if not slips:
             return slips
-        return slips.filtered(
-            lambda s: s.employee_id._l10n_sk_health_insurer()
-            == self.insurer_code and not self._excluded_agreement(s))
+        return self._health_selected_payslips(slips)
 
     def _excluded_agreement(self, payslip):
         """Also respect other legislation, e.g. a documented foreign A1.
@@ -167,12 +154,7 @@ class L10nSkHealth(models.Model):
         The health-exempt flag is currently the payroll's way to express the
         latter case. Its legal evidence remains the operator's responsibility.
         """
-        version = self._payslip_version(payslip)
-        return bool(self._pension_agreement(payslip) or (
-            version and "l10n_sk_agreement_type" in version._fields
-            and "l10n_sk_health_exempt" in version._fields
-            and version.l10n_sk_agreement_type in ("dopc", "dovp")
-            and version.l10n_sk_health_exempt))
+        return bool(self._health_payslip_profiles(payslip)[payslip.id].get("exempt"))
 
     def _pension_agreement(self, payslip):
         """§10b(1)(a) points 3/4, z.580/2004: excluded agreement income.
