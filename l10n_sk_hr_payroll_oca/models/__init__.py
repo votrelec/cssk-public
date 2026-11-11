@@ -11,3 +11,4 @@ from . import fund_capture
 from . import health_exemption
 from . import health_calculation
 from . import monthly_funds
+from . import canonical_rules
