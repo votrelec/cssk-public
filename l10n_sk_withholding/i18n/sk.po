@@ -437,6 +437,12 @@ msgid "Every dividend source must belong to the notice company."
 msgstr "Každý zdroj príjmu musí patriť firme oznámenia."
 
 #. module: l10n_sk_withholding
+#. odoo-python
+#: code:addons/l10n_sk_withholding/models/income_capacity.py:0
+msgid "Every linked author credit must belong to the original bill's company."
+msgstr "Každý naviazaný autorský dobropis musí patriť firme pôvodnej faktúry."
+
+#. module: l10n_sk_withholding
 #: model_terms:ir.ui.view,arch_db:l10n_sk_withholding.withholding_form
 msgid "Export XML"
 msgstr "Exportovať XML"
@@ -696,6 +702,16 @@ msgstr "Oznámenie"
 #: code:addons/l10n_sk_withholding/models/withholding.py:0
 msgid "Notice allocations exceed the actual posted source line."
 msgstr "Sumy priradené do oznámenia presahujú skutočný zaúčtovaný riadok."
+
+#. module: l10n_sk_withholding
+#. odoo-python
+#: code:addons/l10n_sk_withholding/models/withholding.py:0
+msgid ""
+"Notice income allocations exceed the original author source after its linked"
+" credit notes."
+msgstr ""
+"Príjmy priradené k oznámeniam presahujú pôvodný autorský doklad znížený o "
+"naviazané dobropisy."
 
 #. module: l10n_sk_withholding
 #: model:ir.model.fields,field_description:l10n_sk_withholding.field_l10n_sk_withholding__message_needaction_counter
@@ -964,6 +980,32 @@ msgid ""
 " dates."
 msgstr ""
 "Overte obdobie zisku, rozhodnutie alebo zmluvu a dátumy skutočných úhrad."
+
+#. module: l10n_sk_withholding
+#. odoo-python
+#: code:addons/l10n_sk_withholding/models/income_capacity.py:0
+msgid "Review the cyclic native author-bill reversal links."
+msgstr "Overte cyklické väzby storna autorskej faktúry."
+
+#. module: l10n_sk_withholding
+#. odoo-python
+#: code:addons/l10n_sk_withholding/models/income_capacity.py:0
+msgid ""
+"Review the linked author credit's payable account and recipient before "
+"allocating the remaining income."
+msgstr ""
+"Pred priradením zostávajúceho príjmu overte záväzkový účet a príjemcu "
+"naviazaného autorského dobropisu."
+
+#. module: l10n_sk_withholding
+#. odoo-python
+#: code:addons/l10n_sk_withholding/models/income_capacity.py:0
+msgid ""
+"Review the original author bill's payable lines and recipient before "
+"allocating its income."
+msgstr ""
+"Pred priradením príjmu overte záväzkové riadky pôvodnej autorskej faktúry a "
+"príjemcu."
 
 #. module: l10n_sk_withholding
 #. odoo-python
@@ -1396,6 +1438,16 @@ msgstr "Typ výnimky aktivity v zázname."
 
 #. module: l10n_sk_withholding
 #. odoo-python
+#: code:addons/l10n_sk_withholding/models/income_capacity.py:0
+msgid ""
+"Use matching native invoice or journal reversal links for the remaining "
+"author income."
+msgstr ""
+"Na určenie zostávajúceho autorského príjmu použite zodpovedajúce natívne "
+"väzby storna faktúry alebo účtovného zápisu."
+
+#. module: l10n_sk_withholding
+#. odoo-python
 #: code:addons/l10n_sk_withholding/models/withholding.py:0
 msgid "Use posted source lines of the correct company, account and direction."
 msgstr "Použite zaúčtované zdroje správnej firmy, účtu a strany účtovania."
@@ -1474,21 +1526,3 @@ msgstr "Oznámenie zrážkovej dane 4311"
 #: model:ir.model.fields,field_description:l10n_sk_withholding.field_l10n_sk_withholding__xml_attachment_id
 msgid "Xml Attachment"
 msgstr "Príloha XML"
-
-#. module: l10n_sk_withholding
-#. odoo-python
-#: code:addons/l10n_sk_withholding/models/withholding.py:0
-msgid ""
-"Another process is changing this notice or its correction chain. Reload and "
-"retry."
-msgstr ""
-"Iný proces mení toto oznámenie alebo jeho reťazec opráv. Obnovte údaje a "
-"skúste znova."
-
-#. module: l10n_sk_withholding
-#. odoo-python
-#: code:addons/l10n_sk_withholding/models/withholding.py:0
-msgid ""
-"The reviewed payment must reference a posted bank or cash disbursement."
-msgstr ""
-"Overená úhrada musí odkazovať na zaúčtovaný bankový alebo pokladničný výdaj."
