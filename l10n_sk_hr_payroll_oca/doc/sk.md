@@ -1,13 +1,15 @@
 ---
 title: Slovenské mzdy (OCA)
 summary: Slovenská mesačná výplatná páska pre aplikáciu OCA payroll v Odoo Community — úplná mzdová štruktúra pre pracovný pomer a tri dohody.
-verified: 19.0.1.27.0
+verified: 19.0.1.28.0
 family: l10n_sk_hr_payroll_base#engines
 ---
 
 Úplná slovenská mzdová štruktúra pre aplikáciu OCA `payroll`: štyri štruktúry, jedna na každú formu zamestnania, so spoločnými pravidlami — sociálne a zdravotné poistenie, základ dane, nezdaniteľná časť základu dane na daňovníka, progresívna daň z príjmu, daňový bonus na dieťa, náhrada mzdy za dovolenku a pri prekážkach v sume priemerného zárobku, náhrada príjmu pri PN, exekučné zrážky a stravné. Dodáva aj datované parametre, z ktorých pravidlá čítajú, slovenské typy voľna so *Slovenským mzdovým kódom* a plánmi nárokov a ročné zúčtovanie dane. Slovenské polia sú na karte zamestnanca v záložke mzdy a na šablónach zmlúv; parametre pravidiel sú v *Mzdy → Konfigurácia → Parametre pravidiel*.
 
 Inštaluje sa zámerne, vyžaduje modul OCA `payroll` a funguje v Odoo Community. Na zaúčtovanie do hlavnej knihy pridajte účtovný mostík pre OCA, na mzdové zvýhodnenia skupinu modulov príplatkov.
+
+Pred novou mzdou musí overený zdravotný kalendár vysvetliť dni bežného pracovného pomeru registráciou 2/2P alebo skutočným vyňatím 2N. Dávkové obdobie môže znížiť prémiové dni bez ukončenia registrácie. Pri pomenovanom rozpornom kalendári ho pred výpočtom skontrolujte; mzda nevymýšľa chýbajúce dni. Uchovaný mzdový profil obsahuje obdobie zdrojového kontraktu, preto neskoršia HR úprava alebo revízia kalendára nepreklasifikuje tento historický podklad.
 
 Daňovo relevantný dôchodok poberaný k 1. januáru ovplyvňuje aj mesačný nárok na NČZD. Pole *Poberá daňovo relevantný dôchodok* zaznamenajte na natívnej verzii účinnej od priznania dôchodku podľa uchovaného vyhlásenia daňovníka. Mesačný výpočet číta verziu platnú k 1. januáru svojho roka. Januárový dôchodca nemá mesačnú NČZD ani pri podpísanom vyhlásení a nízkom dôchodku. Priznanie v máji 2026 zachová mesačnú NČZD za rok 2026 a od januára 2027 ju odníme bez úpravy májovej verzie či zablokovania prepočtu decembra 2026. Samotný invalidný, vdovský alebo sirotský dôchodok príznak nenastavuje. Relevantný poistný dôchodok bez príznaku na januárovej verzii zastaví mesačné uplatnenie zrozumiteľnou správou pred pravidlami. Pri skutočnom nástupe počas roka bez januárovej verzie, alebo pri opätovnom prijatí po pracovnom pomere skončenom pred 1. januárom, zaznamenajte januárový dôchodkový status z vyhlásenia pri nástupe na prvej verzii nového pracovného pomeru. Nástup spätne nedatujte; neskoršie priznanie zostáva neskorším údajom. Verzia po mzdovom období alebo z ďalšieho roka status nepreukazuje. Zákonné parametre a pásma sa nemenia.
 

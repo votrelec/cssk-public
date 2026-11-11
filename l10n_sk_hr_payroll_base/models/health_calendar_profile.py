@@ -2,6 +2,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 """Read reviewed calendar facts without changing any payroll calculation."""
 
+from calendar import monthrange
+from datetime import timedelta
+
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -88,4 +91,50 @@ class HealthCalendarProfile(models.Model):
                         "A minimum opt-out requires concurrent employers in the reviewed health calendar."
                     )
                 )
+        return facts
+
+    def _l10n_sk_validate_health_calendar_source(self, day):
+        """Validate new payroll input, never the reading of retained evidence.
+
+        A reviewed month may describe zero premium days without ending a PP:
+        benefits leave registration intact, while explicit 2N explains its
+        exclusion. An empty month cannot replace a signed ordinary contract.
+        Engines call this before evaluation and when building new evidence;
+        legacy profile readers deliberately keep their existing policy.
+        """
+        self.ensure_one()
+        facts = self._l10n_sk_health_calendar_context(day)
+        if not facts or self.l10n_sk_health_is_exempt():
+            return facts
+        first = fields.Date.to_date(day).replace(day=1)
+        last = first.replace(day=monthrange(first.year, first.month)[1])
+        versions = self.employee_id.with_context(active_test=False).version_ids.sorted(
+            lambda version: (version.date_version, version.id),
+        )
+        expected = set()
+        for index, version in enumerate(versions):
+            if not version.contract_date_start or version.l10n_sk_is_agreement():
+                continue
+            start = max(first, version.date_version, version.contract_date_start)
+            end = min(last, version.contract_date_end or last)
+            if index + 1 < len(versions):
+                end = min(end, versions[index + 1].date_version - timedelta(days=1))
+            if start <= end and not version.l10n_sk_health_is_exempt():
+                expected.update(start + timedelta(days=offset)
+                                for offset in range((end - start).days + 1))
+        calendar = self.env["l10n.sk.health.calendar"].browse(facts["calendar_id"])
+        registered, excluded = set(), set()
+        for interval in calendar.interval_ids:
+            if interval.kind not in {"2", "2P", "2N"}:
+                continue
+            target = excluded if interval.kind == "2N" else registered
+            target.update(interval.date_start + timedelta(days=offset)
+                          for offset in range((interval.date_end - interval.date_start).days + 1))
+        if expected - registered - excluded or registered - expected:
+            raise UserError(_(
+                "Review the health calendar for '%(name)s': ordinary contract days must be "
+                "supported by employment (2/2P) or an explicit no-income exclusion (2N). "
+                "Benefit days do not end the employment registration.",
+                name=self.employee_id.display_name,
+            ))
         return facts
