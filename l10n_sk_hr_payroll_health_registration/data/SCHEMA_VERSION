@@ -1,0 +1,17 @@
+../schemas/davka601-derived-2026.xsd  293237677abf6d3402aaf5a2cd461e37  30902
+
+Derived transcription, not an authority XSD download.
+Source: https://www.udzs-sk.sk/wp-content/uploads/2026/01/VE_1_2026_sv.pdf
+PDF SHA256: d45710720fed6130842f9f99ae549e92295b7a4c0f7299d69b736cdd535008c6
+Schema SHA256: 199eb6d5c55bb442804ed869b67ab1435ff8af1ef545dfacafa41d9950dbb393
+
+REFRESH PROCEDURE
+  1. Fetch the current official bulletin and verify its identity and full diff.
+  2. Extract PDF pages 25-44 with PyPDF2 2.12.1; remove pagination and the
+     extracted UTF -8 XML declaration.
+  3. Normalize only the documented extraction artifacts [0 -9] and [A -W]
+     to [0-9] and [A-W]. Keep the published trailing-space 2S pattern.
+  4. Compare the transcription field by field with F-512. Recompute the
+     md5, byte size and SHA256; update this pin and wire601.SCHEMA_SHA256.
+  5. Run codec, schema and declaration tests. A changed authority vintage
+     requires explicit version metadata; do not silently repair the schema.
