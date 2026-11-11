@@ -355,6 +355,16 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertTrue(current.l10n_sk_monthly_fund_warning)
         self.assertTrue(current._cssk_recorded_fund_bases())
 
+    def test_native_batch_confirmation_consumes_agreement_oop_only_once(self):
+        self._student_agreement()
+        first = self._slip(wage=0, clawback=200)
+        second = self._slip(wage=0, clawback=200)
+        (first | second).action_payslip_done()
+        self.assertEqual(set((first | second).mapped("state")), {"done"})
+        self.assertEqual(self._funds(first)[("pension", "employee")]["base"], "0")
+        self.assertEqual(self._funds(second)[("pension", "employee")]["base"], "200")
+        self.assertEqual(self._funds(second)[("pension", "employee")]["amount"], "8")
+
     def test_unknown_monthly_metadata_keeps_native_calculation_with_warning(self):
         first = self._slip(wage=0, clawback=200)
         first.action_payslip_done()

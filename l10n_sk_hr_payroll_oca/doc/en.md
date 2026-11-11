@@ -179,3 +179,15 @@ amounts remain available while those sources need review.
 Calculate a new copy before using it. Recalculation refreshes its warning from
 its actual sources; a full refund of an earlier payment can change which
 sources remain relevant. Previously confirmed payroll remains historical.
+
+## Confirming several payslips {#confirming-batches}
+
+With automatic recalculation enabled, confirmation processes the selected
+payslips in order. Each later calculation uses the earlier confirmed monthly
+amounts, so the monthly allowance and agreement deduction are consumed once.
+
+When recalculation is disabled, a stale precomputed batch is refused as a whole.
+Confirm the first payslip, recalculate the next one and then confirm it. A failed
+batch leaves the original drafts unchanged. Changes to dates, inputs or salary
+lines must also pass source validation before confirmation. Retrying an already
+confirmed or paid payroll does not recalculate its historical amounts.

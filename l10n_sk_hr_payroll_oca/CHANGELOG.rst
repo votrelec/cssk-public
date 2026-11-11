@@ -85,6 +85,11 @@ Carry-over to 18.0
 Fixed
 ~~~~~
 
+* Validate changed source values before closing and make precomputed batch
+  refusal atomic. Delegate default batch confirmation to native singleton
+  workflows in order; retain already confirmed/paid evidence on retries.
+* Reject public creation of forged native full-refund links.
+
 * Retain the monthly tax-source warning when a customised insurance rule
   provides no optional fund records. Refresh it only through calculation;
   copies and public context defaults cannot forge a review status.

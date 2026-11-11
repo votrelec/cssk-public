@@ -173,3 +173,15 @@ rovnakom mesiaci. Natívne sumy zostávajú dostupné aj počas overovania podkl
 Novú kópiu pásky pred použitím vypočítajte. Prepočet obnoví upozornenie podľa
 jej skutočných zdrojov; úplné storno skoršej výplaty môže zmeniť relevantné
 podklady. Už potvrdená mzda zostáva historickým záznamom.
+
+## Potvrdenie viacerých pások {#confirming-batches}
+
+Pri zapnutom automatickom prepočte sa vybrané pásky potvrdzujú postupne. Každý
+neskorší výpočet zohľadní skoršie potvrdené mesačné sumy, takže nezdaniteľná časť
+aj odvodová úľava dohody sa použijú raz za mesiac.
+
+Pri vypnutom prepočte sa zastaraná vypočítaná dávka odmietne celá. Potvrďte prvú
+pásku, nasledujúcu prepočítajte a potom ju potvrďte. Neúspešný pokus ponechá
+pôvodné návrhy nezmenené. Aj zmena dátumov, vstupov alebo mzdových riadkov musí
+pred potvrdením prejsť overením zdrojov. Opakované potvrdenie už potvrdenej alebo
+vyplatenej mzdy neprepočítava jej historické sumy.

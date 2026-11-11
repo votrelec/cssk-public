@@ -1,6 +1,7 @@
 # Copyright 2026 votrelec
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 from copy import deepcopy
+from unittest.mock import patch
 
 from odoo import Command
 from odoo.exceptions import UserError
@@ -72,6 +73,166 @@ class TestFundLifecycle(TransactionCase):
     def _confirm(self, slip):
         return slip.with_context(without_compute_sheet=True).action_payslip_done()
 
+    def _monthly_pair(self):
+        self.version.write({"wage": 1200, "l10n_sk_tax_declaration_signed": True})
+        reference = self._slip()
+        expected = reference.line_ids.filtered(
+            lambda row: row.code == "INCOMETAX"
+        ).total
+        self.version.wage = 600
+        return self._slip(), self._slip(), expected
+
+    def test_precomputed_monthly_batch_refuses_atomically_then_sequentially_works(self):
+        first, second, expected = self._monthly_pair()
+        frozen = (
+            deepcopy(first.l10n_sk_fund_assessment),
+            first._l10n_sk_fund_salary_facts(),
+        )
+        with self.assertRaises(UserError):
+            (first | second).with_context(
+                without_compute_sheet=True
+            ).action_payslip_done()
+        self.assertNotEqual(first.state, "done")
+        self.assertNotEqual(second.state, "done")
+        self.assertTrue(
+            all(
+                not value
+                for value in (first | second).mapped("l10n_sk_fund_confirmed_at")
+            )
+        )
+        self.assertEqual(
+            (first.l10n_sk_fund_assessment, first._l10n_sk_fund_salary_facts()), frozen
+        )
+        self._confirm(first)
+        second.compute_sheet()
+        self._confirm(second)
+        self.assertAlmostEqual(
+            sum(
+                (first | second)
+                .line_ids.filtered(lambda row: row.code == "INCOMETAX")
+                .mapped("total")
+            ),
+            expected,
+            places=2,
+        )
+
+    def test_default_monthly_batch_confirmation_uses_prior_confirmed_amounts(self):
+        first, second, expected = self._monthly_pair()
+        (first | second).action_payslip_done()
+        self.assertEqual(set((first | second).mapped("state")), {"done"})
+        self.assertAlmostEqual(
+            sum(
+                (first | second)
+                .line_ids.filtered(lambda row: row.code == "INCOMETAX")
+                .mapped("total")
+            ),
+            expected,
+            places=2,
+        )
+        self.assertTrue(
+            all(
+                slip.l10n_sk_fund_assessment["profile"]["monthly_tax"]["complete"]
+                for slip in (first, second)
+            )
+        )
+
+    def test_combined_source_and_closing_values_validate_after_source_change(self):
+        slip = self._slip()
+        original = (
+            deepcopy(slip.l10n_sk_fund_assessment),
+            slip._l10n_sk_fund_salary_facts(),
+        )
+        line = slip.line_ids[:1]
+        payloads = [
+            {"date_to": "2026-07-31"},
+            {
+                "input_line_ids": [
+                    Command.create(
+                        {
+                            "name": "New input",
+                            "code": "SOURCE_CHANGE",
+                            "amount": 17,
+                            "contract_id": self.version.id,
+                        }
+                    )
+                ]
+            },
+            {"line_ids": [Command.update(line.id, {"amount": line.amount + 1})]},
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload), self.assertRaises(UserError):
+                slip.write(dict(payload, state="done"))
+            self.assertEqual(str(slip.date_to), "2026-06-30")
+            self.assertNotEqual(slip.state, "done")
+            self.assertFalse(slip.l10n_sk_fund_confirmed_at)
+            self.assertEqual(
+                (slip.l10n_sk_fund_assessment, slip._l10n_sk_fund_salary_facts()),
+                original,
+            )
+        slip.write({"name": "Reviewed source", "state": "done"})
+        self.assertEqual(slip.name, "Reviewed source")
+        self.assertEqual(slip.state, "done")
+
+    def test_retained_done_paid_and_batch_retry_ignore_later_live_predecessors(self):
+        first, second, expected = self._monthly_pair()
+        self._confirm(first)
+        second.compute_sheet()
+        self._confirm(second)
+        frozen = (
+            deepcopy(first.l10n_sk_fund_assessment),
+            first._l10n_sk_fund_salary_facts(),
+            first.l10n_sk_fund_confirmed_at,
+        )
+        state_field = self.env["hr.payslip"]._fields["state"]
+        # Stock OCA has no paid state. Model the selection extension used by
+        # payment adapters, without pretending to execute an actual payment.
+        with (
+            patch.object(
+                state_field, "selection", state_field.selection + [("paid", "Paid")]
+            ),
+            patch.object(
+                state_field, "_selection", set(state_field._selection) | {"paid"}
+            ),
+        ):
+            first.write({"state": "paid"})
+            self.assertEqual(first.state, "paid")
+            (first | second).action_payslip_done()
+            self.assertEqual(first.state, "paid")
+            (first | second).write({"state": "paid"})
+            (first | second).write({"state": "paid"})
+            self.assertEqual(set((first | second).mapped("state")), {"paid"})
+        self.assertEqual(
+            (
+                first.l10n_sk_fund_assessment,
+                first._l10n_sk_fund_salary_facts(),
+                first.l10n_sk_fund_confirmed_at,
+            ),
+            frozen,
+        )
+
+    def test_closing_values_cannot_forge_generated_status_or_refund_links(self):
+        slip = self._slip()
+        for field in (
+            "l10n_sk_fund_source_signature",
+            "l10n_sk_monthly_tax_unverified",
+        ):
+            with self.assertRaises(UserError):
+                slip.write({"name": "Injected", "state": "done", field: False})
+            self.assertEqual(slip.name, "Lifecycle source")
+            self.assertNotEqual(slip.state, "done")
+        self._confirm(slip)
+        candidate = slip.copy({"credit_note": True})
+        draft = self._slip()
+        with self.assertRaises(UserError):
+            draft.write({"refunded_id": candidate.id, "state": "done"})
+        with self.assertRaises(UserError):
+            draft.copy({"refunded_id": candidate.id})
+        with self.assertRaises(UserError):
+            draft.with_context(default_refunded_id=candidate.id).copy()
+        self.assertFalse(draft.refunded_id)
+        slip.refund_sheet()
+        self.assertTrue(slip.refunded_id)
+
     def test_changed_wage_cannot_confirm_stale_calculation(self):
         slip = self._slip()
         self.version.wage = 2200
@@ -84,7 +245,11 @@ class TestFundLifecycle(TransactionCase):
 
     def test_prevent_compute_and_direct_state_use_same_source_check(self):
         slip = self._slip()
-        slip.prevent_compute_on_confirm = True
+        self.env["ir.config_parameter"].sudo().set_param(
+            "payroll.prevent_compute_on_confirm", True
+        )
+        slip.invalidate_recordset(["prevent_compute_on_confirm"])
+        self.assertTrue(slip.prevent_compute_on_confirm)
         self.version.l10n_sk_agreement_oop = True
         with self.assertRaises(UserError):
             slip.action_payslip_done()

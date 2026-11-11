@@ -84,3 +84,24 @@ calculation refreshes it. Public create/write and context defaults reject both
 true and false values. Only the private writer can store the calculation's
 status, inside the same savepoint as native compute. Retained fund JSON and
 missing-record declaration policies are unchanged.
+
+## Atomic closing and native batch order
+
+Closing writes apply non-state values once through cooperative super before
+source validation. Each newly closing record is then validated, stamped and
+closed in order within one savepoint. The next same-month predecessor signature
+therefore sees an earlier closing record in the same transaction. A stale
+precomputed batch rolls back all attempted closures and child/header edits.
+
+`action_payslip_done` delegates each pending singleton to native super in order,
+retaining native automatic-compute settings and the explicit without-compute
+context. It does not reproduce the engine or refund body. Already done/paid
+records validate retained identity/salary evidence only; they never compare
+against today's HR or later monthly predecessor signatures. Stock OCA has no
+paid selection; the paid regression models a payment adapter's selection and
+validation cache extension and does not execute an actual payment.
+
+Public create/context defaults cannot establish a new native refund link.
+Only the native copy hook's generated original identity permits that link;
+existing unchanged legacy links remain historical. All generated-value guards
+and lower cooperative field owners still run before closing.
