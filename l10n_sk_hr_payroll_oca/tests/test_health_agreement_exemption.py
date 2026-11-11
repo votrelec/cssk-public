@@ -247,6 +247,9 @@ class TestHealthAgreementExemption(TransactionCase):
         )
 
     def test_op_rounds_up_after_calendar_proration_and_records_its_actual_base(self):
+        # The one-day registration is a genuine one-day ordinary contract,
+        # rather than an unexplained truncation of a January-starting PP.
+        self.version.contract_date_start = "2026-06-30"
         self.version.l10n_sk_health_oop_claim = True
         self.health_calendar(start="2026-06-30")
         slip = self.slip("none")

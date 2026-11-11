@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll
 summary: The Slovak payroll family in one place — the monthly payslip for a pracovný pomer and the three dohody on either Odoo Enterprise Payroll or the OCA payroll app, with dated statutory rates, leave, the annual tax reconciliation and posting to the general ledger.
-verified: 19.0.1.6.0
+verified: 19.0.1.7.0
 ---
 
 ## What it is for {#purpose}
@@ -433,10 +433,13 @@ Systems that do not yet keep these records continue their existing workflow.
 
 ## Reviewed health calendars {#health-calendars}
 
+Before new payroll is calculated, the reviewed calendar must explain the ordinary contract dates effective in that month. Record employment as 2/2P or an actual no-income exclusion as 2N. An empty review does not end a signed ordinary contract. Benefit days may reduce premium days to zero while the registration continues. A missing or conflicting period names the employee and asks for calendar review; the program does not insert days or wages. Agreement and post-employment registrations continue to use their actual 2D/2Y dates.
+
 An HR manager opens an employee's **Health calendars** tab, creates a month,
 records the dated source intervals and retains their documentary reference.
 Confirm **Entire month reviewed** only when all days and relevant exceptions
-are covered. A reviewed empty calendar explicitly records no insured days.
+are covered. An empty calendar can record no actual agreement registration;
+an ordinary contract still needs employment facts or an explicit 2N exclusion.
 Intervals stay inside that month; 2Y identifies one actual day. Actual agreement
 work/rest-day registration facts must be supplied, rather than inferred from
 contract duration or a working-hours schedule.

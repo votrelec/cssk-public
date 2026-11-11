@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Health Insurance Statement (dávka 514)
 summary: Monthly Slovak health-insurance reporting from recorded payroll assessments, with historical insurers, XML and the published text batch format.
-verified: 19.0.1.3.0
+verified: 19.0.1.4.0
 ---
 
 ## What it is for {#purpose}
@@ -33,6 +33,10 @@ Complete and confirm payroll for the month, including zero-premium months. A rev
 The completeness check also finds ordinary employees from the historical employment versions and contract dates when neither payroll nor a calendar exists. It names the employee whose payroll must be completed, including employees insured elsewhere and archived employees active in the reporting month. A future exemption does not remove an earlier obligation. Agreement and irregular-income registrations use actual reviewed 2D/2Y days; the program does not create zero wages from a contract.
 
 A partial payslip covers only its own dates. Complete payroll for any later registered interval in the same month; a full-month retained payroll profile remains valid after later HR edits. An empty reviewed calendar does not end an ordinary employment registration. Benefits can give zero premium days while registration continues; record an actual no-income exclusion as 2N with its supporting evidence.
+
+New payroll also retains its source contract period. A monthwide payslip on a contract ending on day 15 cannot cover a separate contract starting on day 16. A wage change within the same open contract does not shorten its coverage. When older payroll has no retained contract period, the statement names that source and preserves known amounts; its explicit legacy coverage fallback uses payslip dates. A corrective statement requires the existing reasoned legacy review and records the reviewer and time. Review or a later HR edit does not rewrite submitted files.
+
+After this upgrade, an older unfiled correction review may need confirmation again because the review now also identifies the retained payroll profile. The filed original remains available unchanged.
 
 [Dôvera's 514 instructions](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) require the employee count even when no advance is due. [VšZP's registration instructions](https://www.vszp.sk/showdoc.do?docid=147) distinguish 2D agreement registration and 2Y irregular or post-employment income.
 

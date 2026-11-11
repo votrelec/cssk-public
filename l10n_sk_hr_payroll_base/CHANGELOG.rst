@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ----------
 
+* Validate new payroll calendar sources against effective ordinary contracts,
+  keeping benefit days, explicit 2N exclusions and actual 2D/2Y roles distinct.
+  Retain employment dates separately from premium days.
+
 * Relicensed to **AGPL-3**. Part of a repository-wide move to a single licence:
   everything Data Dance authors is AGPL-3 except the modules that depend on Odoo
   Enterprise, which OEEL forbids from carrying it. What differs between modules

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20261102\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 18:48+0000\n"
-"PO-Revision-Date: 2026-11-11 18:48+0000\n"
+"POT-Creation-Date: 2026-11-11 19:59+0000\n"
+"PO-Revision-Date: 2026-11-11 19:59+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -288,6 +288,15 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__payer_number
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_number
 msgid "Health payer number"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Historical contract coverage was not recorded for: %(slips)s. Review the "
+"original contract periods. Recorded amounts are preserved; the legacy "
+"coverage fallback uses only the payslip dates."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health

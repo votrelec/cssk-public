@@ -1,7 +1,7 @@
 ---
 title: Mesačný výkaz zdravotného poistenia (dávka 514)
 summary: Mesačné vykazovanie zdravotného poistenia z uložených mzdových podkladov, s historickou poisťovňou, XML a zverejneným textovým formátom.
-verified: 19.0.1.3.0
+verified: 19.0.1.4.0
 ---
 
 ## Na čo slúži {#purpose}
@@ -33,6 +33,10 @@ Spracujte a potvrďte mzdy za mesiac vrátane mesiacov s nulovým poistným. Ove
 Kontrola úplnosti nájde bežný pracovný pomer aj podľa historických pracovných verzií a dátumov zmluvy, keď chýba mzda aj kalendár. Pomenuje zamestnanca, ktorého mzdu treba dokončiť, vrátane osôb inej poisťovne a archivovaných osôb zamestnaných vo vykazovanom mesiaci. Budúce vyňatie neruší skoršiu povinnosť. Pri dohodách a nepravidelnom príjme rozhodujú skutočné overené dni 2D/2Y; samotná zmluva nevytvorí nulovú mzdu.
 
 Čiastočná páska pokrýva iba svoje dátumy. Dokončite mzdu aj za neskorší registrovaný interval rovnakého mesiaca; uchovaný profil celomesačnej mzdy zostáva platný po neskorších HR úpravách. Prázdny overený kalendár neukončuje registráciu bežného pracovného pomeru. Dávkové obdobie môže znížiť prémiové dni na nulu pri trvajúcej registrácii; skutočné vyňatie pre absenciu príjmu zaznamenajte ako 2N s príslušným podkladom.
+
+Nová mzda uchová aj obdobie svojho zdrojového kontraktu. Celomesačná páska kontraktu skončeného pätnásteho nemôže pokryť samostatný kontrakt od šestnásteho. Zmena mzdy v tom istom otvorenom kontrakte jeho pokrytie neskracuje. Ak staršia mzda nemá uchované obdobie kontraktu, výkaz pomenuje podklad a zachová známe sumy; výslovný pôvodný postup pri pokrytí používa dátumy pásky. Opravný výkaz vyžaduje existujúce odôvodnené potvrdenie pôvodného postupu so záznamom osoby a času. Toto potvrdenie ani neskoršia HR úprava neprepisuje podané súbory.
+
+Po tejto aktualizácii môže staršie potvrdenie nepodanej opravy vyžadovať opätovné overenie, pretože sa teraz viaže aj na uchovaný mzdový profil. Pôvodný podaný súbor zostáva dostupný bez zmeny.
 
 [Pokyny Dôvery k 514](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) vyžadujú počet zamestnancov aj pri nulovom preddavku. [Registračné pokyny VšZP](https://www.vszp.sk/showdoc.do?docid=147) odlišujú registráciu dohody 2D a nepravidelného alebo pozmluvného príjmu 2Y.
 

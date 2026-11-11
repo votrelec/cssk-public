@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ----------
 
+* Use frozen source-contract and registration dates for 514 coverage and days.
+  A monthwide slip on an ended contract cannot cover a new contract. Missing
+  historical coverage warns by source name without discarding known amounts;
+  corrections require the existing audited legacy review. Filed bytes remain
+  unchanged and retained profiles are not rebuilt from current HR facts.
+
 * Detect missing ordinary payroll from effective historical employment versions
   and contract periods even without a health calendar. Name the missing employee
   before generating either 514 format; retain actual 2D/2Y registration evidence,

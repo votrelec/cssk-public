@@ -332,6 +332,19 @@ msgstr "Najprv skontrolujte celý mesiac a uveďte odkaz na uchovaný podklad."
 
 #. module: l10n_sk_hr_payroll_base
 #. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/health_calendar_profile.py:0
+msgid ""
+"Review the health calendar for '%(name)s': ordinary contract days must be "
+"supported by employment (2/2P) or an explicit no-income exclusion (2N). "
+"Benefit days do not end the employment registration."
+msgstr ""
+"Skontrolujte zdravotný kalendár zamestnanca '%(name)s': dni bežného "
+"pracovného pomeru musia byť podložené zamestnaním (2/2P) alebo výslovným "
+"vyňatím pre absenciu príjmu (2N). Dávkové dni neukončujú registráciu "
+"zamestnania."
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
 #: code:addons/l10n_sk_hr_payroll_base/models/health_calendar.py:0
 msgid "Review the health-calendar intervals: %s"
 msgstr "Skontrolujte intervaly zdravotného kalendára: %s"
@@ -441,12 +454,12 @@ msgstr "Mesiac zdravotného poistenia musí začínať jeho prvým dňom."
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_base.field_l10n_sk_health_calendar__complete
 msgid ""
 "The intervals describe the whole month, including days without insurance and"
-" all known minimum exceptions. An empty reviewed calendar explicitly means "
-"no insured days."
+" all known minimum exceptions. An empty calendar does not end an ordinary "
+"contract registration; record employment or its explicit 2N exclusion."
 msgstr ""
 "Intervaly opisujú celý mesiac vrátane dní bez poistenia a všetkých známych "
-"výnimiek z minima. Prázdny skontrolovaný kalendár výslovne znamená nulový "
-"počet poistných dní."
+"výnimiek z minima. Prázdny kalendár neukončuje registráciu bežného "
+"pracovného pomeru; zaznamenajte zamestnanie alebo jeho výslovné vyňatie 2N."
 
 #. module: l10n_sk_hr_payroll_base
 #. odoo-python

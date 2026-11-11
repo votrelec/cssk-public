@@ -102,6 +102,7 @@ class DeclarationFundBases(models.AbstractModel):
         """Bind consent to this filing and the actual sources, never a context flag."""
         self.ensure_one()
         sources = []
+        profiles = self._payslip_fund_profiles(slips)
         for slip in slips.sorted("id"):
             slip.check_access("read")
             version = self._payslip_version(slip)
@@ -142,6 +143,7 @@ class DeclarationFundBases(models.AbstractModel):
                     "version_facts": version.read(version_fields, load=None)[0]
                     if version
                     else False,
+                    "recorded_profile": profiles[slip.id],
                     "salary": sorted(
                         [
                             [
@@ -290,7 +292,7 @@ class DeclarationFundBases(models.AbstractModel):
         """
         self.ensure_one()
         result, missing = {}, slips.browse()
-        recorded, _without_records = self._payslip_fund_records(slips)
+        recorded, without_evidence = self._payslip_fund_records(slips)
         for slip in slips:
             if slip.company_id != self.company_id:
                 raise UserError(_("Use payslips from the declaration company."))
@@ -307,6 +309,11 @@ class DeclarationFundBases(models.AbstractModel):
                 result[slip.id] = False
             else:
                 result[slip.id] = records
+                # A country form can lack a required profile fact while the
+                # monetary assessments remain exact. Preserve those amounts;
+                # the shared original/corrective review policy still applies.
+                if slip in without_evidence:
+                    missing |= slip
         if (
             missing
             and self.is_correction
@@ -319,15 +326,7 @@ class DeclarationFundBases(models.AbstractModel):
                     slips=", ".join(missing.mapped("display_name")),
                 )
             )
-        warning = (
-            _(
-                "Legacy gross-based fallback was used because recorded fund bases "
-                "are missing for: %(slips)s",
-                slips=", ".join(missing.mapped("display_name")),
-            )
-            if missing
-            else False
-        )
+        warning = self._missing_fund_evidence_warning(missing) if missing else False
         if self.fund_bases_warning != warning:
             self.fund_bases_warning = warning
             if warning:
@@ -335,6 +334,14 @@ class DeclarationFundBases(models.AbstractModel):
                 # employee-supplied names into trusted markup.
                 self.message_post(body=warning)
         return result
+
+    def _missing_fund_evidence_warning(self, missing):
+        """Forms may name an absent profile fact without discarding known sums."""
+        return _(
+            "Legacy gross-based fallback was used because recorded fund bases "
+            "are missing for: %(slips)s",
+            slips=", ".join(missing.mapped("display_name")),
+        )
 
     def _payslip_fund_profiles(self, slips):
         """Optional batch profile adapter, with bridge-owned refund semantics.

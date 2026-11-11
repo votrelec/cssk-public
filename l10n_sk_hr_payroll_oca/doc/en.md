@@ -1,13 +1,15 @@
 ---
 title: Slovak Payroll (OCA)
 summary: The Slovak monthly payslip for the OCA payroll app on Odoo Community — a complete salary structure for a pracovný pomer and the three dohody.
-verified: 19.0.1.27.0
+verified: 19.0.1.28.0
 family: l10n_sk_hr_payroll_base#engines
 ---
 
 A complete Slovak salary structure for the OCA `payroll` app: four structures, one per employment form, sharing one rule set — social and health insurance, the tax base, the non-taxable part per taxpayer, the progressive income tax, the child tax bonus, holiday and obstacle pay at average earnings, employer sick pay, garnishments and the meal allowance. It also ships the dated rule parameters the rules read, Slovak time-off types with a *Slovak Payroll Code* and accrual plans, and the annual tax reconciliation. The Slovak fields appear on the employee form, *Payroll* tab, and on contract templates; the rule parameters are under *Payroll → Configuration → Rule Parameters*.
 
 Install it on purpose; it needs the OCA `payroll` module and works on Odoo Community. For posting to the general ledger add the OCA accounting bridge; for wage surcharges the surcharges family.
+
+Before new payroll, a reviewed health calendar must explain the ordinary contract dates through employment 2/2P or an actual 2N exclusion. Benefits may reduce premium days without ending registration. Review a named conflicting calendar before calculation; payroll does not invent missing days. The retained payroll profile keeps its source contract period, so later HR changes and calendar revisions do not reclassify that historical source.
 
 A tax-relevant pension drawn on 1 January also affects monthly allowance eligibility. Record *Draws a tax-relevant pension* on the native version effective from the pension award date, using the retained taxpayer declaration. Monthly payroll reads the version in force on 1 January of its own year. A January pensioner receives no monthly NČZD even if the declaration is signed and the pension is small. A May 2026 award keeps the 2026 monthly allowance and removes it from January 2027, without editing the May version or preventing a December 2026 recomputation. Disability, widow's and orphan's pensions alone do not set this flag. A relevant insurance pension without the flag on the January version stops a monthly claim with a plain message before salary rules run. For a genuine midyear hire without a January version, or a rehire whose earlier employment ended before 1 January, the first version of the new employment records the January pension status declared at hiring. Do not backdate employment; a later award remains a later fact. A version later than the payslip or belonging to a later year cannot establish that status. Statutory parameters and tax bands remain unchanged.
 
