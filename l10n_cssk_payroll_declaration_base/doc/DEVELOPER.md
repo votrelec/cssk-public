@@ -1,5 +1,7 @@
 # Recorded insurance bases
 
+A form may return valid monetary records together with a payslip in the missing-evidence recordset when an additional required historical profile fact is absent. The shared collector preserves those known amounts, applies the same original/corrective review policy, and calls `_missing_fund_evidence_warning(missing)` for a specific explanation. Missing fund amounts still retain their established legacy fallback. Legacy confirmation digests include the bridge-returned retained profile as well as source identity, salary and native scalar facts; replacing reviewed evidence invalidates consent. Engines without the optional reader keep the existing workflow.
+
 The optional engine adapter is `_cssk_recorded_fund_bases`. An absent/noncallable
 hook means the engine has no recorder and keeps its existing filing workflow.
 An implemented hook returning False means that a particular supported payslip
@@ -24,3 +26,9 @@ The action uses a private Python super-write for its own generated audit fields,
 while preserving other mixins' write chain. No RPC/context capability can grant
 the fallback. MVP/VPP/health/ELDP expose the reason/action and warning banner;
 their inherited field labels need their own native translation references.
+
+## Recorded profiles and output formats
+
+`_payslip_fund_profiles(slips)` returns bridge-validated retained profiles by payslip ID. Missing/non-callable optional readers return false; access errors propagate. A form may override `_required_recorded_fund_keys()` so generation and legacy-review actions agree about incomplete metadata. Country-specific profile completeness stays in the country form's reader.
+
+`_declaration_attachment_name()`, `_declaration_attachment_mimetype()` and `_declaration_generated_message()` customise generated-file metadata without replacing the submission/history state machine. A non-XML country format dispatches rendering and validation in its existing hooks and preserves the default XML branch. Retained attachment downloads use the retained bytes.

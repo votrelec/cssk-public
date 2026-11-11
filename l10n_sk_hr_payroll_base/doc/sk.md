@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy
 summary: Celá skupina modulov slovenských miezd na jednom mieste — mesačná výplatná páska pre pracovný pomer a tri dohody v Odoo Enterprise Payroll alebo v aplikácii OCA payroll, s datovanými zákonnými sadzbami, voľnom, ročným zúčtovaním dane a zaúčtovaním do hlavnej knihy.
-verified: 19.0.1.5.0
+verified: 19.0.1.7.0
 ---
 
 ## Na čo slúži {#purpose}
@@ -443,10 +443,13 @@ ktoré tieto údaje ešte neuchovávajú, pokračuje doterajší postup.
 
 ## Overené zdravotné kalendáre {#health-calendars}
 
+Pred novým výpočtom mzdy musí overený kalendár vysvetliť dni bežného pracovného pomeru účinné v danom mesiaci. Zamestnanie zaznamenajte ako 2/2P alebo skutočné vyňatie pre absenciu príjmu ako 2N. Prázdne overenie neukončuje podpísaný pracovný pomer. Dávkové dni môžu znížiť prémiové dni na nulu pri trvajúcej registrácii. Pri chýbajúcom alebo rozpornom období program pomenuje zamestnanca a vyžiada kontrolu kalendára; nedoplní dni ani mzdu. Dohody a príjem po skončení zmluvy naďalej používajú skutočné dni 2D/2Y.
+
 HR manažér otvorí kartu zamestnanca **Zdravotné kalendáre**, vytvorí mesiac,
 zadá dátumové intervaly a odkaz na uchované podklady. Celý mesiac označí za
-skontrolovaný až po zahrnutí všetkých dní a výnimiek. Prázdny overený kalendár
-výslovne znamená žiadne poistené dni. Intervaly zostávajú v danom mesiaci;
+skontrolovaný až po zahrnutí všetkých dní a výnimiek. Prázdny kalendár môže
+zaznamenať neprihlásené dni dohody; bežný pracovný pomer potrebuje registračné
+údaje alebo výslovné vyňatie 2N. Intervaly zostávajú v danom mesiaci;
 2Y označuje jeden skutočný deň. Dni dohody vrátane príslušných dní odpočinku
 sú preukázané vstupy, neodvodzujú sa iba z trvania zmluvy či pracovných hodín.
 

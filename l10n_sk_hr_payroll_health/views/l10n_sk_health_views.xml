@@ -38,18 +38,20 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="company_id"/>
-                            <field name="insurer_code"/>
-                            <field name="payer_number"/>
-                            <field name="year"/>
-                            <field name="month"/>
-                            <field name="payment_date"/>
+                            <field name="company_id" readonly="state != 'draft'"/>
+                            <field name="insurer_code" readonly="state != 'draft'"/>
+                            <field name="export_format" readonly="state != 'draft'"/>
+                            <field name="correction_type" readonly="state != 'draft'"/>
+                            <field name="payer_number" readonly="state != 'draft'"/>
+                            <field name="year" readonly="state != 'draft'"/>
+                            <field name="month" readonly="state != 'draft'"/>
+                            <field name="payment_date" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="version_id"/>
+                            <field name="version_id" readonly="state != 'draft'"/>
                             <field name="date_from"/>
                             <field name="date_to"/>
-                            <field name="xml_attachment_id"/>
+                            <field name="xml_attachment_id" string="Generated file"/>
                         </group>
                     </group>
                     <field name="line_ids">

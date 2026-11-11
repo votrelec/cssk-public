@@ -13,7 +13,10 @@
                 <group name="sk_health" string="Health insurance (dávka 514)"
                        invisible="country_code != 'SK'">
                     <field name="l10n_sk_health_insurer_code"/>
-                    <field name="l10n_sk_health_payer_number"/>
+                    <field name="l10n_sk_health_payer_number" invisible="1"/>
+                    <field name="l10n_sk_health_payer_vszp"/>
+                    <field name="l10n_sk_health_payer_dovera"/>
+                    <field name="l10n_sk_health_payer_union"/>
                 </group>
             </xpath>
         </field>

@@ -39,7 +39,7 @@ class HealthCalendar(models.Model):
     )
     complete = fields.Boolean(
         string="Entire month reviewed",
-        help="The intervals describe the whole month, including days without insurance and all known minimum exceptions. An empty reviewed calendar explicitly means no insured days.",
+        help="The intervals describe the whole month, including days without insurance and all known minimum exceptions. An empty calendar does not end an ordinary contract registration; record employment or its explicit 2N exclusion.",
     )
     interval_ids = fields.One2many(
         "l10n.sk.health.calendar.interval",

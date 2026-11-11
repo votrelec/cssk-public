@@ -12,7 +12,7 @@ class HealthCalculationPayslip(models.Model):
     def compute_sheet(self):
         for slip in self:
             for version in slip.contract_id or slip._get_employee_contracts():
-                calendar = version._l10n_sk_health_calendar_context(slip.date_from)
+                calendar = version._l10n_sk_validate_health_calendar_source(slip.date_from)
                 if version.l10n_sk_health_minimum_opt_out:
                     version.l10n_sk_health_minimum_is_opted_out()
                     if not calendar:
@@ -26,11 +26,6 @@ class HealthCalculationPayslip(models.Model):
     def _l10n_sk_fund_profile(self):
         result = super()._l10n_sk_fund_profile()
         version = self._l10n_sk_version()
-        calendar = version._l10n_sk_health_calendar_context(self.date_from)
-        result["health"] = {
-            "disabled": version.l10n_sk_health_is_disabled(self.date_from),
-            "exempt": version.l10n_sk_health_is_exempt(),
-            "minimum_opt_out": version.l10n_sk_health_minimum_is_opted_out(),
-            "calendar": calendar or None,
-        }
+        version._l10n_sk_validate_health_calendar_source(self.date_from)
+        result["health"] = version._l10n_sk_health_profile(self.date_from)
         return result

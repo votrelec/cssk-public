@@ -5,10 +5,17 @@ Changelog
 Unreleased
 ==========
 
+* Validate reviewed health sources before salary-rule evaluation and new
+  profile capture; freeze the source contract period independently of later
+  wage versions and later changes to the employee card.
+
 - **19.0.1.22.0 (2026-11-09), DISCHARGED on 18.0 by 997c7bbb:** the employee social insurance cap is prorated for a part-month (§ 138 ods. 13, employer cap untouched); sick pay and the § 16a minimum count calendar days from the start of the incapacity (§ 8 zákona 462/2003); the health allowance is reduced for a part-month (§ 16 ods. 18).
 
 Carry-over to 18.0
 ~~~~~~~~~~~~~~~~~~
+
+* Not yet ported: health514 profile/format integration. Adapt version ownership
+  to contracts and rerun profile, insurer, source, refund and retained-file cases.
 
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
@@ -60,6 +67,17 @@ Carry-over to 18.0
   ``tests/test_parameters_2027.py``. Data only; the 18.0 parameters carry the
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
+
+[19.0.1.27.0] — 2026-11-11
+==========================
+
+Added
+~~~~~
+
+* Declaration-facing recorded-profile reader using the native refund origin;
+  invalid evidence stays optional and access failures propagate.
+* Shared version health-profile hook instead of a second profile calculation
+  in the bridge. Assessment storage and salary-rule arithmetic are unchanged.
 
 [19.0.1.26.0] — 2026-11-11
 ==========================

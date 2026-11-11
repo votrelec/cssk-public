@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 {
     "name": "Slovakia — Health monthly advances (dávka 514)",
-    "version": "19.0.1.2.3",
+    "version": "19.0.1.4.0",
     "category": "Human Resources/Payroll",
     "countries": ["sk"],
     "summary": "Monthly Slovak health-insurance advances statement (Mesačný "
@@ -16,6 +16,7 @@
     "depends": [
         "l10n_cssk_payroll_declaration_base",
         "l10n_sk_base",
+        "l10n_sk_hr_payroll_base",
     ],
     "data": [
         "security/ir.model.access.csv",

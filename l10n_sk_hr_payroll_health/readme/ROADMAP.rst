@@ -1,34 +1,29 @@
 Verification status
 -------------------
 
-* The export is validated against the official ``514-2023.xsd`` shipped in ``data/``.
-  That checks the SHAPE of the file, not that the figures are the ones the health insurer
-  expects. No declaration produced here has been round-tripped through the
-  real submission portal, so treat a passing export as necessary rather than
-  sufficient, and reconcile the first live filing by hand.
-* The test suite drives whichever payroll engine is installed in the database
-  (OCA ``payroll`` or Enterprise ``hr_payroll``) and asserts against that one.
-  There is no test asserting that the two engines produce IDENTICAL
-  declarations from identical inputs — engine parity rests on the shared
-  ``_collect_payslip_totals`` adapter rather than on evidence.
-* A new form vintage means a new ``cssk.payroll.declaration.version`` record
-  with its own QWeb template and XSD. Superseded vintages are not back-filled,
-  so recomputing an old period needs the vintage that was in force then.
+* Recorded assessments and historical profiles feed both XML and the published
+  UTF-8 text batch 514. Native Community payroll and actual Slovak metadata,
+  errors, file bytes and ordinary-officer API workflows are exercised.
+* Full N/O reporting uses the common retained-file workflow. The typed codec
+  can represent A, but the UI does not expose it without a difference collector.
+  Section 2(4) of decree 159/2018 permits O to replace all section 1 data.
+* A form edition is selected for its actual period of validity. A revised
+  authority interface needs a new edition and renewed source verification.
+* The public checkout lacks the documentation-site generator. No site build or
+  Enterprise runtime verification is claimed. Live portal acceptance is proved
+  by the insurer receipt, retained separately from local export validation.
 
-Known limitation — the published schema is defective
-----------------------------------------------------
+XML schema limitation
+---------------------
 
-``514-2023.xsd`` cannot validate any real instance: it carries single-character
-``[0-9]`` patterns under multi-character ``minLength`` constraints and
-impossible integer bounds. The XSD is shipped and loaded, but run as a
-NON-FATAL check; the authoritative gate is well-formedness plus structural
-conformance to the schema's element model. If the insurers publish a corrected
-schema, tighten this back to a hard ``assertValid``.
+The bundled 514-2023.xsd has contradictory restrictions. Its findings remain
+nonfatal; XML well-formedness and structural consistency are checked. The text
+codec follows the pinned published interface and checks typed fields and totals.
 
-Not covered
------------
+Further integration
+-------------------
 
-* Each dávka 514 takes only the employees whose *Health insurer (SK)* (or,
-  when empty, the company default) is the selected insurer. The insurer is
-  read as it is today; a mid-year change of insurer is not dated.
-* Corrections and annulment filings are not modelled.
+* Reconcile multi-income payroll calculations, paid financial corrections and
+  registration evidence through their own workflows before production use.
+* A future A collector must produce signed differences from retained filings,
+  not another complete month. The N/O interface remains available meanwhile.

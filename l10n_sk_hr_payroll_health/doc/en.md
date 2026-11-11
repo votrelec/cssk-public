@@ -1,133 +1,59 @@
 ---
 title: SK Monthly Health Insurance Statement (dávka 514)
-summary: The monthly výkaz preddavkov na poistné for a Slovak health insurer (VšZP, Dôvera, Union) in the common dávka 514 format, built from the month's payslips and exported as XML.
-verified: 19.0.1.2.3
+summary: Monthly Slovak health-insurance reporting from recorded payroll assessments, with historical insurers, XML and the published text batch format.
+verified: 19.0.1.4.0
 ---
 
 ## What it is for {#purpose}
 
-Every month the employer reports to each **health insurer** the health
-insurance advances (*preddavky na poistné*) it pays for its employees and for
-itself: the *mesačný výkaz preddavkov na poistné*. All three Slovak insurers —
-**VšZP** (25), **Dôvera** (24) and **Union** (27) — accept it in the same
-electronic format, **dávka 514**.
+Prepare a monthly statement for VšZP (25), Dôvera (24) or Union (27) from confirmed payroll. Each statement addresses one insurer. Choose XML or **Text batch 514**; text uses the published UTF-8, pipe-separated interface and its prescribed filename.
 
-This module builds the dávka 514 from the payslips of the month and exports
-it as an XML file to upload through the insurer's electronic branch. Payslips
-are read through
-[module:l10n_cssk_payroll_declaration_base](module:l10n_cssk_payroll_declaration_base),
-so it works with either Slovak payroll engine — see
-[the Slovak payroll guide](module:l10n_sk_hr_payroll_base#declarations).
+The statement uses the assessments and statutory profile retained with payroll: actual employee and employer bases, tariffs, OP and the minimum top-up. Several payroll sources and HR records for the same insured person are consolidated by birth number, with distinct calendar days.
 
 ## Legal background {#legal}
 
-References are to the [Health Insurance Act](law:sk/2004/580) (*zákon
-o zdravotnom poistení*).
+The reporting obligation follows sections 20 and 24 of [Act 580/2004](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html). The report keeps the section 13(17) downward assessment-base rounding separate from currency amounts already charged by payroll.
 
-- **The statement.** The employer reports to the competent health insurer
-  the advances for the calendar month, broken down by the employees for whom
-  it pays them and for the employer itself (the *mesačný výkaz*). It states
-  the total income, the income for and the amount of the deductible item, tax-
-  exempt payments, the assessment base and the advance, and must be sent
-  **electronically** — [§ 20 ods. 1](law:sk/2004/580#paragraf-20.odsek-1).
-- **The due date of the advances.** The employee's and employer's advances
-  are due on the day fixed for paying out the employees' income for the month;
-  if no such day is fixed, on the last day of the following month —
-  [§ 17 ods. 1](law:sk/2004/580#paragraf-17.odsek-1).
-- **Corrections.** Data the insurer rejects in its error report (*chybový
-  protokol*) must be corrected electronically within 30 days of receiving it —
-  [§ 24 ods. 1 písm. m)](law:sk/2004/580#paragraf-24.odsek-1.pismeno-m).
+[Decree 159/2018, section 2](https://static.slov-lex.sk/static/SK/ZZ/2018/159/20240301.print.html) permits a full **O corrective statement** for errors in any section 1 data. O replaces the previous statement. A is a difference statement; the UI offers N and O while the difference collector remains separate work.
+
+The text interface is published by [VšZP](https://www.vszp.sk/files/platitelia/tlaciva-platitelov/vykaz-preddavkov-zamestnavatela/struktura-vykazu-1.rtf). Its source checksum is recorded in the module. Choose the installed form edition applicable to the reporting period.
 
 ## Setting it up {#setup}
 
-On the company:
+On the company payroll-reporting page, configure each insurer's assigned payer number and the company's bank account. The default insurer supplies the initial value for a new employee. On a statement, review the selected insurer and its payer number; the number is retained on that statement when company settings later change.
 
-| Value | Where | Used as |
-|---|---|---|
-| *Company ID* (IČO), 8 to 12 digits | company form | `IDCode`, `CompanyIDCode` |
-| *DIČ*, 10 digits | company form (from the Slovak base module) | `CompanyIDTaxCode` |
-| *Health payer number* | company form, or the dávka 514 form | `CodeOfPayer` — the number the insurer assigned to the employer |
-| *Health insurer (dávka 514)* | company form | the default insurer of a new statement (VšZP if not set) |
-| a bank account | the company's contact | `IBAN` — the first account is used |
+The employee's **Health insurer (SK)** belongs to the native historical employment version. Open **Records** to select and edit the applicable version. A later version or a change of company defaults leaves earlier versions intact. An upgrade preserves known current legacy values; unknown historical insurers require review.
 
-Both health fields sit on the company form, tab *Payroll Reporting*, group
-*Health insurance (dávka 514)*. The *Health payer number* can also be filled
-in on the dávka 514 form itself; it is stored on the company either way, so it
-is entered once (changing it needs the right to edit companies).
-
-Every employee on the statement needs the **birth number** in *Identification
-No*, and should carry their **Health insurer (SK)**, next to it on the
-*Personal* tab. Each dávka 514 takes only the employees insured with the
-insurer it is addressed to; an employee whose insurer is left empty counts as
-insured with the company's default insurer (VšZP unless changed). Set the
-insurer on every employee rather than relying on the default.
+Complete the monthly health calendar where actual registered agreement days, benefit periods, disability or concurrent-employment facts are needed. Contract duration and working hours do not establish registered 2D/2Y days. Record the written notice and actual other-employer facts before using the minimum opt-out.
 
 ## Preparing the statement {#usage}
 
-*Payroll Declarations → SK dávka 514 (health)*, then *New*.
+Complete and confirm payroll for the month, including zero-premium months. A reviewed registered calendar without processed payroll is reported as missing work. Review excluded agreement income with nonzero payroll assessments before filing; it is not silently dropped.
 
-1. Choose the **Health insurer**, the **Year** and the **Month**. *Payment
-   Date* gives the day of payment reported in `DateOfPayment`; left empty, the
-   last day of the month is used.
-2. Click **Generate**. The module takes the company's confirmed payslips
-   whose period ends in the month, builds one row per employee and renders the XML.
-3. Upload the file through the insurer's electronic branch and click **Mark
-   Submitted**. **Reset to Draft** reopens it.
+The completeness check also finds ordinary employees from the historical employment versions and contract dates when neither payroll nor a calendar exists. It names the employee whose payroll must be completed, including employees insured elsewhere and archived employees active in the reporting month. A future exemption does not remove an earlier obligation. Agreement and irregular-income registrations use actual reviewed 2D/2Y days; the program does not create zero wages from a contract.
 
-Generation stops if the IČO, the DIČ, the payer number or the insurer is
-missing, if an employee has no valid birth number, or if there are no payslips
-for the month.
+A partial payslip covers only its own dates. Complete payroll for any later registered interval in the same month; a full-month retained payroll profile remains valid after later HR edits. An empty reviewed calendar does not end an ordinary employment registration. Benefits can give zero premium days while registration continues; record an actual no-income exclusion as 2N with its supporting evidence.
 
-**Who is left out.** A DoVP or DoPČ worker is not reported, and does not
-count as an employee of the insurer, when the contract the payslip was
-computed on has either
-- a **Pension granted (SK)**: the statute excludes agreement income of every
-  pensioner group the field offers, with no income limit or claim
-  ([§ 10b ods. 1 písm. a)](law:sk/2004/580#paragraf-10b.odsek-1.pismeno-a)); or
-- **Health-insurance exempt** ticked without a pension, for example a worker
-  covered by another state's legislation (an A1 form). Keeping that evidence
-  is up to you.
+New payroll also retains its source contract period. A monthwide payslip on a contract ending on day 15 cannot cover a separate contract starting on day 16. A wage change within the same open contract does not shorten its coverage. When older payroll has no retained contract period, the statement names that source and preserves known amounts; its explicit legacy coverage fallback uses payslip dates. A corrective statement requires the existing reasoned legacy review and records the reviewer and time. Review or a later HR edit does not rewrite submitted files.
 
-An ordinary employment contract stays on the statement even with a pension.
-A DoVP or DoPČ with a pension but *Health-insurance exempt* not ticked stops
-generation: its payslip carries health advances for income the statute
-excludes. Tick the box on that contract and recalculate the payslip. The check
-covers only the insurer the statement is addressed to.
+After this upgrade, an older unfiled correction review may need confirmation again because the review now also identifies the retained payroll profile. The filed original remains available unchanged.
+
+[Dôvera's 514 instructions](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) require the employee count even when no advance is due. [VšZP's registration instructions](https://www.vszp.sk/showdoc.do?docid=147) distinguish 2D agreement registration and 2Y irregular or post-employment income.
+
+Create a statement for the insurer, select the period, applicable form edition and export format, then **Generate**. Check the employee rows and totals against payroll. Download the generated file and upload it through the insurer's electronic branch. Record **Mark Submitted** and retain the insurer's receipt with the filing.
+
+Use a new **Corrective** statement for a full replacement of an already submitted statement for the same company, insurer and period. The shared workflow preserves the original submitted attachment and its history. Reset an unsubmitted statement to draft before changing its filing inputs or format.
 
 ## What the statement contains {#output}
 
-| Part | Content |
-|---|---|
-| `Identification` | type 514, character *N*, IČO, payer number, the insurer's four-digit code (2500, 2400, 2700), date of sending, serial number 1, number of rows |
-| `CorporateBody` | period, day of payment, company name, IČO, payer number, DIČ, IBAN |
-| `InsuranceBody` | employer totals: number of employees, days, income, assessment base, employer and employee advances, top-up, total |
-| `PersonData` | per employee: birth number, days, the employer's and employee's rate, income, assessment base, advances, top-up |
+Rows include income eligible for OP, other income, actual OP, separate employee/employer advances and the employee's minimum top-up. Tariffs are taken from recorded assessments. The summary distinguishes ordinary and disability groups and counts insured people across all insurers. One person with several HR records has one wire row and a union of calendar days.
 
-The amounts come from the payslip lines: *HEALTHEMPLOYER* (employer's
-advance), *HEALTH* (employee's advance) and the health minimum-base top-up
-(*HEALTHDOPLATOK* or *HEALTH_DOPLATOK*, depending on the engine). The
-assessment base and the income are the employee's *GROSS*. The rates are not
-read from a table: they are worked back as advance ÷ base.
-
-**Checking the file.** The official schema `514-2023.xsd` contradicts itself
-(patterns that admit only one digit in fields that must be 8 to 12 characters
-long, impossible numeric limits), so no real file can pass it. The module
-therefore runs it without stopping and checks the structure instead: the root
-element, the three header blocks and that the number of rows matches.
+XML remains the default for existing callers. Text batch 514 uses decimal commas, CRLF records and a filename such as `N5142606.001`; O uses the corresponding corrective prefix. Both formats use the same collected assessments and filing workflow.
 
 ## Limitations {#limitations}
 
-- **The insurer is a property of the employee, not of the month.** A change
-  of insurer during the year (allowed once a year, from 1 January) has to be
-  recorded on the employee before generating; past statements are not
-  recomputed.
-- **The assessment base is the payslip's GROSS**, not a base computed under
-  the Health Insurance Act; the rate shown is derived from it.
-- Every employee counts as a full calendar month of days, and everyone is
-  reported in the first group (the second group of counts and bases is always
-  zero).
-- Only a regular statement (*N*) with serial number 1. Corrections after an
-  error report must be made through the insurer's electronic branch.
-- Because the official schema cannot be applied, the module cannot guarantee
-  that the insurer will accept the file. Reconcile the first statement with
-  the insurer.
+The bundled XML schema contains contradictory field restrictions. XML is checked for well-formedness and structural consistency; its schema findings are nonfatal. The published text format has typed field and total checks. A local passing export is not an insurer receipt; reconcile the first actual filing and retain the response.
+
+For older payroll without precise records, originals retain the framework's named gross-based fallback warning. A correction needs precise records or the framework's explicit, reasoned legacy review. Filed payroll is not recomputed merely to manufacture old evidence, and stored filed bytes are preserved.
+
+This collector consumes payroll results. Multi-income calculation, paid financial corrections and registration evidence must be reconciled in their respective workflows. Enterprise has not been run for this contribution; its bridge must supply the same recorded-profile protocol.
