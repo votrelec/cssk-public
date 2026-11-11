@@ -12,6 +12,17 @@ from ..health_calculation import monthly_minimum, monthly_op
 class HealthCalculationProfile(models.Model):
     _inherit = "hr.version"
 
+    def _l10n_sk_health_profile(self, day):
+        """Cooperative health facts, extensible by the country output module."""
+        self.ensure_one()
+        calendar = self._l10n_sk_health_calendar_context(day)
+        return {
+            "disabled": self.l10n_sk_health_is_disabled(day),
+            "exempt": self.l10n_sk_health_is_exempt(),
+            "minimum_opt_out": self.l10n_sk_health_minimum_is_opted_out(),
+            "calendar": calendar or None,
+        }
+
     def l10n_sk_health_is_disabled(self, day=None):
         profile = super().l10n_sk_health_is_disabled()
         if day is None:

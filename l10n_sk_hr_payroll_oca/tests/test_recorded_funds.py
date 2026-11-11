@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from odoo import Command
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
 from ..models.fund_capture import FundCapturePayslip
@@ -253,9 +253,11 @@ class TestRecordedFundPayroll(TransactionCase):
         self.assertNotIn(self.employee.identification_id, serialized)
         self.assertTrue(
             all(
-                set(row["facts"]) <= (
+                set(row["facts"])
+                <= (
                     {"rule_code", "topup", "income", "op"}
-                    if row["fund"] == "health" else {"rule_code"}
+                    if row["fund"] == "health"
+                    else {"rule_code"}
                 )
                 for row in evidence["records"]
             )
@@ -363,3 +365,32 @@ class TestRecordedFundPayroll(TransactionCase):
                 (original[key]["base"], original[key]["amount"]),
             )
         self.assertFalse((slip | refund)._cssk_effective_fund_payslips())
+
+    def test_profile_adapter_preserves_evidence_and_validates_its_identity(self):
+        slip = self._slip()
+        original = deepcopy(slip.l10n_sk_fund_assessment["profile"])
+        profile = slip._cssk_recorded_fund_profile()
+        self.assertEqual(profile, original)
+        profile["health"]["disabled"] = not profile["health"]["disabled"]
+        self.assertEqual(slip._cssk_recorded_fund_profile(), original)
+        self.assertEqual(slip.l10n_sk_fund_assessment["profile"], original)
+        slip.date_to = "2026-06-29"
+        self.assertFalse(slip._cssk_recorded_fund_profile())
+
+    def test_profile_access_failure_is_not_missing_evidence(self):
+        slip = self._slip()
+        with patch.object(
+            type(slip),
+            "_l10n_sk_checked_fund_profile",
+            side_effect=AccessError("Synthetic denied read"),
+        ):
+            with self.assertRaises(AccessError):
+                slip._cssk_recorded_fund_profile()
+
+    def test_profile_reader_uses_the_native_refund_origin(self):
+        slip = self._slip()
+        slip.with_context(without_compute_sheet=True).action_payslip_done()
+        profile = slip._cssk_recorded_fund_profile()
+        self.version.l10n_sk_ztp = True
+        slip.refund_sheet()
+        self.assertEqual(slip.refunded_id._cssk_recorded_fund_profile(), profile)

@@ -10,6 +10,8 @@ Confirmation, source locking and native child-row policies belong to the
 engine's lifecycle adapter, not to this abstract protocol.
 """
 
+from copy import deepcopy
+
 from odoo import _, models
 from odoo.exceptions import UserError
 
@@ -57,3 +59,17 @@ class PayslipFundMixin(models.AbstractModel):
                 _("The recorded payroll fund bases are invalid.")
             ) from error
         return list(records.values())
+
+    def _l10n_sk_checked_fund_profile(self):
+        """Read shared evidence through the same identity/salary validation.
+
+        Bridges expose this through their adapter and handle native refunds.
+        Never return a mutable reference to the retained JSON value.
+        """
+        self._l10n_sk_checked_fund_assessment()
+        profile = self.l10n_sk_fund_assessment.get("profile")
+        if not isinstance(profile, dict):
+            raise FundEvidenceError(
+                _("The recorded payroll profile is missing or invalid.")
+            )
+        return deepcopy(profile)

@@ -327,6 +327,23 @@ class DeclarationFundBases(models.AbstractModel):
                 self.message_post(body=warning)
         return result
 
+    def _payslip_fund_profiles(self, slips):
+        """Optional batch profile adapter, with bridge-owned refund semantics.
+
+        Profile facts are retained once, independently of per-fund amounts.
+        The form decides which additional facts its edition actually needs.
+        An access failure is never converted into a missing-profile fallback.
+        """
+        self.ensure_one()
+        result = {}
+        for slip in slips:
+            slip.check_access("read")
+            if slip.company_id != self.company_id:
+                raise UserError(_("Use payslips from the declaration company."))
+            reader = getattr(slip, "_cssk_recorded_fund_profile", None)
+            result[slip.id] = reader() if reader else False
+        return result
+
     def _collect_payslip_totals(self, payslips):
         result = super()._collect_payslip_totals(payslips)
         if self._uses_recorded_funds():

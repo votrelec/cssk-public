@@ -248,6 +248,19 @@ class FundCapturePayslip(models.Model):
                 removed |= original | refund
         return self - removed
 
+    def _cssk_recorded_fund_profile(self):
+        self.ensure_one()
+        self.check_access("read")
+        original = self._l10n_sk_refund_original()
+        if original:
+            return original._cssk_recorded_fund_profile()
+        if not self.l10n_sk_fund_assessment:
+            return False
+        try:
+            return self._l10n_sk_checked_fund_profile()
+        except FundEvidenceError:
+            return False
+
     def _cssk_fund_record_direction(self):
         """OCA uses positive copied lines and a native credit-note direction."""
         self.ensure_one()

@@ -26,11 +26,5 @@ class HealthCalculationPayslip(models.Model):
     def _l10n_sk_fund_profile(self):
         result = super()._l10n_sk_fund_profile()
         version = self._l10n_sk_version()
-        calendar = version._l10n_sk_health_calendar_context(self.date_from)
-        result["health"] = {
-            "disabled": version.l10n_sk_health_is_disabled(self.date_from),
-            "exempt": version.l10n_sk_health_is_exempt(),
-            "minimum_opt_out": version.l10n_sk_health_minimum_is_opted_out(),
-            "calendar": calendar or None,
-        }
+        result["health"] = version._l10n_sk_health_profile(self.date_from)
         return result
