@@ -4,3 +4,4 @@ from . import health_exemption_profile
 
 from . import health_calendar
 from . import health_calendar_profile
+from . import health_calculation

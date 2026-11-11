@@ -15,6 +15,8 @@ Carry-over to 18.0
   and rerun signed, optional-module, refund and legacy-review scenarios.
 * Not yet ported. Mirror the shared predicates in the 18.0 and Enterprise rules.
   This contribution does not change OP rounding, premium rates or social OOP.
+* Not yet ported. Adapt hr.version to hr.contract and mirror the same base API
+  in both engines; rerun native profile/calendar/OP and ordinary-user scenarios.
 
 - **19.0.1.24.4 and 19.0.1.24.5 (2026-11-10), not yet on 18.0:** employer
   sick pay clipped to the employment and on the onset's terms
@@ -58,6 +60,29 @@ Carry-over to 18.0
   ``tests/test_parameters_2027.py``. Data only; the 18.0 parameters carry the
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
+
+[19.0.1.26.0] — 2026-11-11
+==========================
+
+Fixed
+~~~~~
+
+* Use reviewed calendar days for employee OP and minimum, monthly disability
+  rates and actual concurrent-employer/self-employment restrictions.
+* Require dated concurrent-employer facts before the written minimum opt-out.
+  Validate source errors before safe_eval, without changing other fund rules.
+
+Added
+~~~~~
+
+* Actual OP/income facts emitted by the charging health rule and one shared
+  calendar/profile in existing fund evidence, without restricted birth numbers.
+
+Changed
+~~~~~~~
+
+* Native premium rounding and no-calendar PN fallback remain unchanged.
+  Separate remuneration consolidation and 514/601 output are not added here.
 
 [19.0.1.25.1] — 2026-11-11
 ==========================

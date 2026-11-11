@@ -20,6 +20,31 @@ Carry-over to 18.0
   engine-independent, access, revision, source-boundary and concurrency cases.
 * Not yet ported. Use contract-scoped profile/evidence fields and apply the same
   eligibility predicates in both engine rules; rerun the profile/output matrix.
+* Not yet ported. Adapt version helpers to contracts; mirror engine rules and
+  rerun calendar, cent-boundary, access and retained-fund cases.
+
+[19.0.1.5.0] — 2026-11-11
+-------------------------
+
+Added
+~~~~~
+
+* Engine-neutral monthly OP/minimum helpers and cooperative reviewed-calendar
+  inputs for payroll rules; separate statutory day counts and shared profile.
+
+Fixed
+~~~~~
+
+* Round OP upward after proration; postpone monthly OP for concurrent employers
+  or self-employment and distinguish benefit days from no-income 2N days.
+* Apply disability-month facts consistently and check recognised invalidity
+  against the reviewed calendar without requiring a separate ZTP checkbox.
+
+Changed
+~~~~~~~
+
+* Existing native absence fallback remains available without a calendar.
+  Multi-source income allocation and declaration codecs are separate work.
 
 [19.0.1.4.0] — 2026-11-11
 -------------------------

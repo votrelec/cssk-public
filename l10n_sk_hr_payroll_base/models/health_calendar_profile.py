@@ -5,6 +5,8 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+from ..health_exemption import pension_health_disabled
+
 
 class HealthCalendarProfile(models.Model):
     _inherit = "hr.version"
@@ -67,7 +69,10 @@ class HealthCalendarProfile(models.Model):
         facts = calendar._calendar_context() if calendar else False
         if (
             facts
-            and getattr(self, "l10n_sk_ztp", False)
+            and (
+                getattr(self, "l10n_sk_ztp", False)
+                or pension_health_disabled(self.l10n_sk_pension_status())
+            )
             and not facts["disability_in_month"]
         ):
             raise UserError(

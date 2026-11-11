@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy
 summary: Celá skupina modulov slovenských miezd na jednom mieste — mesačná výplatná páska pre pracovný pomer a tri dohody v Odoo Enterprise Payroll alebo v aplikácii OCA payroll, s datovanými zákonnými sadzbami, voľnom, ročným zúčtovaním dane a zaúčtovaním do hlavnej knihy.
-verified: 19.0.1.4.0
+verified: 19.0.1.5.0
 ---
 
 ## Na čo slúži {#purpose}
@@ -496,3 +496,28 @@ Spoločný base dodáva rozhodnutia obom enginom. OCA pravidlá ich používajú
 zmeny OP zaokrúhlenia, sadzieb, sociálnej OOP či kalendárového pomeru. Ostatné
 dňové výnimky a výstupné formáty sú samostatné príspevky.
 [Zákon580/2004 §10b,11,16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html).
+
+## Overený mesačný zdravotný výpočet {#health-calculation}
+
+Mzdové pravidlá používajú overený kalendár pre dni pracovného vzťahu na OP,
+súbeh iných zamestnávateľov/SZČO, mesačné sadzby pri postihnutí a dni minima.
+Dávkové dni nekrátia pracovný vzťah na OP; dni bez príjmu 2N ho krátia.
+Písomné neuplatnenie minima potrebuje overené dátumy skutočného súbehu.
+Bez kalendára sa zachová pôvodný PN postup. Postihnutie aj v posledný deň
+mesiaca zníži obe mesačné sadzby a vylúči minimum za celý mesiac. Rozpor
+kalendára s uznanou invaliditou sa preverí rovnako ako s ručným ZŤP.
+
+Spoločný OP helper najprv obmedzí sumu oprávneným príjmom, pomerne ju skráti
+a zaokrúhli nahor na centy podľa aktuálneho usmernenia poisťovne. Iný príjem
+u toho istého zamestnávateľa ovplyvňuje pokles OP, sám však OP nedostáva.
+Natívny hook zatiaľ odovzdáva jeden pracovný príjem; konsolidácia oddelených
+odmien/verzií potrebuje výslovné rozdelenie ich príjmov. Odmena konateľa sa
+nesmie potichu považovať za oprávnený pracovný príjem. Tieto ďalšie toky nie
+sú implementované týmto príspevkom.
+
+Pôvodné zaokrúhľovanie poistného a ostatných 12 fondových vzorcov sa nemenia.
+Účtujúce pravidlo uchová skutočnú OP/základ; bridge uloží spoločný profil
+a kalendár iba raz, bez rodného čísla. Výkazy musia čítať rovnaké podklady;
+codec 514/601 je samostatná nadväzujúca implementácia. Podklady:
+[580/2004 § 16 a 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html),
+[Dôvera — OP a zaokrúhlenie nahor](https://www.dovera.sk/platitel/zamestnavatel/tema-legislativne-informacie/odpocitatelna-polozka).

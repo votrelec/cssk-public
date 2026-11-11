@@ -1084,6 +1084,16 @@ msgstr "Typ výsledku"
 
 #. module: l10n_sk_hr_payroll_oca
 #. odoo-python
+#: code:addons/l10n_sk_hr_payroll_oca/models/health_calculation.py:0
+msgid ""
+"Review a health calendar proving concurrent employers before applying the "
+"minimum opt-out."
+msgstr ""
+"Pred neuplatnením minimálneho preddavku skontrolujte poistný kalendár "
+"preukazujúci súbeh zamestnávateľov."
+
+#. module: l10n_sk_hr_payroll_oca
+#. odoo-python
 #: code:addons/l10n_sk_hr_payroll_oca/models/hr_employee.py:0
 #: code:addons/l10n_sk_hr_payroll_oca/models/hr_payslip.py:0
 #: code:addons/l10n_sk_hr_payroll_oca/models/l10n_sk_tax_reconciliation.py:0
