@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20261102\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 17:55+0000\n"
-"PO-Revision-Date: 2026-11-11 17:55+0000\n"
+"POT-Creation-Date: 2026-11-11 18:48+0000\n"
+"PO-Revision-Date: 2026-11-11 18:48+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -61,14 +61,6 @@ msgstr ""
 msgid ""
 "Company '%(company)s' needs a 10-digit DIČ (tax identification number) for "
 "the dávka 514 <CompanyIDTaxCode> element. Set 'DIČ' on the company."
-msgstr ""
-
-#. module: l10n_sk_hr_payroll_health
-#. odoo-python
-#: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
-msgid ""
-"Company '%(company)s' needs a health payer number for the dávka 514. Fill in"
-" 'Health payer number' on this form."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -165,6 +157,11 @@ msgid "Dôvera (24)"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_dovera
+msgid "Dôvera payer number"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model,name:l10n_sk_hr_payroll_health.model_hr_employee
 msgid "Employee"
 msgstr ""
@@ -190,6 +187,14 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__lines_count
 msgid "Employees"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
+msgid ""
+"Enter the 10-digit payer number assigned by the selected insurer on this "
+"dávka 514."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -404,6 +409,14 @@ msgid "Next Activity Type"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__payer_number
+msgid ""
+"Number assigned by this statement's insurer. Initialised from the insurer's "
+"company setting, then retained with the statement when company settings "
+"change."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__message_needaction_counter
 msgid "Number of Actions"
 msgstr ""
@@ -436,7 +449,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__payer_number
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_number
 msgid ""
 "Payer number assigned to the employer by the health insurer — the payer-"
@@ -481,8 +493,14 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
-#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+#: code:addons/l10n_sk_hr_payroll_health/models/health_payer.py:0
 msgid "Reset the declaration to draft before changing its export format."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_payer.py:0
+msgid "Reset the declaration to draft before changing its filing inputs."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -493,6 +511,14 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__activity_user_id
 msgid "Responsible User"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review actual agreement or irregular-income registration days in the monthly"
+" health calendar for '%(name)s' before generating the 514."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
@@ -629,6 +655,14 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/res_company.py:0
+msgid ""
+"The default payer number must match the configured number of the default "
+"insurer."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
 #: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
 msgid "The generated 514 text batch has an invalid record structure."
 msgstr ""
@@ -645,6 +679,11 @@ msgid "Union (27)"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_union
+msgid "Union payer number"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__fund_bases_warning
 msgid "Unrecorded fund bases"
 msgstr ""
@@ -658,6 +697,11 @@ msgstr ""
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__hr_version__l10n_sk_health_insurer_code__25
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__res_company__l10n_sk_health_insurer_code__25
 msgid "VšZP (25)"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_vszp
+msgid "VšZP payer number"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_health

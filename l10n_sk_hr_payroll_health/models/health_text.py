@@ -11,20 +11,15 @@ from .. import text514
 class HealthText(models.Model):
     _inherit = "l10n.sk.health"
 
-    _supported_correction_types = ("regular", "corrective", "supplementary")
+    # Section 2(4), decree 159/2018: O replaces the full filing and can
+    # correct every section 1 item. A is a difference under section 2(5),
+    # so the full-state collector must not offer it as another full month.
+    _supported_correction_types = ("regular", "corrective")
 
     export_format = fields.Selection(
         [("xml", "XML"), ("text514", "Text batch 514")],
         string="Export format", default="xml", required=True, tracking=True,
     )
-
-    def write(self, values):
-        if "export_format" in values and any(
-            record.state != "draft" and record.export_format != values["export_format"]
-            for record in self
-        ):
-            raise UserError(_("Reset the declaration to draft before changing its export format."))
-        return super().write(values)
 
     def _render_xml(self, data):
         if self.export_format != "text514":

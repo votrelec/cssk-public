@@ -29,9 +29,23 @@ Fixed
 Carry-over to 18.0
 ~~~~~~~~~~~~~~~~~~
 
+* Not yet ported: health514 profile/format integration. Adapt version ownership
+  to contracts and rerun profile, insurer, source, refund and retained-file cases.
+
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
+
+[19.0.1.7.0] — 2026-11-11
+=========================
+
+Added
+~~~~~
+
+* Optional batch reader for bridge-retained statutory profiles and form-owned
+  required fund keys shared by generation and explicit legacy-review actions.
+* Attachment-name, MIME-type and generation-message hooks for non-XML formats;
+  the existing XML defaults and submission state machine remain the defaults.
 
 [19.0.1.6.0] — 2026-11-11
 =========================

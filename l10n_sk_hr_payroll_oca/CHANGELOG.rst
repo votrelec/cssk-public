@@ -10,6 +10,9 @@ Unreleased
 Carry-over to 18.0
 ~~~~~~~~~~~~~~~~~~
 
+* Not yet ported: health514 profile/format integration. Adapt version ownership
+  to contracts and rerun profile, insurer, source, refund and retained-file cases.
+
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
@@ -60,6 +63,17 @@ Carry-over to 18.0
   ``tests/test_parameters_2027.py``. Data only; the 18.0 parameters carry the
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
+
+[19.0.1.27.0] — 2026-11-11
+==========================
+
+Added
+~~~~~
+
+* Declaration-facing recorded-profile reader using the native refund origin;
+  invalid evidence stays optional and access failures propagate.
+* Shared version health-profile hook instead of a second profile calculation
+  in the bridge. Assessment storage and salary-rule arithmetic are unchanged.
 
 [19.0.1.26.0] — 2026-11-11
 ==========================

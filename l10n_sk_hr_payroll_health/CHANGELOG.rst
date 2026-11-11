@@ -3,12 +3,41 @@ Changelog
 =========
 
 Unreleased
-~~~~~~~~~~
+----------
 
 * Relicensed to **AGPL-3**. Part of a repository-wide move to a single licence:
   everything Data Dance authors is AGPL-3 except the modules that depend on Odoo
   Enterprise, which OEEL forbids from carrying it. What differs between modules
   is now whether they are published, not how they are licensed.
+
+Carry-over to 18.0
+~~~~~~~~~~~~~~~~~~
+
+* Not yet ported: health514 profile/format integration. Adapt version ownership
+  to contracts and rerun profile, insurer, source, refund and retained-file cases.
+
+[19.0.1.3.0] — 2026-11-11
+-------------------------
+
+Added
+~~~~~
+
+* Published UTF-8 text batch 514 and prescribed filenames through the common
+  generation, attachment and submitted-history workflow; full N/O reporting.
+* Historical insurer on native HR versions and separately retained statement
+  payer numbers, with per-insurer company settings and legacy-byte migration.
+* Shared recorded-profile/fund consumption, actual OP and minimum top-up,
+  disability groups, one row per person and distinct registered calendar days.
+
+Fixed
+~~~~~
+
+* Preserve original and explicitly reviewed corrective legacy policy when
+  precise health profiles or assessment sides are missing.
+* Review nonzero excluded assessments before filtering and require actual
+  registered days for fresh insured agreements or irregular income.
+* Keep payer identities and generated inputs stable across company changes.
+  Offer the legally complete O replacement; do not mislabel a full month as A.
 
 [19.0.1.2.3] — 2026-11-07
 -------------------------

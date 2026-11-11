@@ -108,11 +108,11 @@ class L10nSkHealth(models.Model):
                     "Company '%(company)s' needs an 8-12 digit IČO "
                     "(Company Registry) for the dávka 514 identification "
                     "block.", company=company.display_name))
-            if not (company.l10n_sk_health_payer_number or "").strip():
+            payer = "".join((rec.payer_number or "").split())
+            if len(payer) != 10 or any(ch not in "0123456789" for ch in payer):
                 raise UserError(_(
-                    "Company '%(company)s' needs a health payer number "
-                    "for the dávka 514. Fill in 'Health payer number' on "
-                    "this form.", company=company.display_name))
+                    "Enter the 10-digit payer number assigned by the selected insurer "
+                    "on this dávka 514."))
             if not rec.insurer_code:
                 raise UserError(_(
                     "Select the target health insurer on the dávka "
@@ -234,7 +234,7 @@ class L10nSkHealth(models.Model):
             "typ": "514",
             "ico": self._company_ico(company),
             "cislo_platitela": self._digits(
-                company.l10n_sk_health_payer_number)[:10],
+                self.payer_number),
             "kod_zp": INSURER_CODE_4.get(self.insurer_code, "2500"),
             "datum_odoslania": today.strftime("%Y-%m-%d"),
             "poradie": "1",

@@ -70,16 +70,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
 msgid ""
-"Company '%(company)s' needs a health payer number for the dávka 514. Fill in"
-" 'Health payer number' on this form."
-msgstr ""
-"Spoločnosť '%(company)s' potrebuje číslo platiteľa poistného pre dávku 514. "
-"Vyplňte 'Číslo platiteľa poistného' v tomto formulári."
-
-#. module: l10n_sk_hr_payroll_health
-#. odoo-python
-#: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
-msgid ""
 "Company '%(company)s' needs an 8-12 digit IČO (Company Registry) for the "
 "dávka 514 identification block."
 msgstr ""
@@ -176,6 +166,11 @@ msgid "Dôvera (24)"
 msgstr "Dôvera (24)"
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_dovera
+msgid "Dôvera payer number"
+msgstr "Číslo platiteľa v Dôvere"
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model,name:l10n_sk_hr_payroll_health.model_hr_employee
 msgid "Employee"
 msgstr "Zamestnanec"
@@ -204,6 +199,16 @@ msgstr "Hlásenia zamestnancov"
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__lines_count
 msgid "Employees"
 msgstr "Zamestnanci"
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/l10n_sk_health.py:0
+msgid ""
+"Enter the 10-digit payer number assigned by the selected insurer on this "
+"dávka 514."
+msgstr ""
+"Na tejto dávke 514 uveďte desaťmiestne číslo platiteľa pridelené vybranou "
+"poisťovňou."
 
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__fund_bases_fallback_reason
@@ -426,6 +431,16 @@ msgid "Next Activity Type"
 msgstr "Typ ďalšej aktivity"
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__payer_number
+msgid ""
+"Number assigned by this statement's insurer. Initialised from the insurer's "
+"company setting, then retained with the statement when company settings "
+"change."
+msgstr ""
+"Číslo pridelené poisťovňou tohto výkazu. Prevezme sa z firemného nastavenia "
+"poisťovne a zostane uložené pri výkaze aj po zmene firemných nastavení."
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Počet akcií"
@@ -460,7 +475,6 @@ msgstr ""
 "obdobia."
 
 #. module: l10n_sk_hr_payroll_health
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_l10n_sk_health__payer_number
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_number
 msgid ""
 "Payer number assigned to the employer by the health insurer — the payer-"
@@ -512,9 +526,15 @@ msgstr "Kód výkazu"
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
-#: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
+#: code:addons/l10n_sk_hr_payroll_health/models/health_payer.py:0
 msgid "Reset the declaration to draft before changing its export format."
 msgstr "Pred zmenou formátu exportu vráťte výkaz do návrhu."
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_payer.py:0
+msgid "Reset the declaration to draft before changing its filing inputs."
+msgstr "Pred zmenou vstupov podania vráťte výkaz do návrhu."
 
 #. module: l10n_sk_hr_payroll_health
 #: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_health.view_l10n_sk_health_form
@@ -525,6 +545,16 @@ msgstr "Vrátiť do konceptu"
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__activity_user_id
 msgid "Responsible User"
 msgstr "Zodpovedný užívateľ"
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Review actual agreement or irregular-income registration days in the monthly"
+" health calendar for '%(name)s' before generating the 514."
+msgstr ""
+"Pred vytvorením dávky 514 skontrolujte skutočné dni prihlásenia dohody alebo"
+" nepravidelného príjmu v mesačnom zdravotnom kalendári pásky '%(name)s'."
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
@@ -680,6 +710,16 @@ msgstr ""
 
 #. module: l10n_sk_hr_payroll_health
 #. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/res_company.py:0
+msgid ""
+"The default payer number must match the configured number of the default "
+"insurer."
+msgstr ""
+"Predvolené číslo platiteľa musí zodpovedať nastavenému číslu predvolenej "
+"poisťovne."
+
+#. module: l10n_sk_hr_payroll_health
+#. odoo-python
 #: code:addons/l10n_sk_hr_payroll_health/models/health_text.py:0
 msgid "The generated 514 text batch has an invalid record structure."
 msgstr "Vytvorená textová dávka 514 má neplatnú štruktúru záznamov."
@@ -696,6 +736,11 @@ msgid "Union (27)"
 msgstr "Union (27)"
 
 #. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_union
+msgid "Union payer number"
+msgstr "Číslo platiteľa v Unione"
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__fund_bases_warning
 msgid "Unrecorded fund bases"
 msgstr "Chýbajúce zaznamenané základy fondov"
@@ -710,6 +755,11 @@ msgstr "Verzia"
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_health.selection__res_company__l10n_sk_health_insurer_code__25
 msgid "VšZP (25)"
 msgstr "VšZP (25)"
+
+#. module: l10n_sk_hr_payroll_health
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_res_company__l10n_sk_health_payer_vszp
+msgid "VšZP payer number"
+msgstr "Číslo platiteľa vo VšZP"
 
 #. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__website_message_ids

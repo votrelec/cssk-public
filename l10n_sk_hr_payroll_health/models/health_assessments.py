@@ -2,14 +2,33 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 """Consume the shared recorded-fund protocol for the existing 514 workflow."""
 
+from datetime import date, timedelta
 from decimal import Decimal
-from datetime import timedelta
 
 from odoo import _, models
 from odoo.exceptions import UserError
 
 from ..assessment514 import merge_assessment_rows, row_from_assessments
 from ..text514 import aggregate
+
+
+def _xml_health_row(row, previous, sequence=None):
+    rendered = dict(previous)
+    for target, key in (
+        ("tarifa_zamtel", "rate_employer"), ("tarifa_zamnec", "rate_employee"),
+        ("prijem", "income"), ("vz", "base"), ("preddavok_zamtel", "employer"),
+        ("preddavok_zamnec", "employee"), ("preddavok_spolu", "total"),
+        ("doplatok", "topup"), ("op_prijem", "op_income"),
+        ("iny_prijem", "other_income"), ("op", "op"), ("exempt_income", "exempt_income"),
+    ):
+        rendered[target] = format(row[key], ".2f")
+    rendered.update(
+        minimum_not_applied=str(row["minimum_opt_out"]), poc_dni=str(row["days"]),
+        shorttime_base=format(row["shorttime_base"], ".2f") if row["shorttime_base"] is not None else None,
+    )
+    if sequence is not None:
+        rendered["pc"] = str(sequence)
+    return rendered
 
 
 class HealthAssessments(models.Model):
@@ -20,6 +39,45 @@ class HealthAssessments(models.Model):
 
     def _required_recorded_fund_keys(self):
         return frozenset({("health", "employee"), ("health", "employer")})
+
+    @staticmethod
+    def _complete_health_profile(profile):
+        if not isinstance(profile, dict) or not {"agreement", "regular", "health"}.issubset(profile):
+            return False
+        if not isinstance(profile["agreement"], str) or type(profile["regular"]) is not bool:
+            return False
+        health = profile["health"]
+        flags = {"op_eligible", "minimum_exempt", "minimum_opt_out", "exempt", "disabled"}
+        if not isinstance(health, dict) or not (flags | {"insurer_code", "calendar"}).issubset(health):
+            return False
+        if any(type(health[name]) is not bool for name in flags):
+            return False
+        if health["insurer_code"] not in ("24", "25", "27", None, False):
+            return False
+        calendar = health["calendar"]
+        if calendar is None or calendar is False:
+            return True
+        if not isinstance(calendar, dict) or not {"insured_days", "insured_dates", "month_start"}.issubset(calendar):
+            return False
+        days, dates = calendar["insured_days"], calendar["insured_dates"]
+        if type(days) is not int or not 0 <= days <= 31 or not isinstance(dates, list):
+            return False
+        if any(not isinstance(day, str) for day in dates) or len(set(dates)) != days:
+            return False
+        try:
+            month = date.fromisoformat(calendar["month_start"]).replace(day=1)
+            return all(date.fromisoformat(day).replace(day=1) == month for day in dates)
+        except (ValueError, TypeError):
+            return False
+
+    def _payslip_fund_records(self, slips):
+        records, missing = super()._payslip_fund_records(slips)
+        profiles = self._payslip_fund_profiles(slips)
+        for slip in slips:
+            if records[slip.id] and not self._complete_health_profile(profiles[slip.id]):
+                records[slip.id] = False
+                missing |= slip
+        return records, missing
 
     def _health_employment_dates(self, employee):
         return {
@@ -74,11 +132,16 @@ class HealthAssessments(models.Model):
         result = {}
         for slip in slips:
             recorded = profiles[slip.id]
+            precise = self._complete_health_profile(recorded)
             health = recorded.get("health") if recorded else False
-            if not health:
+            if not precise:
                 version = self._payslip_version(slip)
                 health = version._l10n_sk_health_profile(slip.date_from) if version else {}
-            result[slip.id] = health
+            result[slip.id] = dict(
+                health, precise_profile=precise,
+                employment_form=recorded["agreement"] if precise else False,
+                regular=recorded["regular"] if precise else True,
+            )
         return result
 
     def _health_selected_payslips(self, slips):
@@ -95,6 +158,18 @@ class HealthAssessments(models.Model):
                 "Review the historical health insurer for: %(slips)s",
                 slips=", ".join(missing.mapped("display_name")),
             ))
+        for slip in slips:
+            profile = profiles[slip.id]
+            if (
+                profile.get("insurer_code") == self.insurer_code
+                and not profile.get("exempt") and profile["precise_profile"]
+                and (profile["employment_form"] != "none" or not profile["regular"])
+                and not profile.get("calendar")
+            ):
+                raise UserError(_(
+                    "Review actual agreement or irregular-income registration days in the monthly health "
+                    "calendar for '%(name)s' before generating the 514.", name=slip.display_name,
+                ))
         return slips.filtered(
             lambda slip: profiles[slip.id].get("insurer_code") == self.insurer_code
             and not profiles[slip.id].get("exempt")
@@ -220,20 +295,7 @@ class HealthAssessments(models.Model):
                 }
                 row["total"] = row["employee"] + row["employer"] + row["topup"]
             complete_rows.append(dict(row, birth_number=rendered["rc"]))
-            for target, key in (
-                ("tarifa_zamtel", "rate_employer"), ("tarifa_zamnec", "rate_employee"),
-                ("prijem", "income"), ("vz", "base"), ("preddavok_zamtel", "employer"),
-                ("preddavok_zamnec", "employee"), ("preddavok_spolu", "total"),
-                ("doplatok", "topup"), ("op_prijem", "op_income"),
-                ("iny_prijem", "other_income"), ("op", "op"),
-            ):
-                rendered[target] = format(row[key], ".2f")
-            rendered["minimum_not_applied"] = str(row["minimum_opt_out"])
-            rendered["poc_dni"] = str(row["days"])
-            rendered["exempt_income"] = format(row["exempt_income"], ".2f")
-            rendered["shorttime_base"] = (
-                format(row["shorttime_base"], ".2f") if row["shorttime_base"] is not None else None
-            )
+            rendered.update(_xml_health_row(row, rendered))
         if len(complete_rows) == len(result["rows514"]):
             grouped = {}
             for row in complete_rows:
@@ -249,19 +311,9 @@ class HealthAssessments(models.Model):
             rendered_by_identity = {row["rc"]: row for row in result["rows514"]}
             result["rows514"] = []
             for sequence, row in enumerate(complete_rows, 1):
-                rendered = dict(rendered_by_identity[row["birth_number"]])
-                rendered.update(pc=str(sequence), poc_dni=str(row["days"]))
-                for target, key in (
-                    ("prijem", "income"), ("vz", "base"), ("preddavok_zamtel", "employer"),
-                    ("preddavok_zamnec", "employee"), ("preddavok_spolu", "total"),
-                    ("doplatok", "topup"), ("op_prijem", "op_income"),
-                    ("iny_prijem", "other_income"), ("op", "op"), ("exempt_income", "exempt_income"),
-                ):
-                    rendered[target] = format(row[key], ".2f")
-                rendered["shorttime_base"] = (
-                    format(row["shorttime_base"], ".2f") if row["shorttime_base"] is not None else None
-                )
-                result["rows514"].append(rendered)
+                result["rows514"].append(_xml_health_row(
+                    row, rendered_by_identity[row["birth_number"]], sequence,
+                ))
             result["ident"]["pocet_viet"] = str(len(complete_rows))
             registered, registered_all = self._health_registered_counts()
             summary = aggregate(complete_rows, registered, registered_all)

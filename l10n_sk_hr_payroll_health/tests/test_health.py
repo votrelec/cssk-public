@@ -8,6 +8,7 @@ the test asserts well-formedness + structural conformance (the three blocks,
 NumberOfRecords = PersonData count, insurer code) and that the per-employee
 health advances match the payslip. It also asserts the shipped XSD compiles."""
 import base64
+from copy import deepcopy
 import unittest
 from datetime import date
 from unittest.mock import patch
@@ -59,6 +60,13 @@ class TestHealth514(TransactionCase):
                 "l10n_sk_hr_payroll.hr_payroll_structure_sk_employee_salary")
         cls.calendar = cls.env["resource.calendar"].create(
             {"name": "SK 40h", "company_id": cls.company.id})
+        cls.agreement_calendar = cls.env["resource.calendar"].create({
+            "name": "Synthetic agreement two hours weekly", "company_id": cls.company.id,
+            "attendance_ids": [Command.create({
+                "name": "Monday", "dayofweek": "0", "hour_from": 8,
+                "hour_to": 10, "day_period": "morning",
+            })],
+        })
 
     @classmethod
     def _detect_engine(cls):
@@ -86,7 +94,8 @@ class TestHealth514(TransactionCase):
             return "ee"
         return None
 
-    def _employee_payslip(self, wage=2000.0, agreement="none", pension=False, version_values=None):
+    def _employee_payslip(self, wage=2000.0, agreement="none", pension=False,
+                         version_values=None, health_intervals=None):
         structure = self.structure
         if agreement != "none":
             module = "l10n_sk_hr_payroll_oca" if self.engine == "oca" else "l10n_sk_hr_payroll"
@@ -94,7 +103,7 @@ class TestHealth514(TransactionCase):
         emp_vals = {
             "name": "Jozko Mrkvicka",
             "company_id": self.company.id,
-            "resource_calendar_id": self.calendar.id,
+            "resource_calendar_id": (self.calendar if agreement == "none" else self.agreement_calendar).id,
             "identification_id": "8501011234",
             "date_version": date(2026, 1, 1),
             "contract_date_start": date(2026, 1, 1),
@@ -111,6 +120,15 @@ class TestHealth514(TransactionCase):
                                        "l10n_sk_health_exempt": agreement != "none"})
         if version_values:
             employee.version_id.write(version_values)
+        if health_intervals is not None:
+            reviewed = self.env["l10n.sk.health.calendar"].with_company(self.company).create({
+                "company_id": self.company.id, "employee_id": employee.id,
+                "month": "2026-03-01", "complete": True,
+                "evidence": "Synthetic actual registered days",
+                "interval_ids": [Command.create({"kind": kind, "date_start": start, "date_end": end})
+                                 for kind, start, end in health_intervals],
+            })
+            reviewed.action_review()
 
         slip = self.env["hr.payslip"].with_company(self.company).create({
             "name": "Payslip",
@@ -179,6 +197,7 @@ class TestHealth514(TransactionCase):
             self.assertEqual(slip.get_salary_line_total("HEALTHEMPLOYER"), 0)
 
     def test_mismatch_at_another_insurer_does_not_block_this_insurer(self):
+        self.company.l10n_sk_health_payer_vszp = "8800112233"
         _, broken = self._employee_payslip(200, "dopc", "disability")
         broken.employee_id.l10n_sk_health_insurer_code = "25"
         self._version(broken).l10n_sk_health_exempt = False
@@ -296,12 +315,66 @@ class TestHealth514(TransactionCase):
             self.assertFalse(self._new_health_statement()._payslip_fund_profiles(slip)[slip.id])
 
     def test_later_pension_card_edit_does_not_reinterpret_recorded_payroll(self):
-        _employee, slip = self._employee_payslip(200, "dopc")
+        _employee, slip = self._employee_payslip(
+            200, "dopc", health_intervals=[("2D", "2026-03-02", "2026-03-02")],
+        )
         statement = self._new_health_statement()
         self._version(slip).l10n_sk_pension_type = "old_age"
         self.assertFalse(statement._health_payslip_profiles(slip)[slip.id]["exempt"])
         self.assertIn(slip, statement._get_period_payslips())
         statement._preflight()
+
+    def test_fresh_insured_agreement_needs_actual_registered_days(self):
+        self._employee_payslip(200, "dopc")
+        with self.assertRaisesRegex(UserError, "Review actual agreement"):
+            self._new_health_statement().action_generate()
+
+    def test_recorded_agreement_uses_reviewed_days_without_requiring_a_second_checkbox(self):
+        self._employee_payslip(
+            200, "dopc", health_intervals=[("2D", "2026-03-02", "2026-03-02")],
+        )
+        root = self._generated_tree(self._new_health_statement())
+        row = root.find("PersonData")
+        self.assertEqual(row.findtext("NumberOfDays"), "1")
+        self.assertEqual(row.findtext("ReceiptOfEmployee"), "0.00")
+        self.assertEqual(row.findtext("TotalReceiptOfOther"), "200.00")
+
+    def test_missing_recorded_profile_uses_framework_legacy_policy(self):
+        _employee, slip = self._employee_payslip()
+        statement = self._new_health_statement()
+        with patch.object(type(slip), "_cssk_recorded_fund_profile", return_value=False):
+            statement.action_generate()
+            self.assertTrue(statement.fund_bases_warning)
+            statement.action_submit()
+            correction = statement.copy({"state": "draft", "correction_type": "corrective"})
+            with self.assertRaisesRegex(UserError, "Precise recorded fund bases"):
+                correction.action_generate()
+            correction.fund_bases_fallback_reason = "Synthetic review of retained legacy payroll"
+            correction.action_confirm_legacy_fund_bases()
+            correction.action_generate()
+
+    def test_malformed_profile_is_missing_evidence_instead_of_a_crash_or_silent_filter(self):
+        _employee, slip = self._employee_payslip()
+        statement = self._new_health_statement()
+        profile = statement._payslip_fund_profiles(slip)[slip.id]
+        variants = []
+        broken = deepcopy(profile)
+        broken["health"]["insurer_code"] = []
+        variants.append(broken)
+        broken = deepcopy(profile)
+        broken["health"]["calendar"] = {
+            "insured_days": 1, "insured_dates": ["2026-02-30"], "month_start": "2026-02-01",
+        }
+        variants.append(broken)
+        broken = deepcopy(profile)
+        broken["regular"] = "false"
+        variants.append(broken)
+        for broken in variants:
+            with self.subTest(profile=broken):
+                with patch.object(type(slip), "_cssk_recorded_fund_profile", return_value=broken):
+                    records, missing = statement._payslip_fund_records(slip)
+                    self.assertFalse(records[slip.id])
+                    self.assertEqual(missing, slip)
 
     def _text_statement(self):
         self.env["res.partner.bank"].create({
@@ -390,6 +463,72 @@ class TestHealth514(TransactionCase):
         calendar.action_review()
         with self.assertRaisesRegex(UserError, "Complete payroll, including zero-premium"):
             self._text_statement().action_generate()
+
+    def test_additional_export_cannot_repeat_unchanged_full_payroll(self):
+        self._employee_payslip()
+        original = self._text_statement()
+        original.action_generate()
+        original.action_submit()
+        try:
+            additional = original.copy({"state": "draft", "correction_type": "supplementary"})
+            additional.action_generate()
+        except UserError:
+            # A UI which offers only the legally complete O replacement is
+            # valid; it must not advertise a full-month A as a delta.
+            return
+        except ValueError as exc:
+            if "correction_type" not in str(exc):
+                raise
+            return
+        records = base64.b64decode(additional.xml_attachment_id.datas).decode().splitlines()
+        total = sum(float(row.split("|")[9].replace(",", ".")) for row in records[3:])
+        self.assertEqual(total, 0, "Unchanged payroll has zero additional premium, not the full month again")
+
+    def test_each_insurer_keeps_its_own_payer_and_generated_inputs_are_stable(self):
+        self.company.write({
+            "l10n_sk_health_payer_dovera": "1111111111",
+            "l10n_sk_health_payer_vszp": "2222222222",
+        })
+        self._insured("Synthetic payer24", "8501011234", "24")
+        self._insured("Synthetic payer25", "9002022345", "25")
+        first, second = self._new_health_statement("24"), self._new_health_statement("25")
+        self.assertEqual(first.payer_number, "1111111111")
+        self.assertEqual(second.payer_number, "2222222222")
+        self.assertEqual(self._generated_tree(first).findtext("Identification/CodeOfPayer"), "1111111111")
+        self.assertEqual(self._generated_tree(second).findtext("Identification/CodeOfPayer"), "2222222222")
+        self.company.l10n_sk_health_payer_dovera = "3333333333"
+        first.write({
+            "company_id": self.company.id, "insurer_code": "24", "payer_number": "1111111111",
+            "year": "2026", "month": "3", "payment_date": False,
+        })
+        self.assertEqual(first.payer_number, "1111111111")
+        with self.assertRaisesRegex(UserError, "filing inputs"):
+            first.payer_number = "3333333333"
+        with self.assertRaisesRegex(UserError, "filing inputs"):
+            first.insurer_code = "25"
+        first.action_reset_to_draft()
+        first.payer_number = "3333333333"
+        self.assertEqual(first.payer_number, "3333333333")
+
+    def test_explicit_statement_payer_is_allowed_without_changing_company_configuration(self):
+        statement = self._new_health_statement("25")
+        self.assertFalse(statement.payer_number)
+        statement.payer_number = "5555555555"
+        self.assertEqual(statement.payer_number, "5555555555")
+        self.assertEqual(self.company.l10n_sk_health_payer_number, "9900112233")
+
+    def test_payer_upgrade_reads_retained_bytes_instead_of_current_company_settings(self):
+        self._employee_payslip()
+        original = self._new_health_statement()
+        original.action_generate()
+        original.action_submit()
+        filed = original.submitted_attachment_id.datas
+        self.company.l10n_sk_health_payer_number = "6666666666"
+        self.env.cr.execute("UPDATE l10n_sk_health SET payer_number = NULL WHERE id = %s", [original.id])
+        original.invalidate_recordset(["payer_number"])
+        self.env["l10n.sk.health"].with_context(bin_size=True)._l10n_sk_migrate_legacy_payer_numbers()
+        self.assertEqual(original.payer_number, "9900112233")
+        self.assertEqual(original.submitted_attachment_id.datas, filed)
 
     def test_generate_and_validate(self):
         employee, slip = self._employee_payslip()
@@ -501,6 +640,7 @@ class TestHealth514(TransactionCase):
     def test_each_insurer_gets_only_its_insurees(self):
         """Every employee went into every insurer's dávka 514: the insurer
         was a property of the record, never of the employee."""
+        self.company.l10n_sk_health_payer_vszp = "8800112233"
         self._insured("Dovera Poistenec", "8501011234", "24")
         self._insured("Vszp Poistenec", "9002022345", "25")
         decl24, rows24 = self._rows("24")
@@ -509,10 +649,12 @@ class TestHealth514(TransactionCase):
         self.assertEqual(rows25, ["9002022345"])
         self.assertEqual(decl24.lines_count, 1)
         self.assertEqual(decl25.lines_count, 1)
+        self.assertEqual(decl25.payer_number, "8800112233")
 
     def test_employee_initial_company_default_survives_later_company_change(self):
         employee, _slip = self._employee_payslip()
         self.assertEqual(employee.l10n_sk_health_insurer_code, "24")
+        self.company.l10n_sk_health_payer_dovera = "9900112233"
         self.company.l10n_sk_health_insurer_code = "25"
         _decl, rows = self._rows("24")  # the company default
         self.assertEqual(rows, ["8501011234"])
@@ -534,8 +676,8 @@ class TestHealth514(TransactionCase):
         decl = self.env["l10n.sk.health"].with_company(self.company).create({
             "company_id": self.company.id, "year": "2026", "month": "3"})
         decl.payer_number = "1122334455"
-        self.assertEqual(self.company.l10n_sk_health_payer_number,
-                         "1122334455")
+        self.assertEqual(decl.payer_number, "1122334455")
+        self.assertEqual(self.company.l10n_sk_health_payer_number, "9900112233")
 
 @tagged("post_install", "-at_install")
 class TestSchemaPins(TransactionCase):

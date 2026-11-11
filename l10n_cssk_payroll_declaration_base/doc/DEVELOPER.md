@@ -24,3 +24,9 @@ The action uses a private Python super-write for its own generated audit fields,
 while preserving other mixins' write chain. No RPC/context capability can grant
 the fallback. MVP/VPP/health/ELDP expose the reason/action and warning banner;
 their inherited field labels need their own native translation references.
+
+## Recorded profiles and output formats
+
+`_payslip_fund_profiles(slips)` returns bridge-validated retained profiles by payslip ID. Missing/non-callable optional readers return false; access errors propagate. A form may override `_required_recorded_fund_keys()` so generation and legacy-review actions agree about incomplete metadata. Country-specific profile completeness stays in the country form's reader.
+
+`_declaration_attachment_name()`, `_declaration_attachment_mimetype()` and `_declaration_generated_message()` customise generated-file metadata without replacing the submission/history state machine. A non-XML country format dispatches rendering and validation in its existing hooks and preserves the default XML branch. Retained attachment downloads use the retained bytes.
