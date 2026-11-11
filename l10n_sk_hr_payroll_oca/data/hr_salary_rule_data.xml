@@ -139,7 +139,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'sickness', 'employee', min(categories.GROSS, contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from)), _r, -result,
-        facts={"rule_code": 'SICK'})
+        facts={"rule_code": 'SICK', "monthly": {
+            "income": categories.GROSS, "maximum": contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -166,7 +168,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'pension', 'employee', base, _r, -result,
-        facts={"rule_code": 'PENSION'})
+        facts={"rule_code": 'PENSION', "monthly": {
+            "income": categories.GROSS, "maximum": contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from),
+            "deduction": (payslip.rule_parameter('l10n_sk_dohoda_oop') if contract.l10n_sk_agreement_type != 'none' and contract.l10n_sk_agreement_oop else 0)}})
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -193,7 +197,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'disability', 'employee', base, _r, -result,
-        facts={"rule_code": 'DISABILITY'})
+        facts={"rule_code": 'DISABILITY', "monthly": {
+            "income": categories.GROSS, "maximum": contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from),
+            "deduction": (payslip.rule_parameter('l10n_sk_dohoda_oop') if contract.l10n_sk_agreement_type != 'none' and contract.l10n_sk_agreement_oop else 0)}})
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -215,7 +221,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'unemployment', 'employee', min(categories.GROSS, contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from)), _r, -result,
-        facts={"rule_code": 'UNEMPLOYMENT'})
+        facts={"rule_code": 'UNEMPLOYMENT', "monthly": {
+            "income": categories.GROSS, "maximum": contract.l10n_sk_employee_social_cap(payslip.rule_parameter('l10n_sk_monthly_taxable_max'), payslip.date_from),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="True"/>
     </record>
@@ -240,7 +248,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'sickness', 'employer', min(categories.GROSS, payslip.rule_parameter('l10n_sk_monthly_taxable_max')), _r, result,
-        facts={"rule_code": 'SICKEMPLOYER'})
+        facts={"rule_code": 'SICKEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -265,7 +275,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'pension', 'employer', base, _r, result,
-        facts={"rule_code": 'PENSIONEMPLOYER'})
+        facts={"rule_code": 'PENSIONEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": (payslip.rule_parameter('l10n_sk_dohoda_oop') if contract.l10n_sk_agreement_type != 'none' and contract.l10n_sk_agreement_oop else 0)}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -291,7 +303,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'disability', 'employer', base, _r, result,
-        facts={"rule_code": 'DISABILITYEMPLOYER'})
+        facts={"rule_code": 'DISABILITYEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": (payslip.rule_parameter('l10n_sk_dohoda_oop') if contract.l10n_sk_agreement_type != 'none' and contract.l10n_sk_agreement_oop else 0)}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -318,7 +332,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'unemployment', 'employer', min(categories.GROSS, payslip.rule_parameter('l10n_sk_monthly_taxable_max')), _r, result,
-        facts={"rule_code": 'UNEMPLOYMENTEMPLOYER'})
+        facts={"rule_code": 'UNEMPLOYMENTEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -340,7 +356,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'shorttime', 'employer', min(categories.GROSS, payslip.rule_parameter('l10n_sk_monthly_taxable_max')), _r, result,
-        facts={"rule_code": 'SHORTTIMEEMPLOYER'})
+        facts={"rule_code": 'SHORTTIMEEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -364,7 +382,9 @@ if contract.l10n_sk_guarantee_exempt:
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'guarantee', 'employer', min(categories.GROSS, payslip.rule_parameter('l10n_sk_monthly_taxable_max')), _r, result,
-        facts={"rule_code": 'GUARANTEEEMPLOYER'})
+        facts={"rule_code": 'GUARANTEEEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -386,7 +406,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'accident', 'employer', categories.GROSS, _r, result,
-        facts={"rule_code": 'ACCIDENT'})
+        facts={"rule_code": 'ACCIDENT', "monthly": {
+            "income": categories.GROSS, "maximum": None,
+            "deduction": 0}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>
@@ -411,7 +433,9 @@ result_rate = 100
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
         'reserve', 'employer', base, _r, result,
-        facts={"rule_code": 'RESERVEFUNDEMPLOYER'})
+        facts={"rule_code": 'RESERVEFUNDEMPLOYER', "monthly": {
+            "income": categories.GROSS, "maximum": payslip.rule_parameter('l10n_sk_monthly_taxable_max'),
+            "deduction": (payslip.rule_parameter('l10n_sk_dohoda_oop') if contract.l10n_sk_agreement_type != 'none' and contract.l10n_sk_agreement_oop else 0)}})
         </field>
         <field name="appears_on_payslip" eval="False"/>
     </record>

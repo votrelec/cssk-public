@@ -256,6 +256,92 @@ class TestRecordedFundPayroll(TransactionCase):
             }
         )
 
+    def test_monthly_agreement_oop_is_not_reused_by_a_second_payment(self):
+        self.version.struct_id = self.env.ref(
+            "l10n_sk_hr_payroll_oca.hr_payroll_structure_sk_dopc"
+        )
+        self.version.struct_id.rule_ids |= self.adjustment
+        self.version.write({
+            "l10n_sk_agreement_oop": True,
+            "l10n_sk_pension_type": "old_age",
+            "l10n_sk_hourly_wage": 0,
+        })
+        # Independent monthly reference before any source payment is posted.
+        # The second payment is an extra gross remuneration, with no mutation
+        # of the employment version or of the first confirmed salary lines.
+        reference = self._slip(wage=0, clawback=400)
+        expected = {line.code: line.total for line in reference.line_ids}
+        first = self._slip(wage=0, clawback=200)
+        first.action_payslip_done()
+        before = self._lines(first)
+        second = self._slip(wage=0, clawback=200)
+        funds = self._funds(second)
+        self.assertEqual(funds[("pension", "employee")]["base"], "200")
+        self.assertEqual(funds[("pension", "employee")]["amount"], "8")
+        for code in ("TAXBASE", "INCOMETAX", "NET"):
+            with self.subTest(code=code):
+                actual = sum(line.total for line in (first | second).line_ids
+                             if line.code == code)
+                self.assertAlmostEqual(actual, expected[code], places=2)
+        self.assertEqual(self._lines(first), before)
+
+    def test_monthly_adapter_does_not_overwrite_a_custom_charged_amount(self):
+        self.version.struct_id = self.env.ref(
+            "l10n_sk_hr_payroll_oca.hr_payroll_structure_sk_dopc"
+        )
+        self.version.struct_id.rule_ids |= self.adjustment
+        self.version.write({"l10n_sk_agreement_oop": True,
+                            "l10n_sk_pension_type": "old_age", "l10n_sk_hourly_wage": 0})
+        first = self._slip(wage=0, clawback=200)
+        first.action_payslip_done()
+        pension = self.version.struct_id.rule_ids.filtered(lambda rule: rule.code == "PENSION")
+        pension.amount_python_compute += "\nresult -= 1\n"
+        second = self._slip(wage=0, clawback=200)
+        self.assertEqual(second.get_salary_line_total("PENSION"), -1)
+        self.assertFalse(second.l10n_sk_fund_assessment)
+
+    def test_monthly_scope_resolves_the_contract_for_api_created_payroll(self):
+        self.version.struct_id = self.env.ref(
+            "l10n_sk_hr_payroll_oca.hr_payroll_structure_sk_dopc"
+        )
+        self.version.struct_id.rule_ids |= self.adjustment
+        self.version.write({"l10n_sk_agreement_oop": True,
+                            "l10n_sk_pension_type": "old_age", "l10n_sk_hourly_wage": 0})
+        first = self._slip(wage=0, clawback=200)
+        first.action_payslip_done()
+        second = self._slip(wage=0, clawback=200, contract_id=False)
+        self.assertFalse(second.contract_id)
+        self.assertEqual(second._l10n_sk_version(), first.contract_id)
+        self.assertEqual(self._funds(second)[("pension", "employee")]["amount"], "8")
+
+    def test_unsupported_straddling_payroll_is_missing_not_silently_absent(self):
+        prior = self._slip(wage=0, clawback=200,
+                           date_from="2026-05-15", date_to="2026-06-14")
+        prior.action_payslip_done()
+        self.assertFalse(prior.l10n_sk_fund_assessment)
+        current = self._slip(wage=0, clawback=200)
+        self.assertTrue(current.l10n_sk_monthly_fund_warning)
+        self.assertFalse(current._cssk_recorded_fund_bases())
+
+    def test_unknown_monthly_metadata_keeps_native_calculation_with_warning(self):
+        first = self._slip(wage=0, clawback=200)
+        first.action_payslip_done()
+        evidence = deepcopy(first.l10n_sk_fund_assessment)
+        for row in evidence["records"]:
+            if row["fund"] != "health":
+                row["facts"]["monthly"] = True
+        # Out-of-band old/custom metadata is not a caller capability and must
+        # neither become exact evidence nor break the native computation.
+        self.env.cr.execute(
+            "UPDATE hr_payslip SET l10n_sk_fund_assessment = %s::jsonb WHERE id = %s",
+            [json.dumps(evidence), first.id],
+        )
+        first.invalidate_recordset(["l10n_sk_fund_assessment"])
+        second = self._slip(wage=0, clawback=200)
+        self.assertTrue(second.line_ids)
+        self.assertTrue(second.l10n_sk_monthly_fund_warning)
+        self.assertFalse(second._cssk_recorded_fund_bases())
+
     def test_all_five_eligible_funds_reduce_income_before_the_cap(self):
         self._student_agreement()
         for income in (200, 16763.995, 16764, 16900, 17100):
@@ -322,7 +408,7 @@ class TestRecordedFundPayroll(TransactionCase):
                 <= (
                     {"rule_code", "topup", "income", "op"}
                     if row["fund"] == "health"
-                    else {"rule_code"}
+                    else {"rule_code", "monthly", "monthly_unverified"}
                 )
                 for row in evidence["records"]
             )

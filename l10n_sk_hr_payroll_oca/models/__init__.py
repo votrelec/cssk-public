@@ -10,3 +10,4 @@ from . import l10n_sk_tax_reconciliation
 from . import fund_capture
 from . import health_exemption
 from . import health_calculation
+from . import monthly_funds

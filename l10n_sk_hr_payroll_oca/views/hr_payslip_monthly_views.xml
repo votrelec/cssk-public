@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_payslip_monthly_fund_warning" model="ir.ui.view">
+        <field name="name">hr.payslip.monthly.fund.warning</field>
+        <field name="model">hr.payslip</field>
+        <field name="inherit_id" ref="payroll.hr_payslip_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <field name="l10n_sk_monthly_fund_warning" invisible="1"/>
+                <div class="alert alert-warning" invisible="not l10n_sk_monthly_fund_warning">
+                    Earlier monthly fund sources could not be verified. The native calculation was retained; review the monthly assessments before using this payroll for a filing.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
