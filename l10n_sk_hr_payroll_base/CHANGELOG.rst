@@ -16,6 +16,27 @@ Carry-over to 18.0
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
+* Not yet ported. Use contract-scoped profile/evidence fields and apply the same
+  eligibility predicates in both engine rules; rerun the profile/output matrix.
+
+[19.0.1.3.1] — 2026-11-11
+-------------------------
+
+Added
+~~~~~
+
+* Engine-neutral statutory health agreement exclusions and a separate
+  pension-state-insuree minimum predicate, with dated individual basis evidence.
+
+Fixed
+~~~~~
+
+* Distinguish excluded agreement income from ordinary employment of a pensioner.
+  The latter still carries premiums, with relief from the minimum top-up.
+* Require a retained individual legal basis for a manually selected exclusion.
+  State-insured status alone does not exclude ordinary employment income.
+* Recognised ordinary/service invalidity independently establishes the reduced
+  health rate under section 12(2), without requiring another ZTP checkbox.
 
 [19.0.1.3.0] — 2026-11-11
 -------------------------

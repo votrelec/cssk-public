@@ -44,8 +44,9 @@
                     <field name="l10n_sk_pension_type"/>
                     <field name="l10n_sk_agreement_oop"
                            invisible="l10n_sk_agreement_type == 'none'"/>
-                    <field name="l10n_sk_health_exempt"
-                           invisible="l10n_sk_agreement_type == 'none'"/>
+                    <field name="l10n_sk_health_exempt"/>
+                    <field name="l10n_sk_health_exempt_evidence"
+                           invisible="not l10n_sk_health_exempt"/>
                     <field name="l10n_sk_guarantee_exempt"/>
                 </group>
                 <group string="Garnishment (Slovakia)" groups="payroll.group_payroll_user">
@@ -100,8 +101,9 @@
                         <field name="l10n_sk_pension_type"/>
                         <field name="l10n_sk_agreement_oop"
                                invisible="l10n_sk_agreement_type == 'none'"/>
-                        <field name="l10n_sk_health_exempt"
-                               invisible="l10n_sk_agreement_type == 'none'"/>
+                        <field name="l10n_sk_health_exempt"/>
+                        <field name="l10n_sk_health_exempt_evidence"
+                               invisible="not l10n_sk_health_exempt"/>
                         <field name="l10n_sk_guarantee_exempt"/>
                     </group>
                     <group string="Garnishment (Slovakia)" groups="payroll.group_payroll_user">
