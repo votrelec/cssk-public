@@ -4,7 +4,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from odoo import Command
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import TransactionCase, tagged
 
 
@@ -232,6 +232,75 @@ class TestFundLifecycle(TransactionCase):
         self.assertFalse(draft.refunded_id)
         slip.refund_sheet()
         self.assertTrue(slip.refunded_id)
+
+    def test_denied_create_and_closing_check_access_before_employee_epoch(self):
+        slip = self._slip()
+        group = self.env["res.groups"].create(
+            {"name": "Read-only payroll source review"}
+        )
+        self.env["ir.model.access"].create(
+            {
+                "name": "Read-only payroll source review",
+                "model_id": self.env["ir.model"]._get_id("hr.payslip"),
+                "group_id": group.id,
+                "perm_read": True,
+                "perm_write": False,
+                "perm_create": False,
+                "perm_unlink": False,
+            }
+        )
+        reader = (
+            self.env["res.users"]
+            .with_context(no_reset_password=True)
+            .create(
+                {
+                    "name": "Read-only payroll reviewer",
+                    "login": "source-reader@example.invalid",
+                    "company_id": self.company.id,
+                    "company_ids": [Command.set(self.company.ids)],
+                    "group_ids": [
+                        Command.set(
+                            [
+                                self.env.ref("base.group_user").id,
+                                self.env.ref("hr.group_hr_manager").id,
+                                group.id,
+                            ]
+                        )
+                    ],
+                }
+            )
+        )
+        readonly = slip.with_user(reader).with_company(self.company)
+        self.assertFalse(readonly.env.user.has_group("payroll.group_payroll_user"))
+        employee_type = type(self.employee)
+        original = employee_type._l10n_sk_lock_fund_source
+        calls = []
+
+        def employee_gate(employees):
+            calls.extend(employees.ids)
+            return original(employees)
+
+        operations = [
+            lambda: readonly.write({"state": "done"}),
+            lambda: readonly.env["hr.payslip"].create(
+                {
+                    "name": "Denied create",
+                    "company_id": self.company.id,
+                    "employee_id": self.employee.id,
+                    "contract_id": self.version.id,
+                    "struct_id": self.structure.id,
+                    "date_from": "2026-06-01",
+                    "date_to": "2026-06-30",
+                }
+            ),
+        ]
+        with patch.object(employee_type, "_l10n_sk_lock_fund_source", employee_gate):
+            for operation in operations:
+                calls.clear()
+                with self.subTest(operation=operation):
+                    with self.assertRaises(AccessError):
+                        operation()
+                    self.assertEqual(calls, [])
 
     def test_changed_wage_cannot_confirm_stale_calculation(self):
         slip = self._slip()

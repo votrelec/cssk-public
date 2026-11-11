@@ -105,3 +105,6 @@ Public create/context defaults cannot establish a new native refund link.
 Only the native copy hook's generated original identity permits that link;
 existing unchanged legacy links remain historical. All generated-value guards
 and lower cooperative field owners still run before closing.
+
+Payslip create/write access is checked before acquiring employee source epochs.
+Denied callers therefore cannot change epoch rows or acquire source locks.
