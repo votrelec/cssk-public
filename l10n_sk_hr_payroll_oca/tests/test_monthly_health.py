@@ -176,3 +176,19 @@ class TestMonthlyHealthNative(TransactionCase):
         with patch.object(type(first), "_cssk_recorded_fund_bases", side_effect=AccessError("Synthetic denied source")):
             with self.assertRaisesRegex(AccessError, "Synthetic denied source"):
                 current._monthly_health_sources(source["policy"])
+
+    def test_other_extension_outputs_do_not_change_health_input_identity(self):
+        employee = self.employee()
+        first = self.slip(employee)
+        reader = type(first)._cssk_recorded_fund_profile
+
+        def retained(record):
+            result = reader(record)
+            if result and record == first:
+                result["monthly_tax"] = {"synthetic_retained_output": True}
+            return result
+
+        with patch.object(type(first), "_cssk_recorded_fund_profile", retained):
+            second = self.slip(employee)
+        self.assertFalse(second.l10n_sk_monthly_fund_warning)
+        self.assertEqual(self.health(second)["HEALTHDOPLATOK"], 23.45)

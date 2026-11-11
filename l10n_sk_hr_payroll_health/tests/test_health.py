@@ -188,13 +188,10 @@ class TestHealth514(TransactionCase):
 
     def test_foreign_insured_agreement_without_pension_is_excluded(self):
         for agreement in ("dopc", "dovp"):
-            _, slip = self._employee_payslip(200, agreement)
-            self._version(slip).write({
+            _, slip = self._employee_payslip(200, agreement, version_values={
                 "l10n_sk_health_exempt": True,
                 "l10n_sk_health_exempt_evidence": "Synthetic reviewed foreign coverage",
             })
-            slip.compute_sheet()
-            slip.action_payslip_done()
             declaration = self.env["l10n.sk.health"].with_company(self.company).create({
                 "company_id": self.company.id, "year": "2026", "month": "3"})
             declaration._preflight()

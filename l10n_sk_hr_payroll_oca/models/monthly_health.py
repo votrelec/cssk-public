@@ -76,14 +76,16 @@ class MonthlyHealthPayslip(models.Model):
     def _monthly_health_sources(self, policy):
         self.ensure_one()
         profile = self._l10n_sk_fund_profile()
-        keys = ("version", "contract_period", "agreement", "pension", "regular",
-                "oop", "guarantee_exempt", "health")
+        profile_keys = (
+            "version", "contract_period", "agreement", "pension", "regular",
+            "oop", "guarantee_exempt", "health",
+        )
         previous, missing, ids = [], [], []
         for peer in self._l10n_sk_monthly_predecessors()._cssk_effective_fund_payslips():
             retained = peer._cssk_recorded_fund_profile()
             records = peer._cssk_recorded_fund_bases()
-            if (not retained or not records or any(
-                    retained.get(key) != profile.get(key) for key in keys)
+            if (not retained or not records
+                    or any(retained.get(key) != profile.get(key) for key in profile_keys)
                     or not profile.get("version") or peer.credit_note):
                 missing.append(peer.id)
                 continue
@@ -124,11 +126,13 @@ class MonthlyHealthRule(models.Model):
         values = super()._compute_rule(localdict)
         slip = localdict.get("payslip")
         if (not slip or self.code not in HEALTH_CODES
-                or not slip._l10n_sk_is_recording_funds() or slip.credit_note):
+                or not slip._l10n_sk_is_recording_funds()):
             return values
         native = -values["amount"] if self.code != "HEALTHEMPLOYER" else values["amount"]
         if self.code in {"HEALTH", "HEALTHEMPLOYER"}:
             localdict["l10n_sk_health_native_" + COMPONENTS[self.code]] = native
+        if slip.credit_note:
+            return values
         record = localdict.get(
             "l10n_sk_fund_record" if self.code != "HEALTHDOPLATOK"
             else "l10n_sk_health_minimum_record"
