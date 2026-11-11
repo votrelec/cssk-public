@@ -11,8 +11,12 @@ They deliberately retain the existing rounding and OOP/cap order. A disclosed
 arithmetic correction must review its changed expected amounts separately;
 this reference must not silently follow the implementation being tested.
 
-The separate health-eligibility FIX leaves this JSON unchanged. AST parity
-pins the twelve unaffected rules. Full runtime parity still covers ordinary
+The health-eligibility FIX leaves its three reference entries unchanged. AST parity
+pins twelve rules, including the five disclosed OOP-before-cap corrections. Full runtime parity still covers ordinary
 non-exempt sub-cent and signed inputs. The three changed health eligibility
 rules are checked independently against student/pension agreements, pensioner
 employment, ordinary minimum top-up and individually evidenced exclusions.
+
+Disclosed correction: the five pension/disability/reserve formulas now apply
+the agreement OOP before the maximum under section 138. No other arithmetic
+is changed. The reference above is updated only for these five reviewed changes.

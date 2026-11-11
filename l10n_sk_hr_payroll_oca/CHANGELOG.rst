@@ -13,6 +13,9 @@ Carry-over to 18.0
 * Not yet ported: health514 profile/format integration. Adapt version ownership
   to contracts and rerun profile, insurer, source, refund and retained-file cases.
 
+* Not yet ported: mirror the five OOP-before-maximum changes in both engines
+  and rerun the year-boundary, unaffected-fund and tax/net-effect checks.
+
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
@@ -112,12 +115,23 @@ Fixed
 * Select the reduced rate for recognised invalidity without another checkbox;
   preflight an unsupported manual exclusion before the salary-rule evaluator.
 
+* Apply the ordinary agreement pension OOP before the statutory maximum in
+  employee pension/disability and employer pension/disability/reserve rules
+  (section 138). Guarantee and accident bases remain unreduced by this OOP.
+  A 2026 eligible agreement at 17,100 EUR now uses 16,764 rather than 16,564.
+  At the 35% marginal tax rate an old-age DoPC employee pays 8.00 more pension
+  insurance, TAXBASE decreases by 8.00, tax withheld by 2.80 and NET by 5.20.
+  The corresponding student DoBPS at 19,000 EUR has NET lower by 9.10.
+
 Changed
 ~~~~~~~
 
-* Preserve the original fifteen-formula reference unchanged. AST checks pin
-  the twelve unaffected formulas; independent profile/output cases verify the
-  three intentionally corrected health eligibility rules.
+* Update the frozen arithmetic reference for these five disclosed changes only.
+  The rest of the native rounding, exemptions, rates and dated parameters stay
+  unchanged. Existing posted payslips are not automatically recomputed.
+
+* The three corrected health eligibility rules keep independent statutory
+  checks; the other reference formulas remain unchanged.
 
 [19.0.1.25.0] — 2026-11-11
 ==========================

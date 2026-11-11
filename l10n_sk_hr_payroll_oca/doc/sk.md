@@ -108,3 +108,31 @@ Dôchodca v bežnom pracovnom pomere platí oba odvody a nemá minimálny doplat
 poistenca štátu. Pri individuálnom vyňatí vyberte manuálnu voľbu a na pracovnej
 verzii uchovajte právny dôvod a odkaz na podklad.
 Podrobnosti: [spoločná zdravotná politika](../../l10n_sk_hr_payroll_base/doc/sk.md#health-exclusions).
+
+## OOP dohody pred maximom {#social-oop-order}
+
+Pri oprávnenej dohode s uplatnenou dôchodkovou OOP sa najprv zníži príjem a až
+potom použije maximum zamestnanca alebo zamestnávateľa. Oprava sa týka starobného
+a invalidného poistenia na oboch stranách a rezervného fondu zamestnávateľa.
+Garančné a úrazové poistné sa o túto OOP neznižujú; maximum garančného základu
+zostáva. V roku 2026 pri príjme 17 100 €, OOP 200 € a maxime 16 764 € je správny
+dôchodkový základ 16 764 € namiesto 16 564 €. Podklad:
+[§ 138](law:sk/2003/461#paragraf-138) a dátumovaná položka podľa
+[§ 138a](law:sk/2003/461#paragraf-138a).
+
+Rovnaké poradie číta existujúce parametre pre rok 2027 (OOP 300 € a maximum 17 820 €).
+
+Zmenené odvody zamestnanca ovplyvnia aj základ dane TAXBASE, zrazenú daň
+INCOMETAX a čistú odmenu NET. Pri inak nezmenenej páske 2026 v pásme 35 %:
+
+| Dohoda a hrubý príjem | Odvody zamestnanca | TAXBASE | Zrazená daň | NET |
+|---|---:|---:|---:|---:|
+| Starobný dôchodca DoPČ, 17 100 € | +8,00 | -8,00 | -2,80 | -5,20 |
+| Študent DoBPŠ, 19 000 € | +14,00 | -14,00 | -4,90 | -9,10 |
+
+Záporný riadok zrážky dane je teda menej záporný; hrubý príjem sa nemení.
+Príklady nenahrádzajú skutočný daňový profil zamestnanca.
+
+Nemenia sa sadzby, zaokrúhľovanie, záznamy parametrov ani zdravotné pravidlá. Zaúčtovaná
+suma potrebuje príslušný opravný postup; zmena spätne neprepočítava mzdy ani
+nepredstavuje vyriešenú kumuláciu nezávislých pások.
