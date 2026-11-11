@@ -93,10 +93,13 @@ class HealthAssessments(models.Model):
         ))
         slips = self._effective_fund_payslips(slips)
         profiles = self._health_payslip_profiles(slips)
-        people, selected, covered = set(), set(), set()
+        people, selected, covered = set(), set(), {}
         for slip in slips:
             health = profiles[slip.id]
-            covered.add(slip.employee_id.id)
+            start, end = max(self.date_from, slip.date_from), min(self.date_to, slip.date_to)
+            covered.setdefault(slip.employee_id.id, set()).update(
+                start + timedelta(days=offset) for offset in range((end - start).days + 1)
+            )
             if health.get("exempt"):
                 continue
             identity = self._digits(slip.employee_id.identification_id)
@@ -114,45 +117,53 @@ class HealthAssessments(models.Model):
         ])
         by_employee = {calendar.employee_id.id: calendar for calendar in calendars}
         employees = self.env["hr.employee"].with_context(active_test=False).search([
-            ("company_id", "=", self.company_id.id), ("id", "not in", list(covered)),
+            ("company_id", "=", self.company_id.id),
         ])
         for employee in employees:
-            if self._health_missing_payroll_registration(employee, by_employee.get(employee.id)):
+            if self._health_missing_payroll_registration(
+                employee, by_employee.get(employee.id), covered.get(employee.id, set()),
+            ):
                 raise UserError(_(
                     "Complete payroll, including zero-premium months, for '%(name)s' before filing the 514.",
                     name=employee.display_name,
                 ))
         return len(selected), len(people)
 
-    def _health_missing_payroll_registration(self, employee, calendar):
+    def _health_missing_payroll_registration(self, employee, calendar, covered_dates):
         """Discover missing sources independently of slips and calendars.
 
         A regular PP establishes employment during its effective contract. A
         dohoda or post-contract 2Y only establishes the actual registered days
         recorded in a reviewed calendar. Neither source establishes wages.
         All insurers matter because the 514 also counts all insured persons.
-        Confirmed payroll above keeps its recorded profile, even if HR changes.
+        Confirmed payroll keeps its recorded profile for its actual date range,
+        even if HR changes. A partial payslip cannot cover another interval.
         """
+        if len(covered_dates) == (self.date_to - self.date_from).days + 1:
+            return False
         versions = employee.with_context(active_test=False).version_ids.sorted(
             lambda version: (version.date_version, version.id),
         )
         ordinary_dates = set()
+        relevant = self.env["hr.version"]
         for index, version in enumerate(versions):
+            start, end = max(self.date_from, version.date_version), self.date_to
+            if index + 1 < len(versions):
+                end = min(end, versions[index + 1].date_version - timedelta(days=1))
+            dates = {start + timedelta(days=offset) for offset in range((end - start).days + 1)} - covered_dates
+            if not dates:
+                continue
+            relevant |= version
             # An HR card alone is not an employment registration. Unlike a
             # report-day fallback, completeness needs a real contract start.
             if not version.contract_date_start:
                 continue
-            start = max(self.date_from, version.date_version, version.contract_date_start)
-            end = min(self.date_to, version.contract_date_end or self.date_to)
-            if index + 1 < len(versions):
-                end = min(end, versions[index + 1].date_version - timedelta(days=1))
-            if (start <= end and not version.l10n_sk_is_agreement()
+            dates = {day for day in dates if version.contract_date_start <= day
+                     <= (version.contract_date_end or self.date_to)}
+            if (dates and not version.l10n_sk_is_agreement()
                     and not version.l10n_sk_health_is_exempt()):
-                ordinary_dates.update(start + timedelta(days=offset)
-                                      for offset in range((end - start).days + 1))
+                ordinary_dates.update(dates)
         if calendar:
-            relevant = (versions.filtered(lambda row: row.date_version <= self.date_from)[-1:]
-                        | versions.filtered(lambda row: self.date_from < row.date_version <= self.date_to))
             if not relevant or all(version.l10n_sk_health_is_exempt() for version in relevant):
                 return False
             if calendar.state != "reviewed":
@@ -166,7 +177,7 @@ class HealthAssessments(models.Model):
                     continue
                 target.update(interval.date_start + timedelta(days=offset)
                               for offset in range((interval.date_end - interval.date_start).days + 1))
-            for day in dates - excluded:
+            for day in dates - excluded - covered_dates:
                 version = versions.filtered(lambda row: row.date_version <= day)[-1:]
                 if version and not version.l10n_sk_health_is_exempt():
                     return True

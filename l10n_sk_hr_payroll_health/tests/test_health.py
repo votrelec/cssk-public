@@ -95,7 +95,7 @@ class TestHealth514(TransactionCase):
         return None
 
     def _employee_payslip(self, wage=2000.0, agreement="none", pension=False,
-                         version_values=None, health_intervals=None):
+                         version_values=None, health_intervals=None, period_end=date(2026, 3, 31)):
         structure = self.structure
         if agreement != "none":
             module = "l10n_sk_hr_payroll_oca" if self.engine == "oca" else "l10n_sk_hr_payroll"
@@ -136,7 +136,7 @@ class TestHealth514(TransactionCase):
             "struct_id": structure.id,
             "company_id": self.company.id,
             "date_from": date(2026, 3, 1),
-            "date_to": date(2026, 3, 31),
+            "date_to": period_end,
         })
         if self.engine == "ee":
             slip = slip.with_context(salary_simulation=True)
@@ -478,6 +478,64 @@ class TestHealth514(TransactionCase):
         for export_format in ("xml", "text514"):
             with self.subTest(export_format=export_format), self.assertRaisesRegex(UserError, employee.name):
                 statement.copy({"export_format": export_format}).action_generate()
+
+    def test_partial_payroll_does_not_cover_an_unprocessed_second_contract(self):
+        employee, _slip = self._employee_payslip(
+            period_end=date(2026, 3, 15), version_values={"contract_date_end": "2026-03-15"},
+        )
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-16",
+            "contract_date_start": "2026-03-16", "contract_date_end": False,
+        })
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_partial_payroll_covers_an_ended_contract(self):
+        self._employee_payslip(
+            period_end=date(2026, 3, 15), version_values={"contract_date_end": "2026-03-15"},
+        )
+        self._text_statement().action_generate()
+
+    def test_full_month_snapshot_still_covers_a_later_hr_version(self):
+        employee, _slip = self._employee_payslip()
+        employee.version_id.copy({"employee_id": employee.id, "date_version": "2026-03-16"})
+        self._text_statement().action_generate()
+
+    def test_two_confirmed_partial_payslips_cover_both_contracts(self):
+        employee, _first = self._employee_payslip(
+            period_end=date(2026, 3, 15), version_values={"contract_date_end": "2026-03-15"},
+        )
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-16",
+            "contract_date_start": "2026-03-16", "contract_date_end": False,
+        })
+        second = self.env["hr.payslip"].with_company(self.company).create({
+            "name": "Synthetic second contract payroll", "employee_id": employee.id,
+            "company_id": self.company.id, "struct_id": self.structure.id,
+            "date_from": "2026-03-16", "date_to": "2026-03-31",
+        })
+        if self.engine == "ee":
+            second = second.with_context(salary_simulation=True)
+        second.compute_sheet()
+        confirm_payslips(second)
+        self._text_statement().action_generate()
+
+    def test_exempt_partial_payroll_cannot_hide_later_ordinary_employment(self):
+        self._employee_payslip()
+        employee, _slip = self._employee_payslip(
+            200, "dopc", "old_age", period_end=date(2026, 3, 15),
+            version_values={"contract_date_end": "2026-03-15"},
+        )
+        employee.name = "Synthetic partial exempt payroll"
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-16",
+            "contract_date_start": "2026-03-16", "contract_date_end": False,
+            "l10n_sk_agreement_type": "none", "l10n_sk_health_exempt": False,
+            **({"struct_id": self.structure.id} if self.engine == "oca"
+               else {"structure_type_id": self.structure.type_id.id}),
+        })
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
 
     def test_missing_other_insurer_payroll_also_blocks_all_insurer_count(self):
         self._employee_payslip()

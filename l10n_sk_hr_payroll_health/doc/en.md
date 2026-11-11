@@ -32,6 +32,8 @@ Complete and confirm payroll for the month, including zero-premium months. A rev
 
 The completeness check also finds ordinary employees from the historical employment versions and contract dates when neither payroll nor a calendar exists. It names the employee whose payroll must be completed, including employees insured elsewhere and archived employees active in the reporting month. A future exemption does not remove an earlier obligation. Agreement and irregular-income registrations use actual reviewed 2D/2Y days; the program does not create zero wages from a contract.
 
+A partial payslip covers only its own dates. Complete payroll for any later registered interval in the same month; a full-month retained payroll profile remains valid after later HR edits. An empty reviewed calendar does not end an ordinary employment registration. Benefits can give zero premium days while registration continues; record an actual no-income exclusion as 2N with its supporting evidence.
+
 [Dôvera's 514 instructions](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) require the employee count even when no advance is due. [VšZP's registration instructions](https://www.vszp.sk/showdoc.do?docid=147) distinguish 2D agreement registration and 2Y irregular or post-employment income.
 
 Create a statement for the insurer, select the period, applicable form edition and export format, then **Generate**. Check the employee rows and totals against payroll. Download the generated file and upload it through the insurer's electronic branch. Record **Mark Submitted** and retain the insurer's receipt with the filing.

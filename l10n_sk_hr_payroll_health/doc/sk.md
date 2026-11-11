@@ -32,6 +32,8 @@ Spracujte a potvrďte mzdy za mesiac vrátane mesiacov s nulovým poistným. Ove
 
 Kontrola úplnosti nájde bežný pracovný pomer aj podľa historických pracovných verzií a dátumov zmluvy, keď chýba mzda aj kalendár. Pomenuje zamestnanca, ktorého mzdu treba dokončiť, vrátane osôb inej poisťovne a archivovaných osôb zamestnaných vo vykazovanom mesiaci. Budúce vyňatie neruší skoršiu povinnosť. Pri dohodách a nepravidelnom príjme rozhodujú skutočné overené dni 2D/2Y; samotná zmluva nevytvorí nulovú mzdu.
 
+Čiastočná páska pokrýva iba svoje dátumy. Dokončite mzdu aj za neskorší registrovaný interval rovnakého mesiaca; uchovaný profil celomesačnej mzdy zostáva platný po neskorších HR úpravách. Prázdny overený kalendár neukončuje registráciu bežného pracovného pomeru. Dávkové obdobie môže znížiť prémiové dni na nulu pri trvajúcej registrácii; skutočné vyňatie pre absenciu príjmu zaznamenajte ako 2N s príslušným podkladom.
+
 [Pokyny Dôvery k 514](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) vyžadujú počet zamestnancov aj pri nulovom preddavku. [Registračné pokyny VšZP](https://www.vszp.sk/showdoc.do?docid=147) odlišujú registráciu dohody 2D a nepravidelného alebo pozmluvného príjmu 2Y.
 
 Vytvorte výkaz pre poisťovňu, zvoľte obdobie, platnú verziu formulára a formát exportu a použite **Generovať**. Porovnajte osoby a súčty so mzdami. Stiahnutý súbor nahrajte cez elektronickú pobočku poisťovne. Zaevidujte **Označiť ako podané** a doručenku poisťovne uchovajte spolu s podaním.
