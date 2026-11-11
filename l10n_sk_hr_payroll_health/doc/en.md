@@ -30,6 +30,10 @@ Complete the monthly health calendar where actual registered agreement days, ben
 
 Complete and confirm payroll for the month, including zero-premium months. A reviewed registered calendar without processed payroll is reported as missing work. Review excluded agreement income with nonzero payroll assessments before filing; it is not silently dropped.
 
+The completeness check also finds ordinary employees from the historical employment versions and contract dates when neither payroll nor a calendar exists. It names the employee whose payroll must be completed, including employees insured elsewhere and archived employees active in the reporting month. A future exemption does not remove an earlier obligation. Agreement and irregular-income registrations use actual reviewed 2D/2Y days; the program does not create zero wages from a contract.
+
+[Dôvera's 514 instructions](https://www.dovera.sk/najcastejsie-otazky/elektronicka-pobocka/e-pobocka-platitel/1372-davka-514-struktura-vykazu) require the employee count even when no advance is due. [VšZP's registration instructions](https://www.vszp.sk/showdoc.do?docid=147) distinguish 2D agreement registration and 2Y irregular or post-employment income.
+
 Create a statement for the insurer, select the period, applicable form edition and export format, then **Generate**. Check the employee rows and totals against payroll. Download the generated file and upload it through the insurer's electronic branch. Record **Mark Submitted** and retain the insurer's receipt with the filing.
 
 Use a new **Corrective** statement for a full replacement of an already submitted statement for the same company, insurer and period. The shared workflow preserves the original submitted attachment and its history. Reset an unsubmitted statement to draft before changing its filing inputs or format.

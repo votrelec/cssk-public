@@ -464,6 +464,166 @@ class TestHealth514(TransactionCase):
         with self.assertRaisesRegex(UserError, "Complete payroll, including zero-premium"):
             self._text_statement().action_generate()
 
+    def _unprocessed_employee(self, **values):
+        return self.env["hr.employee"].with_company(self.company).create({
+            "name": "Synthetic missing ordinary payroll", "company_id": self.company.id,
+            "date_version": "2026-01-01", "contract_date_start": "2026-01-01",
+            "identification_id": "9002022345", **values,
+        })
+
+    def test_missing_ordinary_employee_without_calendar_blocks_named(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        statement = self._text_statement()
+        for export_format in ("xml", "text514"):
+            with self.subTest(export_format=export_format), self.assertRaisesRegex(UserError, employee.name):
+                statement.copy({"export_format": export_format}).action_generate()
+
+    def test_missing_other_insurer_payroll_also_blocks_all_insurer_count(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee(l10n_sk_health_insurer_code="27")
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_hr_card_without_contract_start_does_not_invent_registration(self):
+        self._employee_payslip()
+        self._unprocessed_employee(contract_date_start=False)
+        self._text_statement().action_generate()
+
+    def test_empty_reviewed_calendar_cannot_hide_an_ordinary_contract(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        calendar = self.env["l10n.sk.health.calendar"].with_company(self.company).create({
+            "company_id": self.company.id, "employee_id": employee.id,
+            "month": "2026-03-01", "complete": True, "evidence": "Synthetic empty month review",
+        })
+        calendar.action_review()
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_reviewed_full_month_2n_excludes_ordinary_registration(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        calendar = self.env["l10n.sk.health.calendar"].with_company(self.company).create({
+            "company_id": self.company.id, "employee_id": employee.id,
+            "month": "2026-03-01", "complete": True, "evidence": "Synthetic no-income exclusion",
+            "interval_ids": [Command.create({
+                "kind": kind, "date_start": "2026-03-01", "date_end": "2026-03-31",
+            }) for kind in ("2", "2N")],
+        })
+        calendar.action_review()
+        self._text_statement().action_generate()
+
+    def test_missing_archived_employee_is_checked_in_historical_month(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee(active=False, contract_date_end="2026-03-15")
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_ended_or_future_contract_does_not_require_march_payroll(self):
+        self._employee_payslip()
+        self._unprocessed_employee(contract_date_end="2026-02-28")
+        self._unprocessed_employee(date_version="2026-04-01", contract_date_start="2026-04-01")
+        self._text_statement().action_generate()
+
+    def test_historical_ordinary_version_cannot_be_hidden_by_future_exemption(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-04-01",
+            "l10n_sk_health_exempt": True,
+            "l10n_sk_health_exempt_evidence": "Synthetic foreign coverage reference",
+        })
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_future_ordinary_version_does_not_reinterpret_historical_exemption(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee(
+            l10n_sk_health_exempt=True,
+            l10n_sk_health_exempt_evidence="Synthetic foreign coverage reference",
+        )
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-04-01",
+            "l10n_sk_health_exempt": False,
+        })
+        self._text_statement().action_generate()
+
+    def test_old_age_agreement_without_payroll_is_exempt_but_ordinary_is_not(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        employee.version_id.write({"l10n_sk_agreement_type": "dopc", "l10n_sk_pension_type": "old_age"})
+        statement = self._text_statement()
+        statement.action_generate()
+        employee.version_id.l10n_sk_agreement_type = "none"
+        with self.assertRaisesRegex(UserError, employee.name):
+            statement.copy().action_generate()
+
+    def test_agreement_without_registered_days_does_not_invent_payroll(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        employee.version_id.l10n_sk_agreement_type = "dopc"
+        self._text_statement().action_generate()
+
+    def test_actual_2d_and_post_contract_2y_require_payroll(self):
+        self._employee_payslip()
+        statement = self._text_statement()
+        for kind in ("2D", "2Y"):
+            with self.subTest(kind=kind), self.env.cr.savepoint():
+                employee = self._unprocessed_employee(**(
+                    {"contract_date_end": "2026-02-28"} if kind == "2Y" else {}
+                ))
+                employee.version_id.l10n_sk_agreement_type = "dopc"
+                calendar = self.env["l10n.sk.health.calendar"].with_company(self.company).create({
+                    "company_id": self.company.id, "employee_id": employee.id,
+                    "month": "2026-03-01", "complete": True,
+                    "evidence": "Synthetic actual registration evidence",
+                    "interval_ids": [Command.create({
+                        "kind": kind, "date_start": "2026-03-04", "date_end": "2026-03-04",
+                    })],
+                })
+                calendar.action_review()
+                with self.assertRaisesRegex(UserError, employee.name):
+                    statement.copy().action_generate()
+                # Keep the next subcase independent without changing reviewed facts.
+                employee.version_id.write({
+                    "l10n_sk_health_exempt": True,
+                    "l10n_sk_health_exempt_evidence": "Synthetic foreign coverage reference",
+                })
+
+    def test_effective_exempt_version_supersedes_older_open_contract(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-01",
+            "l10n_sk_health_exempt": True,
+            "l10n_sk_health_exempt_evidence": "Synthetic foreign coverage reference",
+        })
+        self._text_statement().action_generate()
+
+    def test_recorded_exempt_payroll_is_not_reinterpreted_by_later_hr_edits(self):
+        self._employee_payslip()
+        employee, _slip = self._employee_payslip(200, "dopc", "old_age")
+        employee.version_id.write({
+            "l10n_sk_agreement_type": "none", "l10n_sk_health_exempt": False,
+            **({"struct_id": self.structure.id} if self.engine == "oca"
+               else {"structure_type_id": self.structure.type_id.id}),
+        })
+        self._text_statement().action_generate()
+
+    def test_historical_exempt_employee_with_draft_calendar_does_not_block(self):
+        self._employee_payslip()
+        employee = self._unprocessed_employee()
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-01",
+            "l10n_sk_health_exempt": True,
+            "l10n_sk_health_exempt_evidence": "Synthetic foreign coverage reference",
+        })
+        self.env["l10n.sk.health.calendar"].with_company(self.company).create({
+            "company_id": self.company.id, "employee_id": employee.id, "month": "2026-03-01",
+        })
+        self._text_statement().action_generate()
+
     def test_additional_export_cannot_repeat_unchanged_full_payroll(self):
         self._employee_payslip()
         original = self._text_statement()

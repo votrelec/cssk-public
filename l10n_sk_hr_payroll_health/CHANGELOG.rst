@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ----------
 
+* Detect missing ordinary payroll from effective historical employment versions
+  and contract periods even without a health calendar. Name the missing employee
+  before generating either 514 format; retain actual 2D/2Y registration evidence,
+  historical exemptions and all-insurer completeness without inventing wages.
+
 * Relicensed to **AGPL-3**. Part of a repository-wide move to a single licence:
   everything Data Dance authors is AGPL-3 except the modules that depend on Odoo
   Enterprise, which OEEL forbids from carrying it. What differs between modules
