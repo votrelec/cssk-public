@@ -6,7 +6,7 @@
 
 The common retained profile may include `contract_period = {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD" | null}`. Capture these raw source-contract dates, tied to the existing profile version and payroll identity. Do not use a wage version's effective end as the contract end. A monthwide payslip on a contract ending on day 15 only covers that contract through day 15. A later wage version in the same open contract leaves full-month coverage valid. Never backfill an old profile from today's HR card.
 
-The monthly calendar also retains `employment_dates` separately from `insured_dates`: benefits may remove premium days without removing registration; actual 2Y can lie after a contract end. The health form owns its use of these facts for completeness and wire days.
+The monthly calendar also retains `employment_dates` separately from `insured_dates`: benefits may remove premium days without removing registration. Only explicit `irregular_dates` from 2Y can extend source coverage past its frozen contract end. Ordinary 2/2P and agreement 2D days elsewhere in an employee-wide calendar cannot cover another contract's missing payroll. The health form intersects insured wire days with this source coverage.
 
 ### Enterprise bridge contract
 

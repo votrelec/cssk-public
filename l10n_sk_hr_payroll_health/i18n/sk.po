@@ -310,6 +310,18 @@ msgid "Health payer number"
 msgstr "Číslo platiteľa poistného"
 
 #. module: l10n_sk_hr_payroll_health
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_health/models/health_assessments.py:0
+msgid ""
+"Historical contract coverage was not recorded for: %(slips)s. Review the "
+"original contract periods. Recorded amounts are preserved; the legacy "
+"coverage fallback uses only the payslip dates."
+msgstr ""
+"Historické pokrytie kontraktu nebolo uchované pre: %(slips)s. Skontrolujte "
+"pôvodné obdobia kontraktov. Uchované sumy zostávajú zachované; pôvodný "
+"postup pri pokrytí používa iba dátumy pásky."
+
+#. module: l10n_sk_hr_payroll_health
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_employee__id
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_hr_version__id
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_health.field_l10n_sk_health__id

@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ==========
 
+* Preserve known fund amounts when a form lacks an additional retained profile
+  fact, while keeping shared original/corrective review policy and a specific
+  warning hook. Bind legacy review to the retained profile as well as salary.
+
 Added
 ~~~~~
 

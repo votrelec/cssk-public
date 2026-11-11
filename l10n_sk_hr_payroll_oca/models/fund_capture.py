@@ -104,6 +104,10 @@ class FundCapturePayslip(models.Model):
         version = self._l10n_sk_version()
         return {
             "version": version.id,
+            "contract_period": {
+                "start": str(version.contract_date_start) if version.contract_date_start else None,
+                "end": str(version.contract_date_end) if version.contract_date_end else None,
+            },
             "agreement": version.l10n_sk_employment_form(),
             "pension": version.l10n_sk_pension_status(),
             "regular": version.l10n_sk_income_is_regular(),

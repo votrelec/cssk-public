@@ -108,5 +108,6 @@ def month_context(intervals, month):
         "strike_dates": sorted(value.isoformat() for value in days["2S"]),
         "insured_dates": sorted(value.isoformat() for value in insured),
         "employment_dates": sorted(value.isoformat() for value in employed),
+        "irregular_dates": sorted(value.isoformat() for value in days["2Y"] - days["2N"]),
         "minimum_dates": sorted(value.isoformat() for value in minimum),
     }

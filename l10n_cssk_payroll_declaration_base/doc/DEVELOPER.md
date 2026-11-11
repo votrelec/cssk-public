@@ -1,5 +1,7 @@
 # Recorded insurance bases
 
+A form may return valid monetary records together with a payslip in the missing-evidence recordset when an additional required historical profile fact is absent. The shared collector preserves those known amounts, applies the same original/corrective review policy, and calls `_missing_fund_evidence_warning(missing)` for a specific explanation. Missing fund amounts still retain their established legacy fallback. Legacy confirmation digests include the bridge-returned retained profile as well as source identity, salary and native scalar facts; replacing reviewed evidence invalidates consent. Engines without the optional reader keep the existing workflow.
+
 The optional engine adapter is `_cssk_recorded_fund_bases`. An absent/noncallable
 hook means the engine has no recorder and keeps its existing filing workflow.
 An implemented hook returning False means that a particular supported payslip

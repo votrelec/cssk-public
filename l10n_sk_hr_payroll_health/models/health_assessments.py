@@ -66,6 +66,21 @@ class HealthAssessments(models.Model):
             return False
         try:
             month = date.fromisoformat(calendar["month_start"]).replace(day=1)
+            if "employment_dates" in calendar:
+                employed = calendar["employment_dates"]
+                count = calendar.get("employment_days")
+                if (not isinstance(employed, list) or any(not isinstance(day, str) for day in employed)
+                        or type(count) is not int or len(set(employed)) != count
+                        or not set(dates).issubset(employed)):
+                    return False
+                dates = dates + employed
+            if "irregular_dates" in calendar:
+                irregular = calendar["irregular_dates"]
+                if (not isinstance(irregular, list) or any(not isinstance(day, str) for day in irregular)
+                        or len(set(irregular)) != len(irregular)
+                        or not set(irregular).issubset(calendar.get("employment_dates", []))):
+                    return False
+                dates = dates + irregular
             return all(date.fromisoformat(day).replace(day=1) == month for day in dates)
         except (ValueError, TypeError):
             return False
@@ -77,14 +92,75 @@ class HealthAssessments(models.Model):
             if records[slip.id] and not self._complete_health_profile(profiles[slip.id]):
                 records[slip.id] = False
                 missing |= slip
+            elif records[slip.id] and not self._health_recorded_contract_period(profiles[slip.id]):
+                # Coverage is a required source fact, but its absence must not
+                # discard valid historical monetary assessments or profiles.
+                missing |= slip
         return records, missing
 
-    def _health_employment_dates(self, employee):
-        return {
-            (start + timedelta(days=offset)).isoformat()
-            for start, end in self._employee_contract_intervals(employee, self.date_from, self.date_to)
-            for offset in range((end - start).days + 1)
-        }
+    @staticmethod
+    def _health_recorded_contract_period(profile):
+        period = profile.get("contract_period") if isinstance(profile, dict) else None
+        if not isinstance(period, dict) or set(period) != {"start", "end"}:
+            return None
+        try:
+            start = date.fromisoformat(period["start"])
+            end = date.fromisoformat(period["end"]) if period["end"] is not None else None
+        except (ValueError, TypeError):
+            return None
+        if start.isoformat() != period["start"] or (end and end.isoformat() != period["end"]):
+            return None
+        return (start, end) if not end or start <= end else None
+
+    def _missing_fund_evidence_warning(self, missing):
+        profiles = self._payslip_fund_profiles(missing)
+        records, _without_evidence = self._payslip_fund_records(missing)
+        coverage = missing.filtered(
+            lambda slip: records[slip.id] and self._complete_health_profile(profiles[slip.id])
+            and not self._health_recorded_contract_period(profiles[slip.id])
+        )
+        if not coverage:
+            return super()._missing_fund_evidence_warning(missing)
+        warning = _(
+            "Historical contract coverage was not recorded for: %(slips)s. "
+            "Review the original contract periods. Recorded amounts are preserved; "
+            "the legacy coverage fallback uses only the payslip dates.",
+            slips=", ".join(coverage.mapped("display_name")),
+        )
+        other = missing - coverage
+        return warning + "\n" + super()._missing_fund_evidence_warning(other) if other else warning
+
+    def _health_source_coverage_dates(self, slip, profile):
+        """Use the frozen source contract, not a later HR version's interval."""
+        start, end = max(self.date_from, slip.date_from), min(self.date_to, slip.date_to)
+        period = profile.get("contract_period")
+        if period:
+            start = max(start, period[0])
+            end = min(end, period[1] or self.date_to)
+        dates = {start + timedelta(days=offset) for offset in range((end - start).days + 1)}
+        # Only an explicit 2Y source can extend coverage past this contract.
+        # The employee calendar can also describe another ordinary contract;
+        # its 2/2P or 2D days must never cover that contract's missing payroll.
+        calendar = profile.get("calendar")
+        if period and calendar:
+            dates.update(
+                date.fromisoformat(day) for day in calendar.get("irregular_dates", [])
+                if max(self.date_from, slip.date_from) <= date.fromisoformat(day)
+                <= min(self.date_to, slip.date_to)
+            )
+        return dates
+
+    def _health_source_insured_dates(self, slips, profiles):
+        dates = set()
+        for slip in slips:
+            profile = profiles[slip.id]
+            if profile.get("calendar"):
+                covered = self._health_source_coverage_dates(slip, profile)
+                dates.update(date.fromisoformat(day).isoformat() for day in profile["calendar"]["insured_dates"]
+                             if date.fromisoformat(day) in covered)
+            else:
+                dates.update(day.isoformat() for day in self._health_source_coverage_dates(slip, profile))
+        return dates
 
     def _health_registered_counts(self):
         """Count people across insurers; a reviewed zero month still needs payroll."""
@@ -96,9 +172,8 @@ class HealthAssessments(models.Model):
         people, selected, covered = set(), set(), {}
         for slip in slips:
             health = profiles[slip.id]
-            start, end = max(self.date_from, slip.date_from), min(self.date_to, slip.date_to)
             covered.setdefault(slip.employee_id.id, set()).update(
-                start + timedelta(days=offset) for offset in range((end - start).days + 1)
+                self._health_source_coverage_dates(slip, health)
             )
             if health.get("exempt"):
                 continue
@@ -198,6 +273,7 @@ class HealthAssessments(models.Model):
                 health, precise_profile=precise,
                 employment_form=recorded["agreement"] if precise else False,
                 regular=recorded["regular"] if precise else True,
+                contract_period=self._health_recorded_contract_period(recorded),
             )
         return result
 
@@ -271,12 +347,10 @@ class HealthAssessments(models.Model):
                 # legacy policy. Preserve the existing report fallback.
                 continue
             parts = []
-            dates = set()
+            dates = self._health_source_insured_dates(slips, profiles)
             for slip in slips:
                 health = profiles[slip.id]
                 calendar = health.get("calendar")
-                if calendar:
-                    dates.update(calendar["insured_dates"])
                 direction_hook = getattr(slip, "_cssk_fund_record_direction", None)
                 direction = direction_hook() if callable(direction_hook) else 1
                 try:
@@ -302,8 +376,6 @@ class HealthAssessments(models.Model):
                     "Review the inconsistent monthly health profile across payroll sources for '%(name)s'.",
                     name=employee.display_name,
                 )) from exc
-            if not all(profiles[slip.id].get("calendar") for slip in slips):
-                dates = self._health_employment_dates(employee)
             first["days"] = len(dates)
             first["_insured_dates"] = dates
             rows[employee.id] = first
@@ -334,7 +406,7 @@ class HealthAssessments(models.Model):
                 # rate fallback; mix known precise rows without losing them.
                 row = {
                     "disabled": bool(profile.get("disabled")),
-                    "days": line.insured_days,
+                    "days": len(self._health_source_insured_dates(bucket["payslips"], data["health514_profiles"])),
                     "rate_employer": Decimal(rendered["tarifa_zamtel"]),
                     "rate_employee": Decimal(rendered["tarifa_zamnec"]),
                     "income": Decimal(rendered["prijem"]),
@@ -348,7 +420,7 @@ class HealthAssessments(models.Model):
                     "op": Decimal(0), "exempt_income": Decimal(0), "shorttime_base": None,
                     "minimum_opt_out": 0,
                     "premium_assessed": bool(line.vz_base),
-                    "_insured_dates": self._health_employment_dates(line.employee_id),
+                    "_insured_dates": self._health_source_insured_dates(bucket["payslips"], data["health514_profiles"]),
                 }
                 row["total"] = row["employee"] + row["employer"] + row["topup"]
             complete_rows.append(dict(row, birth_number=rendered["rc"]))

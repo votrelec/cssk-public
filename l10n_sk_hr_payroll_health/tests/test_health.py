@@ -8,6 +8,7 @@ the test asserts well-formedness + structural conformance (the three blocks,
 NumberOfRecords = PersonData count, insurer code) and that the per-employee
 health advances match the payslip. It also asserts the shipped XSD compiles."""
 import base64
+import json
 from copy import deepcopy
 import unittest
 from datetime import date
@@ -95,7 +96,8 @@ class TestHealth514(TransactionCase):
         return None
 
     def _employee_payslip(self, wage=2000.0, agreement="none", pension=False,
-                         version_values=None, health_intervals=None, period_end=date(2026, 3, 31)):
+                         version_values=None, health_intervals=None, period_end=date(2026, 3, 31),
+                         explicit_contract=False, additional_version_values=None):
         structure = self.structure
         if agreement != "none":
             module = "l10n_sk_hr_payroll_oca" if self.engine == "oca" else "l10n_sk_hr_payroll"
@@ -120,6 +122,9 @@ class TestHealth514(TransactionCase):
                                        "l10n_sk_health_exempt": agreement != "none"})
         if version_values:
             employee.version_id.write(version_values)
+        source_version = employee.version_id
+        if additional_version_values:
+            source_version.copy({"employee_id": employee.id, **additional_version_values})
         if health_intervals is not None:
             reviewed = self.env["l10n.sk.health.calendar"].with_company(self.company).create({
                 "company_id": self.company.id, "employee_id": employee.id,
@@ -137,6 +142,7 @@ class TestHealth514(TransactionCase):
             "company_id": self.company.id,
             "date_from": date(2026, 3, 1),
             "date_to": period_end,
+            **({"contract_id": source_version.id} if explicit_contract else {}),
         })
         if self.engine == "ee":
             slip = slip.with_context(salary_simulation=True)
@@ -490,6 +496,128 @@ class TestHealth514(TransactionCase):
         with self.assertRaisesRegex(UserError, employee.name):
             self._text_statement().action_generate()
 
+    def test_monthwide_slip_on_ended_contract_cannot_cover_a_new_contract(self):
+        employee, _slip = self._employee_payslip(version_values={"contract_date_end": "2026-03-15"})
+        employee.version_id.copy({
+            "employee_id": employee.id, "date_version": "2026-03-16",
+            "contract_date_start": "2026-03-16", "contract_date_end": False,
+        })
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_employee_calendar_cannot_cover_a_second_unprocessed_contract(self):
+        if self.engine != "oca":
+            self.skipTest("Explicit OCA source contract; Enterprise adapter is maintained separately")
+        employee, _slip = self._employee_payslip(
+            version_values={"contract_date_end": "2026-03-15"}, explicit_contract=True,
+            additional_version_values={
+                "date_version": "2026-03-16", "contract_date_start": "2026-03-16",
+                "contract_date_end": False,
+            },
+            health_intervals=[("2", "2026-03-01", "2026-03-31")],
+        )
+        with self.assertRaisesRegex(UserError, employee.name):
+            self._text_statement().action_generate()
+
+    def test_contract_period_is_frozen_and_monthwide_ended_source_has_fifteen_days(self):
+        employee, slip = self._employee_payslip(version_values={"contract_date_end": "2026-03-15"})
+        profile = deepcopy(slip._cssk_recorded_fund_profile())
+        self.assertEqual(profile["contract_period"], {"start": "2026-01-01", "end": "2026-03-15"})
+        root = self._generated_tree(self._new_health_statement())
+        self.assertEqual(root.findtext("PersonData/NumberOfDays"), "15")
+        employee.version_id.contract_date_end = "2026-03-20"
+        self.assertEqual(slip._cssk_recorded_fund_profile(), profile)
+
+    def test_post_contract_2y_is_covered_by_actual_frozen_registration(self):
+        if self.engine != "oca":
+            self.skipTest("Explicit OCA contract binding; Enterprise maintainer mirrors the adapter")
+        _employee, slip = self._employee_payslip(
+            200, "dopc", version_values={"contract_date_end": "2026-03-15"},
+            health_intervals=[("2Y", "2026-03-31", "2026-03-31")], explicit_contract=True,
+        )
+        self.assertEqual(slip._cssk_recorded_fund_profile()["health"]["calendar"]["irregular_dates"], ["2026-03-31"])
+        statement = self._new_health_statement()
+        root = self._generated_tree(statement)
+        self.assertFalse(statement.fund_bases_warning)
+        self.assertEqual(root.findtext("PersonData/NumberOfDays"), "1")
+        self.assertEqual(root.findtext("PersonData/TotalReceiptOfOther"), "200.00")
+
+    def test_full_month_benefit_keeps_registration_with_zero_premium_days(self):
+        _employee, slip = self._employee_payslip(
+            0, health_intervals=[(kind, "2026-03-01", "2026-03-31") for kind in ("2", "benefit")],
+        )
+        profile = slip._cssk_recorded_fund_profile()["health"]["calendar"]
+        self.assertEqual((len(profile["employment_dates"]), profile["insured_days"]), (31, 0))
+        statement = self._new_health_statement()
+        self.assertEqual(self._generated_tree(statement).findtext("PersonData/NumberOfDays"), "0")
+        self.assertEqual(statement._health_registered_counts(), (1, 1))
+
+    def test_full_month_2n_remains_a_valid_zero_income_source(self):
+        _employee, slip = self._employee_payslip(
+            0, health_intervals=[("2N", "2026-03-01", "2026-03-31")],
+        )
+        profile = slip._cssk_recorded_fund_profile()["health"]["calendar"]
+        self.assertEqual((profile["employment_dates"], profile["insured_days"]), ([], 0))
+        self.assertEqual(slip.state, "done")
+
+    def test_later_empty_calendar_does_not_reinterpret_a_retained_valid_profile(self):
+        employee, slip = self._employee_payslip(
+            health_intervals=[("2", "2026-03-01", "2026-03-31")],
+        )
+        original = self._new_health_statement()
+        original.action_generate()
+        original.action_submit()
+        filed, profile = original.submitted_attachment_id.datas, deepcopy(slip._cssk_recorded_fund_profile())
+        calendar = self.env["l10n.sk.health.calendar"].search([("employee_id", "=", employee.id)])
+        revision = self.env["l10n.sk.health.calendar"].browse(calendar.action_create_revision()["res_id"])
+        revision.interval_ids.unlink()
+        revision.write({"complete": True, "evidence": "Synthetic later review, not a payroll rewrite"})
+        revision.action_review()
+        with self.assertRaisesRegex(UserError, employee.name):
+            slip._l10n_sk_fund_profile()
+        self.assertEqual(slip._cssk_recorded_fund_profile(), profile)
+        original.copy({"state": "draft", "correction_type": "corrective"}).action_generate()
+        self.assertEqual(original.submitted_attachment_id.datas, filed)
+
+    def test_real_legacy_profile_without_contract_period_keeps_amounts_and_review_audit(self):
+        _employee, slip = self._employee_payslip()
+        evidence = deepcopy(slip.l10n_sk_fund_assessment)
+        evidence["profile"].pop("contract_period")
+        self.env.cr.execute(
+            "UPDATE hr_payslip SET l10n_sk_fund_assessment = %s::jsonb WHERE id = %s",
+            [json.dumps(evidence), slip.id],
+        )
+        slip.invalidate_recordset(["l10n_sk_fund_assessment"])
+        original = self._new_health_statement()
+        records, missing = original._payslip_fund_records(slip)
+        self.assertTrue(records[slip.id])
+        self.assertEqual(missing, slip)
+        original.action_generate()
+        self.assertIn(slip.display_name, original.fund_bases_warning)
+        self.assertIn("contract coverage", original.fund_bases_warning)
+        original.action_submit()
+        filed = original.submitted_attachment_id.datas
+        correction = original.copy({"state": "draft", "correction_type": "corrective"})
+        with self.assertRaisesRegex(UserError, "Precise recorded fund bases"):
+            correction.action_generate()
+        correction.fund_bases_fallback_reason = "Synthetic review of retained contract and payroll dates"
+        correction.action_confirm_legacy_fund_bases()
+        digest, moment = correction.fund_bases_confirmation_digest, correction.fund_bases_confirmed_at
+        correction.action_confirm_legacy_fund_bases()
+        self.assertEqual((correction.fund_bases_confirmation_digest, correction.fund_bases_confirmed_at), (digest, moment))
+        self.assertEqual(correction.fund_bases_confirmed_by, self.env.user)
+        correction.action_generate()
+        correction.action_reset_to_draft()
+        evidence["profile"]["contract_period"] = {"start": "invalid", "end": None}
+        self.env.cr.execute(
+            "UPDATE hr_payslip SET l10n_sk_fund_assessment = %s::jsonb WHERE id = %s",
+            [json.dumps(evidence), slip.id],
+        )
+        slip.invalidate_recordset(["l10n_sk_fund_assessment"])
+        with self.assertRaisesRegex(UserError, "Precise recorded fund bases"):
+            correction.action_generate()
+        self.assertEqual(original.submitted_attachment_id.datas, filed)
+
     def test_partial_payroll_covers_an_ended_contract(self):
         self._employee_payslip(
             period_end=date(2026, 3, 15), version_values={"contract_date_end": "2026-03-15"},
@@ -558,6 +686,10 @@ class TestHealth514(TransactionCase):
         calendar.action_review()
         with self.assertRaisesRegex(UserError, employee.name):
             self._text_statement().action_generate()
+
+    def test_empty_reviewed_calendar_blocks_new_ordinary_payroll_by_name(self):
+        with self.assertRaisesRegex(UserError, "Jozko Mrkvicka"):
+            self._employee_payslip(health_intervals=[])
 
     def test_reviewed_full_month_2n_excludes_ordinary_registration(self):
         self._employee_payslip()
