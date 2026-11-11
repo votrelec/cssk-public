@@ -8,6 +8,11 @@ Unreleased
 Added
 ~~~~~
 
+* Keep HR-event declarations on the shared generation/archive workflow through
+  source-data, private workflow-write, attachment-metadata and generated-message
+  hooks. Existing payslip-based declarations retain their default behavior;
+  ``doc/DEVELOPER.md`` documents the extension and cooperative access contracts.
+
 - ``SEPARATE_TAX_BASE`` in the Czech rule-code map: ``PAR6BASE`` on both
   engines, the separate tax base of § 6 odst. 4 ZDP from 2027.
 

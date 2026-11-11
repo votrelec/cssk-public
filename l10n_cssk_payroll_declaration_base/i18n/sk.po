@@ -185,16 +185,7 @@ msgstr "Zobrazovaný názov"
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__cssk_payroll_declaration_mixin__state__draft
 #: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__cssk_payroll_employee_declaration__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_eldp__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_hoz__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_onz__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pppz__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pvpoj__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_vyuctovani__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_eldp__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_mvp__state__draft
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_vpp__state__draft
+#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health_registration__state__draft
 msgid "Draft"
 msgstr "Koncept"
 
@@ -231,8 +222,8 @@ msgstr ""
 
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_cssk_payroll_declaration_mixin__submitted_attachment_id
-msgid "Filed XML"
-msgstr "Podané XML"
+msgid "Filed file"
+msgstr "Podaný súbor"
 
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_cssk_payroll_declaration_mixin__filed_history_ids
@@ -248,18 +239,14 @@ msgstr "Pred označením hlásenia ako odoslané najprv vygenerujte XML."
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__cssk_payroll_declaration_mixin__state__generated
 #: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__cssk_payroll_employee_declaration__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_eldp__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_hoz__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_onz__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pppz__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pvpoj__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_vyuctovani__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_eldp__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_mvp__state__generated
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_vpp__state__generated
+#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health_registration__state__generated
 msgid "Generated"
 msgstr "Vygenerované"
+
+#. module: l10n_cssk_payroll_declaration_base
+#: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_cssk_payroll_declaration_mixin__xml_attachment_id
+msgid "Generated file"
+msgstr "Vygenerovaný súbor"
 
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields,help:l10n_cssk_payroll_declaration_base.field_cssk_payroll_employee_declaration__worked_hours
@@ -545,16 +532,7 @@ msgstr "Podania"
 
 #. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__cssk_payroll_declaration_mixin__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_eldp__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_hoz__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_onz__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pppz__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_pvpoj__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_cz_vyuctovani__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_eldp__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_mvp__state__submitted
-#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_vpp__state__submitted
+#: model:ir.model.fields.selection,name:l10n_cssk_payroll_declaration_base.selection__l10n_sk_health_registration__state__submitted
 msgid "Submitted"
 msgstr "Odoslané"
 
@@ -704,11 +682,6 @@ msgid "XSD path relative to xml_schema_module, e.g. 'data/PVPOJ25.xsd'."
 msgstr "Cesta k XSD relatívna k xml_schema_module, napr. 'data/PVPOJ25.xsd'."
 
 #. module: l10n_cssk_payroll_declaration_base
-#: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_cssk_payroll_declaration_mixin__xml_attachment_id
-msgid "Xml Attachment"
-msgstr "Príloha XML"
-
-#. module: l10n_cssk_payroll_declaration_base
 #: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_cssk_payroll_declaration_version__xml_root_element
 msgid "Xml Root Element"
 msgstr "Koreňový element XML"
@@ -748,19 +721,3 @@ msgstr "ČSSZ (sociálne zabezpečenie)"
 #: model:ir.model.fields,field_description:l10n_cssk_payroll_declaration_base.field_res_company__l10n_cz_ossz_vs
 msgid "ČSSZ variable symbol (VS)"
 msgstr "Variabilný symbol ČSSZ (VS)"
-
-#. module: l10n_cssk_payroll_declaration_base
-#: model:ir.module.module,shortdesc:base.module_l10n_cssk_payroll_declaration_base
-msgid "CZ/SK Payroll e-Reporting — Declaration Base"
-msgstr "CZ/SK mzdové e-podania — základ hlásení"
-
-#. module: l10n_cssk_payroll_declaration_base
-#: model:ir.module.module,summary:base.module_l10n_cssk_payroll_declaration_base
-msgid ""
-"Engine-neutral base for Czech/Slovak payroll authority e-submissions: XSD-"
-"validated XML export, a submission state machine and an hr.payslip adapter "
-"that works on both the payroll and the hr_payroll engines."
-msgstr ""
-"Základ nezávislý od mzdového enginu pre české/slovenské elektronické podania"
-" mzdovým inštitúciám: export XML validovaný voči XSD, stavový automat "
-"podania a adaptér hr.payslip fungujúci na engine payroll aj hr_payroll."
