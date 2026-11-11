@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll (OCA)
 summary: The Slovak monthly payslip for the OCA payroll app on Odoo Community — a complete salary structure for a pracovný pomer and the three dohody.
-verified: 19.0.1.28.0
+verified: 19.0.1.30.0
 family: l10n_sk_hr_payroll_base#engines
 ---
 
@@ -164,3 +164,7 @@ declaration; review those separately.
 A customised salary rule without optional recorded fund information can still
 be calculated and confirmed. The declaration's existing missing-record warning
 and correction review remain applicable.
+
+## Meal allowance from December 2026
+
+[Notice 255/2026 Z. z.](https://employment.gov.sk/showdoc.do?docid=60223) raises the 5–12 hour domestic meal allowance to EUR 9.80 from 1 December 2026. The dated payroll parameter also applies in January 2027 until a later rate takes effect. With 20 meal days and the default 55% contribution, payroll records EUR 107.80 employer contribution; a minimum 75% voucher leaves EUR 39.20 employee share. November 2026 still uses EUR 9.30 and EUR 102.40 employer contribution. Explicit contractual contributions retain their existing priority. Travel rates are supplied by the travel module separately.
