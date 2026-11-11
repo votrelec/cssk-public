@@ -400,6 +400,18 @@ msgid "DoVP — agreement to perform work"
 msgstr "DoVP — dohoda o vykonaní práce"
 
 #. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_ztp
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_ztp
+msgid ""
+"Documented disability or severe disability under section 12(2). Recognised "
+"invalidity-pension profiles also imply the reduced health rate without this "
+"additional checkbox."
+msgstr ""
+"Preukázané zdravotné postihnutie alebo ŤZP podľa §12(2). Uznaný invalidný "
+"dôchodkový profil tiež zakladá nárok na zníženú zdravotnú sadzbu bez tohto "
+"ďalšieho checkboxu."
+
+#. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__l10n_sk_tax_reconciliation__state__draft
 msgid "Draft"
 msgstr "Návrh"
@@ -611,12 +623,6 @@ msgid "Health Insurance Minimum Top-up"
 msgstr "Doplatok do minimálneho zdravotného poistenia"
 
 #. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
-#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
-msgid "Health-insurance exempt (štátny poistenec)"
-msgstr "Oslobodený od zdravotného poistenia (štátny poistenec)"
-
-#. module: l10n_sk_hr_payroll_oca
 #: model:hr.leave.type,name:l10n_sk_hr_payroll_oca.l10n_sk_leave_type_dovolenka
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__hr_leave_type__l10n_sk_payroll_code__dovolenka
 msgid "Holiday"
@@ -667,6 +673,12 @@ msgstr "Základ dane z príjmu"
 #: model:hr.salary.rule.category,name:l10n_sk_hr_payroll_oca.hr_payroll_income_tax_employee_total
 msgid "Income Tax Total"
 msgstr "Daň z príjmu spolu"
+
+#. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
+msgid "Individually reviewed health exemption"
+msgstr "Individuálne overené vyňatie zo zdravotných odvodov"
 
 #. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_l10n_sk_tax_reconciliation__asignacia_note
@@ -989,16 +1001,6 @@ msgstr "Dôchodok k 1. januáru (ročne)"
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_pension_type
 msgid "Pension granted (SK)"
 msgstr "Priznaný dôchodok (SK)"
-
-#. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_ztp
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_ztp
-msgid ""
-"Person with a health disability (>=50% functional impairment). Applies the "
-"halved health-insurance rate (2%/2.5% employee)."
-msgstr ""
-"Osoba so zdravotným postihnutím (pokles schopnosti o ≥ 50 %). Uplatňuje sa "
-"polovičná sadzba zdravotného poistenia (2 %/2,5 % zamestnanec)."
 
 #. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_l10n_sk_tax_reconciliation__result_amount
@@ -1758,22 +1760,6 @@ msgstr ""
 "zozname nie sú."
 
 #. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
-msgid ""
-"The worker is a state insuree (poistenec štátu) — typically a student on a "
-"DoBPŠ agreement or a working pensioner — so the agreement income carries no "
-"health insurance (employee, employer, or minimum-base top-up), per z. "
-"580/2004. Independent of the pension OOP: a student is health-exempt even in"
-" a month where the OOP is not claimed."
-msgstr ""
-"Pracovník je poistencom štátu — typicky študent na DoBPŠ alebo pracujúci "
-"dôchodca — takže z príjmu z dohody sa neplatí zdravotné poistenie "
-"(zamestnanec, zamestnávateľ ani doplatok do minimálneho základu), podľa z. "
-"580/2004. Nezávisle od dôchodkovej OOP: študent je oslobodený od zdravotného"
-" poistenia aj v mesiaci, v ktorom si OOP neuplatňuje."
-
-#. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_guarantee_exempt
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_guarantee_exempt
 msgid ""
@@ -1838,6 +1824,20 @@ msgstr "Neplatené voľno"
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__hr_leave_type__l10n_sk_payroll_code__neplatene
 msgid "Unpaid leave"
 msgstr "Neplatené voľno"
+
+#. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
+msgid ""
+"Use only for a separately reviewed legal basis, such as applicable foreign "
+"insurance, and retain its reference. State-insured status alone does not "
+"exclude ordinary employment income. Statutory student and pension agreement "
+"exclusions are derived automatically from the profile."
+msgstr ""
+"Použite iba pre osobitne overený právny dôvod, napríklad príslušné "
+"zahraničné poistenie, a uchovajte odkaz na podklad. Samotný status poistenca"
+" štátu nevyjme príjem z bežného pracovného pomeru. Zákonné vyňatie "
+"študentských a dôchodcovských dohôd sa odvodzuje automaticky z profilu."
 
 #. module: l10n_sk_hr_payroll_oca
 #. odoo-python

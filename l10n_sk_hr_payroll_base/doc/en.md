@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll
 summary: The Slovak payroll family in one place — the monthly payslip for a pracovný pomer and the three dohody on either Odoo Enterprise Payroll or the OCA payroll app, with dated statutory rates, leave, the annual tax reconciliation and posting to the general ledger.
-verified: 19.0.1.3.0
+verified: 19.0.1.3.1
 ---
 
 ## What it is for {#purpose}
@@ -430,3 +430,30 @@ payroll you can review the archived payroll, enter a reason and explicitly
 confirm the previous calculation on the correction. The form records who
 confirmed it and when. Do not recalculate filed payroll just to create records.
 Systems that do not yet keep these records continue their existing workflow.
+
+## Health income exclusions {#health-exclusions}
+
+DoBPS student-agreement income and statutory pensioner DoVP/DoPC receipts are
+excluded under section 10b(1)(a) of Act 580/2004. The supported pension profile
+`service_at_age` includes the reviewed retirement-age condition; it does not
+mean every service pension at any age. An ordinary employment pensioner still
+pays employee and employer health premiums, with separate state-insuree relief
+from the minimum top-up under sections 11(7)(b) and 16a(2).
+
+Select an individual exemption only for another reviewed legal basis, such as
+applicable foreign coverage, and retain its basis/reference on the dated
+employment version. A state-insuree label alone cannot exempt ordinary
+employment income. Existing manual flags are not automatically invented as
+foreign-coverage evidence. New calculations need that review; posted history
+must be handled through the separate correction workflow.
+
+Recognised invalidity under section 12(2), footnote 48 (Acts 461/2003 and
+328/2002), also establishes the reduced health rate without a second ZTP-card
+checkbox. The dated invalidity profile remains distinct from ordinary old-age
+or service-at-retirement-age pensions. The calculation does not overwrite the
+manual disability field.
+
+The shared base supplies these eligibility decisions to both engines. The
+OCA rules apply them without changing OP rounding, premium rates, social OOP
+or calendar proration. Other day exceptions and output formats remain separate
+contributions. [Act 580/2004 sections 10b, 11 and 16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html).

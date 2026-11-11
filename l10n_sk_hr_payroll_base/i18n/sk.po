@@ -34,6 +34,12 @@ msgid "ID"
 msgstr "ID"
 
 #. module: l10n_sk_hr_payroll_base
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_base.field_hr_employee__l10n_sk_health_exempt_evidence
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_base.field_hr_version__l10n_sk_health_exempt_evidence
+msgid "Individual health exemption basis and reference"
+msgstr "Právny dôvod a podklad individuálneho vyňatia zo zdravotných odvodov"
+
+#. module: l10n_sk_hr_payroll_base
 #. odoo-python
 #: code:addons/l10n_sk_hr_payroll_base/models/payslip_fund_mixin.py:0
 msgid "Recalculate the unconfirmed payslip to record its payroll fund bases."
@@ -45,6 +51,28 @@ msgstr ""
 #: model:ir.model,name:l10n_sk_hr_payroll_base.model_l10n_sk_payslip_fund_mixin
 msgid "Recorded payroll fund evidence"
 msgstr "Zaznamenané podklady mzdových fondov"
+
+#. module: l10n_sk_hr_payroll_base
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_base/models/health_exemption_profile.py:0
+msgid ""
+"Retain the individual legal basis for excluding health premiums. State-"
+"insured status alone does not exclude ordinary employment income."
+msgstr ""
+"Zaevidujte individuálny právny dôvod vyňatia zo zdravotných odvodov. Samotný"
+" status poistenca štátu nevyjme príjem z bežného pracovného pomeru."
+
+#. module: l10n_sk_hr_payroll_base
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_base.field_hr_employee__l10n_sk_health_exempt_evidence
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_base.field_hr_version__l10n_sk_health_exempt_evidence
+msgid ""
+"Retain the individually reviewed legal basis, such as applicable foreign "
+"coverage. State-insured status alone does not exclude ordinary employment "
+"income."
+msgstr ""
+"Uchovajte individuálne overený právny dôvod, napríklad príslušné zahraničné "
+"poistenie. Samotný status poistenca štátu nevyjme príjem z bežného "
+"pracovného pomeru."
 
 #. module: l10n_sk_hr_payroll_base
 #. odoo-python

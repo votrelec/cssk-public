@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll (OCA)
 summary: The Slovak monthly payslip for the OCA payroll app on Odoo Community — a complete salary structure for a pracovný pomer and the three dohody.
-verified: 19.0.1.25.0
+verified: 19.0.1.25.1
 family: l10n_sk_hr_payroll_base#engines
 ---
 
@@ -103,3 +103,12 @@ precise records are unavailable, enter the reviewed reason on the correction
 and use **Confirm original gross-based calculation**. The confirmation and its
 author appear in the chatter. Changing the reviewed sources requires another
 confirmation; the originally filed copy stays available.
+
+## Health income exclusions {#health-exclusions}
+
+The employee, employer and minimum rules now use the shared dated eligibility
+profile. Supported student/pension agreements need no extra exemption checkbox.
+An ordinary employment pensioner keeps both premiums and has no state-insuree
+minimum top-up. For a separately reviewed individual exclusion, select the
+manual option and retain its legal basis/reference on the employment version.
+See the [shared health policy](../../l10n_sk_hr_payroll_base/doc/en.md#health-exclusions).

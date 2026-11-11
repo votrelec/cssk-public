@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.0-20261102\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 14:40+0000\n"
-"PO-Revision-Date: 2026-11-11 14:40+0000\n"
+"POT-Creation-Date: 2026-11-11 17:03+0000\n"
+"PO-Revision-Date: 2026-11-11 17:03+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -376,6 +376,15 @@ msgid "DoVP — agreement to perform work"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_ztp
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_ztp
+msgid ""
+"Documented disability or severe disability under section 12(2). Recognised "
+"invalidity-pension profiles also imply the reduced health rate without this "
+"additional checkbox."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__l10n_sk_tax_reconciliation__state__draft
 msgid "Draft"
 msgstr ""
@@ -569,12 +578,6 @@ msgid "Health Insurance Minimum Top-up"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
-#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
-msgid "Health-insurance exempt (štátny poistenec)"
-msgstr ""
-
-#. module: l10n_sk_hr_payroll_oca
 #: model:hr.leave.type,name:l10n_sk_hr_payroll_oca.l10n_sk_leave_type_dovolenka
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__hr_leave_type__l10n_sk_payroll_code__dovolenka
 msgid "Holiday"
@@ -624,6 +627,12 @@ msgstr ""
 #: model:hr.salary.rule,name:l10n_sk_hr_payroll_oca.l10n_sk_income_tax_total
 #: model:hr.salary.rule.category,name:l10n_sk_hr_payroll_oca.hr_payroll_income_tax_employee_total
 msgid "Income Tax Total"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
+msgid "Individually reviewed health exemption"
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca
@@ -923,14 +932,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_pension_type
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_pension_type
 msgid "Pension granted (SK)"
-msgstr ""
-
-#. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_ztp
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_ztp
-msgid ""
-"Person with a health disability (>=50% functional impairment). Applies the "
-"halved health-insurance rate (2%/2.5% employee)."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca
@@ -1624,17 +1625,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
-#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
-msgid ""
-"The worker is a state insuree (poistenec štátu) — typically a student on a "
-"DoBPŠ agreement or a working pensioner — so the agreement income carries no "
-"health insurance (employee, employer, or minimum-base top-up), per z. "
-"580/2004. Independent of the pension OOP: a student is health-exempt even in"
-" a month where the OOP is not claimed."
-msgstr ""
-
-#. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_guarantee_exempt
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_guarantee_exempt
 msgid ""
@@ -1691,6 +1681,16 @@ msgstr ""
 #. module: l10n_sk_hr_payroll_oca
 #: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_oca.selection__hr_leave_type__l10n_sk_payroll_code__neplatene
 msgid "Unpaid leave"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_oca
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_employee__l10n_sk_health_exempt
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_oca.field_hr_version__l10n_sk_health_exempt
+msgid ""
+"Use only for a separately reviewed legal basis, such as applicable foreign "
+"insurance, and retain its reference. State-insured status alone does not "
+"exclude ordinary employment income. Statutory student and pension agreement "
+"exclusions are derived automatically from the profile."
 msgstr ""
 
 #. module: l10n_sk_hr_payroll_oca

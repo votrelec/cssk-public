@@ -170,12 +170,18 @@ class TestRecordedFundPayroll(TransactionCase):
                     self._compare_original_formulas(wage=wage).l10n_sk_fund_assessment
                 )
 
-    def test_every_native_formula_ast_is_unchanged_before_record_emission(self):
+    def test_unaffected_native_formulas_keep_their_original_arithmetic(self):
         native = json.loads(
             (Path(__file__).parent / "data/native_fund_rules.json").read_text()
         )
-        rules = self.structure.rule_ids.filtered(lambda rule: rule.code in native)
-        self.assertEqual(len(rules), 15)
+        # This disclosed FIX changes health eligibility, not the other twelve
+        # frozen formulas. The original JSON stays unchanged; independent
+        # statutory profile tests cover the three deliberately changed rules.
+        changed = {"HEALTH", "HEALTHEMPLOYER", "HEALTHDOPLATOK"}
+        rules = self.structure.rule_ids.filtered(
+            lambda rule: rule.code in native and rule.code not in changed
+        )
+        self.assertEqual(len(rules), 12)
         for rule in rules:
             original = ast.parse(unescape(native[rule.code]).strip())
             current = ast.parse(rule.amount_python_compute.strip())
@@ -230,7 +236,10 @@ class TestRecordedFundPayroll(TransactionCase):
                 "l10n_sk_hourly_wage": 0,
             }
         )
-        slip = self._compare_original_formulas(wage=0, clawback=17100)
+        # Health is now correctly excluded for this pension agreement. Pin
+        # the unchanged social ordering directly, rather than asserting that
+        # the entire slip still contains the old erroneous health premiums.
+        slip = self._slip(wage=0, clawback=17100)
         self.assertEqual(self._funds(slip)[("pension", "employee")]["base"], "16564")
 
     def test_positive_base_with_zero_rounded_premium_is_not_missing(self):

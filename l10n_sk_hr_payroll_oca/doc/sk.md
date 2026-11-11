@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy (OCA)
 summary: Slovenská mesačná výplatná páska pre aplikáciu OCA payroll v Odoo Community — úplná mzdová štruktúra pre pracovný pomer a tri dohody.
-verified: 19.0.1.25.0
+verified: 19.0.1.25.1
 family: l10n_sk_hr_payroll_base#engines
 ---
 
@@ -99,3 +99,12 @@ Ak presné údaje nie sú dostupné, zapíšte do opravného výkazu overený d�
 a použite **Potvrdiť pôvodný výpočet z hrubej odmeny**. Potvrdenie aj jeho autor
 zostanú v histórii komunikácie. Zmena overených podkladov vyžaduje nové
 potvrdenie; pôvodne podaná kópia zostáva dostupná.
+
+## Vyňatie príjmu zo zdravotných odvodov {#health-exclusions}
+
+Pravidlá zamestnanca, zamestnávateľa aj minima používajú spoločný dátumový
+profil. Zákonné študentské a dôchodcovské dohody nepotrebujú ďalší checkbox.
+Dôchodca v bežnom pracovnom pomere platí oba odvody a nemá minimálny doplatok
+poistenca štátu. Pri individuálnom vyňatí vyberte manuálnu voľbu a na pracovnej
+verzii uchovajte právny dôvod a odkaz na podklad.
+Podrobnosti: [spoločná zdravotná politika](../../l10n_sk_hr_payroll_base/doc/sk.md#health-exclusions).
