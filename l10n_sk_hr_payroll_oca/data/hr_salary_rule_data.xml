@@ -575,7 +575,7 @@ else:
     min_combined = int(round(min_combined * days / period_days * 100.0, 4)) / 100.0
   actual_combined = abs(result_rules.HEALTH.total) + result_rules.HEALTHEMPLOYER.total
   if payslip._l10n_sk_is_recording_funds():
-    actual_combined = l10n_sk_health_native_employee + l10n_sk_health_native_employer
+    actual_combined = abs(l10n_sk_health_native_employee) + l10n_sk_health_native_employer
   result = -max(0.0, round(min_combined - actual_combined, 2))
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_health_minimum_record = {"facts": {"income": categories.GROSS,

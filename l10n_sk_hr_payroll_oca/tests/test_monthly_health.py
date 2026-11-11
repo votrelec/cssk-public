@@ -167,6 +167,16 @@ class TestMonthlyHealthNative(TransactionCase):
         })
         self.assertTrue(custom.l10n_sk_monthly_fund_warning)
 
+    def test_custom_native_quantity_keeps_native_minimum(self):
+        employee = self.employee()
+        rule = self.structure.rule_ids.filtered(lambda row: row.code == "HEALTH")
+        rule.amount_python_compute += "\nresult -= 1\nresult_qty = 2\n"
+        custom = self.slip(employee)
+        self.assertEqual(self.health(custom), {
+            "HEALTH": -2, "HEALTHEMPLOYER": 22, "HEALTHDOPLATOK": -21.45,
+        })
+        self.assertFalse(custom.l10n_sk_fund_assessment)
+
     def test_peer_reader_access_error_propagates(self):
         employee = self.employee()
         first = self.slip(employee)

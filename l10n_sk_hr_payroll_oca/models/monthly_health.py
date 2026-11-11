@@ -129,6 +129,7 @@ class MonthlyHealthRule(models.Model):
                 or not slip._l10n_sk_is_recording_funds()):
             return values
         native = -values["amount"] if self.code != "HEALTHEMPLOYER" else values["amount"]
+        native *= values["quantity"] * values["rate"] / 100
         if self.code in {"HEALTH", "HEALTHEMPLOYER"}:
             localdict["l10n_sk_health_native_" + COMPONENTS[self.code]] = native
         if slip.credit_note:
