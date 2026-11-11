@@ -6,6 +6,7 @@ No second tax ledger: the existing immutable payroll snapshot retains actual
 lines and the dated configuration used by this cooperative calculation.
 """
 import json
+from math import isfinite
 
 from odoo import api, fields, models
 
@@ -39,7 +40,9 @@ class MonthlyTaxPayslip(models.Model):
             evidence = slip.l10n_sk_fund_assessment
             profile = evidence.get("profile", {}) if isinstance(evidence, dict) else {}
             tax = profile.get("monthly_tax", {}) if isinstance(profile, dict) else {}
-            slip.l10n_sk_monthly_tax_warning = bool(tax and not tax.get("complete"))
+            slip.l10n_sk_monthly_tax_warning = bool(
+                tax and (not isinstance(tax, dict) or tax.get("complete") is not True)
+            )
 
     def _monthly_tax_configuration(self):
         version = self._l10n_sk_version()
@@ -62,13 +65,29 @@ class MonthlyTaxPayslip(models.Model):
         for peer in self._monthly_confirmed_candidates()._cssk_effective_fund_payslips():
             profile = peer._cssk_recorded_fund_profile()
             tax = profile.get("monthly_tax") if isinstance(profile, dict) else None
-            if (peer.credit_note or not isinstance(tax, dict) or not tax.get("complete")
-                    or tax.get("configuration") != config):
+            lines = peer._monthly_tax_retained_lines(tax)
+            if (peer.credit_note or lines is None or tax.get("configuration") != config):
                 missing.append(peer.id)
             else:
-                previous.append(tax["lines"])
+                previous.append(lines)
         return {"configuration": config, "previous": previous,
                 "missing": missing, "canonical": canonical, "expected": {}}
+
+    def _monthly_tax_retained_lines(self, tax):
+        """Unknown custom/legacy shapes are missing evidence, not arithmetic."""
+        self.ensure_one()
+        if not isinstance(tax, dict) or tax.get("complete") is not True:
+            return None
+        lines = tax.get("lines")
+        if not isinstance(lines, dict) or set(lines) != {"TAXBASE", *_CODES}:
+            return None
+        for code, amount in lines.items():
+            if type(amount) not in (int, float) or not isfinite(amount):
+                return None
+            actual = self.line_ids.filtered(lambda line: line.code == code)
+            if len(actual) != 1 or actual.total != amount:
+                return None
+        return dict(lines)
 
     def compute_sheet(self):
         lock = getattr(self, "_l10n_sk_lock_fund_payslips", None)

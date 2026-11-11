@@ -614,7 +614,7 @@ base = payslip._l10n_sk_monthly_tax_base(result_rules.TAXBASE.total)
 # eligibility is separate: FS FAQ7/9 excludes the monthly allowance.
 nczd = payslip.l10n_sk_monthly_nczd(contract)
 
-taxable = max(0.0, base - nczd)
+taxable = payslip.company_id.currency_id.round(max(0.0, base - nczd))
 
 # --- Progressive monthly bands ---
 bands = payslip.rule_parameter('l10n_sk_income_tax_bands')
@@ -623,7 +623,7 @@ prev = 0.0
 for rate, ceiling in bands:
     if taxable &gt; prev:
         amt = min(taxable, ceiling) - prev
-        tax += amt * rate
+        tax += payslip.company_id.currency_id.round(amt * rate)
     prev = ceiling
 
 result = payslip._l10n_sk_monthly_tax_amount(-tax, 'INCOMETAX')

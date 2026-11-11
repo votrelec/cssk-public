@@ -8,6 +8,7 @@ from copy import deepcopy
 from decimal import Decimal
 from html import unescape
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from odoo import Command
@@ -407,6 +408,31 @@ class TestRecordedFundPayroll(TransactionCase):
         second.compute_sheet()
         self.assertTrue(second.l10n_sk_monthly_tax_warning)
         self.assertEqual(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["missing"], [first.id])
+
+    def test_tax_rounds_each_progressive_band_mathematically(self):
+        # FS section47 example has 6000.00 ->1328.63. Two extra cents expose
+        # the difference between separately rounded bands and final-only round.
+        self.version.l10n_sk_tax_declaration_signed = False
+        slip = self._slip(wage=0, clawback=600)
+        rule = self.structure.get_all_rules().filtered(lambda row: row.code == "INCOMETAX")
+        result = rule._compute_rule({
+            "payslip": slip, "contract": self.version, "employee": self.employee,
+            "result_rules": SimpleNamespace(TAXBASE=SimpleNamespace(total=6000.02)),
+        })
+        self.assertEqual(self.company.currency_id.round(result["amount"]), -1328.64)
+
+    def test_malformed_or_mismatched_monthly_tax_lines_are_missing_sources(self):
+        first, second, unused, frozen = self._split_regular_tax_case()
+        for lines in (True, {"TAXBASE": 0, "INCOMETAX": 0, "CHILD_BONUS": 0}):
+            with self.subTest(lines=lines):
+                evidence = deepcopy(frozen[0])
+                evidence["profile"]["monthly_tax"]["lines"] = lines
+                self.env.cr.execute("UPDATE hr_payslip SET l10n_sk_fund_assessment=%s WHERE id=%s",
+                                    (json.dumps(evidence), first.id))
+                first.invalidate_recordset(["l10n_sk_fund_assessment"])
+                second.compute_sheet()
+                self.assertTrue(second.l10n_sk_monthly_tax_warning)
+                self.assertEqual(second.l10n_sk_fund_assessment["profile"]["monthly_tax"]["missing"], [first.id])
 
     def test_all_five_eligible_funds_reduce_income_before_the_cap(self):
         self._student_agreement()
