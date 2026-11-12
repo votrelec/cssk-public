@@ -309,6 +309,52 @@ class TestMvp(TransactionCase):
         self.assertEqual(Decimal(row.get("vzZecNp")), daily * 17)
         self.assertGreater(Decimal(row.get("vzUp")), Decimal("16764"))
 
+    def test_agreement_oop_once_and_noninsured_funds_are_zero(self):
+        if self.engine != "oca":
+            self.skipTest("Recorded OCA agreement fixture")
+        structure = self.env.ref("l10n_sk_hr_payroll_oca.hr_payroll_structure_sk_dopc")
+        rule = self.env["hr.salary.rule"].create({
+            "name": "Synthetic additional agreement remuneration", "code": "MVP_TEST_GROSS",
+            "sequence": 90, "category_id": self.env.ref("l10n_sk_hr_payroll_oca.ALW").id,
+            "condition_select": "none", "amount_select": "code", "amount_python_compute": "result = 200",
+        })
+        structure.rule_ids |= rule
+        employee = self.env["hr.employee"].with_company(self.company).create({
+            "name": "Regular old-age agreement", "company_id": self.company.id,
+            "identification_id": "8501011234", "struct_id": structure.id,
+            "date_version": date(2026, 1, 1), "contract_date_start": date(2026, 1, 1),
+            "wage": 0, "l10n_sk_hourly_wage": 0, "l10n_sk_agreement_oop": True,
+            "l10n_sk_pension_type": "old_age", "l10n_sk_income_regular": True,
+        })
+        values = {"name": "Synthetic actual remuneration", "company_id": self.company.id,
+                  "employee_id": employee.id, "contract_id": employee.version_id.id,
+                  "struct_id": structure.id, "date_from": date(2026, 3, 1), "date_to": date(2026, 3, 31)}
+        slips = self.env["hr.payslip"].with_company(self.company).create([values, dict(values)])
+        slips.action_payslip_done()
+        _declaration, row = self._assert_recorded_wire_bases(self._mvp(), slips)
+        self.assertEqual(row.get("vzSp"), "200.00")
+        self.assertEqual(row.get("vzZecSp"), "200.00")
+        self.assertEqual(row.get("vzNp"), "0.00")
+        self.assertEqual(row.get("vzUp"), "400.00")
+
+    def test_mixed_known_and_missing_fragments_keep_known_fund_bases(self):
+        if self.engine != "oca":
+            self.skipTest("Recorded OCA source fixture")
+        _employee, first = self._employee_payslip(20000)
+        second = first.copy({"name": "Second actual remuneration"})
+        second.compute_sheet()
+        confirm_payslips(second)
+        saved = {slip.id: deepcopy(slip._cssk_recorded_fund_bases()) for slip in first | second}
+        declaration = self._mvp()
+        with patch.object(type(first), "_cssk_recorded_fund_bases", lambda slip: saved[slip.id] if slip.id == first.id else False):
+            declaration.action_generate()
+        tree = etree.fromstring(base64.b64decode(declaration.xml_attachment_id.datas))
+        row = tree.find(".//m:poistneZamestnanca", NS)
+        self.assertEqual(row.get("vzNp"), "36764.00")
+        self.assertEqual(row.get("vzUp"), "40000.00")
+        self.assertIn(second.display_name, declaration.fund_bases_warning)
+        self.assertEqual(first._cssk_recorded_fund_bases(), saved[first.id])
+
     def test_missing_charged_fund_uses_shared_original_and_correction_policy(self):
         if self.engine != "oca":
             self.skipTest("Recorded OCA source fixture")
