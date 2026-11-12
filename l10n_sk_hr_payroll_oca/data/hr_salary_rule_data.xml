@@ -945,7 +945,7 @@ else:
          exempt under § 5 ods. 7 písm. f) zákona 595/2003 Z. z.; keeping it out
          of the taxable base is intentional. Sources: podnikajte.sk "PN zamestnanca od 1.1.2026"
          <https://www.podnikajte.sk/socialne-a-zdravotne-odvody/pn-zamestnanca-od-1-1-2026-zmeny>,
-         MPSVR SR "Náhrada príjmu pri PN"; max DVZ 2026 = 100,2083 €
+         MPSVR SR "Náhrada príjmu pri PN"; employer max DVZ 2026 = 100,2082 €
          (= 2 × 1524 × 12 / 365). -->
     <record id="l10n_sk_sickness_compensation" model="hr.salary.rule">
         <field name="company_id" eval="False"/>

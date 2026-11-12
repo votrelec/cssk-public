@@ -1,6 +1,7 @@
 # Copyright 2026 votrelec
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 """Health-only monthly differences before the native categories and tax base."""
+
 from calendar import monthrange
 from copy import deepcopy
 
@@ -16,10 +17,13 @@ from odoo.addons.l10n_sk_hr_payroll_base.monthly_health import (
     monthly_health,
     number,
 )
+from odoo.addons.l10n_sk_hr_payroll_base.fund_sources import same_monthly_relationship
 
 HEALTH_CODES = frozenset({"HEALTH", "HEALTHEMPLOYER", "HEALTHDOPLATOK"})
 COMPONENTS = {
-    "HEALTH": "employee", "HEALTHEMPLOYER": "employer", "HEALTHDOPLATOK": "topup",
+    "HEALTH": "employee",
+    "HEALTHEMPLOYER": "employer",
+    "HEALTHDOPLATOK": "topup",
 }
 
 
@@ -59,11 +63,15 @@ class MonthlyHealthPayslip(models.Model):
             minimum_days=minimum_days,
             apply_op=bool(
                 version.l10n_sk_health_oop_claim
-                and version.l10n_sk_employment_form() == "none" and not exempt
-                and not (calendar and (
-                    calendar["concurrent_other_employment"]
-                    or calendar["concurrent_self_employment"]
-                ))
+                and version.l10n_sk_employment_form() == "none"
+                and not exempt
+                and not (
+                    calendar
+                    and (
+                        calendar["concurrent_other_employment"]
+                        or calendar["concurrent_self_employment"]
+                    )
+                )
             ),
             minimum_exempt=bool(
                 version.l10n_sk_health_minimum_is_exempt()
@@ -77,16 +85,28 @@ class MonthlyHealthPayslip(models.Model):
         self.ensure_one()
         profile = self._l10n_sk_fund_profile()
         profile_keys = (
-            "version", "contract_period", "agreement", "pension", "regular",
-            "oop", "guarantee_exempt", "health",
+            "contract_period",
+            "agreement",
+            "pension",
+            "regular",
+            "oop",
+            "guarantee_exempt",
+            "health",
         )
         previous, missing, ids = [], [], []
-        for peer in self._l10n_sk_monthly_predecessors()._cssk_effective_fund_payslips():
+        for (
+            peer
+        ) in self._l10n_sk_monthly_predecessors()._cssk_effective_fund_payslips():
             retained = peer._cssk_recorded_fund_profile()
             records = peer._cssk_recorded_fund_bases()
-            if (not retained or not records
-                    or any(retained.get(key) != profile.get(key) for key in profile_keys)
-                    or not profile.get("version") or peer.credit_note):
+            if (
+                not retained
+                or not records
+                or not same_monthly_relationship(retained, profile)
+                or any(retained.get(key) != profile.get(key) for key in profile_keys)
+                or not profile.get("version")
+                or peer.credit_note
+            ):
                 missing.append(peer.id)
                 continue
             indexed = index_assessments(records)
@@ -97,8 +117,10 @@ class MonthlyHealthPayslip(models.Model):
                 continue
             sources = [row["facts"].get("monthly_health") for row in (ee, er)]
             if any(row["facts"].get("monthly_unverified") for row in (ee, er)) or any(
-                not isinstance(source, dict) or source.get("schema") != 1
-                or source.get("policy") != policy for source in sources
+                not isinstance(source, dict)
+                or source.get("schema") != 1
+                or source.get("policy") != policy
+                for source in sources
             ):
                 missing.append(peer.id)
                 continue
@@ -107,11 +129,17 @@ class MonthlyHealthPayslip(models.Model):
                 if number(income) != number(er["facts"]["income"]):
                     raise ValueError("Different health income facts")
                 topup = ee["facts"]["topup"]
-                previous.append({
-                    "income": income, "base": ee["base"], "employer_base": er["base"],
-                    "employee": number(ee["amount"]) - number(topup),
-                    "employer": er["amount"], "op": ee["facts"]["op"], "topup": topup,
-                })
+                previous.append(
+                    {
+                        "income": income,
+                        "base": ee["base"],
+                        "employer_base": er["base"],
+                        "employee": number(ee["amount"]) - number(topup),
+                        "employer": er["amount"],
+                        "op": ee["facts"]["op"],
+                        "topup": topup,
+                    }
+                )
                 ids.append(peer.id)
             except (KeyError, ValueError):
                 missing.append(peer.id)
@@ -125,17 +153,23 @@ class MonthlyHealthRule(models.Model):
         localdict.pop("l10n_sk_health_minimum_record", None)
         values = super()._compute_rule(localdict)
         slip = localdict.get("payslip")
-        if (not slip or self.code not in HEALTH_CODES
-                or not slip._l10n_sk_is_recording_funds()):
+        if (
+            not slip
+            or self.code not in HEALTH_CODES
+            or not slip._l10n_sk_is_recording_funds()
+        ):
             return values
-        native = -values["amount"] if self.code != "HEALTHEMPLOYER" else values["amount"]
+        native = (
+            -values["amount"] if self.code != "HEALTHEMPLOYER" else values["amount"]
+        )
         native *= values["quantity"] * values["rate"] / 100
         if self.code in {"HEALTH", "HEALTHEMPLOYER"}:
             localdict["l10n_sk_health_native_" + COMPONENTS[self.code]] = native
         if slip.credit_note:
             return values
         record = localdict.get(
-            "l10n_sk_fund_record" if self.code != "HEALTHDOPLATOK"
+            "l10n_sk_fund_record"
+            if self.code != "HEALTHDOPLATOK"
             else "l10n_sk_health_minimum_record"
         )
         if not isinstance(record, dict):
@@ -147,15 +181,21 @@ class MonthlyHealthRule(models.Model):
         policy = source["policy"]
         previous, missing, ids = slip._monthly_health_sources(policy)
         # Verify the entire health set before the first component is changed.
-        rules = slip.struct_id.get_all_rules().filtered(lambda row: row.code in HEALTH_CODES)
+        rules = slip.struct_id.get_all_rules().filtered(
+            lambda row: row.code in HEALTH_CODES
+        )
         canonical = len(rules) == 3 and all(
             rule._l10n_sk_is_canonical_fund_rule() for rule in rules
         )
         try:
             standalone = health_total(record["facts"]["income"], policy)
             expected = standalone[COMPONENTS[self.code]]
-            if (not canonical or values["quantity"] != 1
-                    or values["rate"] != 100 or number(native) != expected):
+            if (
+                not canonical
+                or values["quantity"] != 1
+                or values["rate"] != 100
+                or number(native) != expected
+            ):
                 raise ValueError("Native health rule is not canonical")
             if self.code != "HEALTHDOPLATOK":
                 index_assessments([record])
@@ -164,7 +204,9 @@ class MonthlyHealthRule(models.Model):
             if missing:
                 raise ValueError("Unverified prior health remuneration")
             assessed = monthly_health(
-                income=record["facts"]["income"], policy=policy, previous=previous,
+                income=record["facts"]["income"],
+                policy=policy,
+                previous=previous,
             )
         except ValueError:
             self._monthly_health_unverified(localdict, record, missing or True)
@@ -178,9 +220,12 @@ class MonthlyHealthRule(models.Model):
             facts["op"] = str(assessed["op"])
         amount = assessed["employee" if employee else "employer"]
         localdict["l10n_sk_fund_record"] = fund_assessment(
-            fund="health", side="employee" if employee else "employer",
+            fund="health",
+            side="employee" if employee else "employer",
             base=assessed["base" if employee else "employer_base"],
-            rate=record["rate"], amount=amount, facts=facts,
+            rate=record["rate"],
+            amount=amount,
+            facts=facts,
         )
         return dict(values, amount=float(amount) * (-1 if employee else 1))
 

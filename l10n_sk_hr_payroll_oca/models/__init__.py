@@ -6,7 +6,6 @@ from . import hr_employee
 from . import hr_leave_type
 from . import hr_leave_accrual_plan
 from . import hr_payslip
-from . import sickness_cases
 from . import l10n_sk_tax_reconciliation
 from . import fund_capture
 from . import health_exemption
@@ -18,5 +17,7 @@ from . import fund_children
 from . import fund_sources
 from . import monthly_health
 from . import source_lock_order
+from . import sickness_cases
+
 # Cooperative consumers follow the concrete source providers they extend.
 from . import monthly_tax

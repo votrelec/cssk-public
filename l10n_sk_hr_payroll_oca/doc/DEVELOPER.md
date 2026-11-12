@@ -108,3 +108,21 @@ and lower cooperative field owners still run before closing.
 
 Payslip create/write access is checked before acquiring employee source epochs.
 Denied callers therefore cannot change epoch rows or acquire source locks.
+
+# Monthly relationship identity and medical sources
+
+`_l10n_sk_fund_relationship_facts()` records the native employee, company and
+legal contract dates. Optional bridges can append assigned relationship
+identifiers or a distinct legal title. The complete dictionary participates in
+the immutable profile; monthly consumers compare every extension key and their
+own relevant fund, health or tax settings. A new wage version alone does not
+restart monthly deductions. Older proofs without the key remain compatible on
+the same version and contract dates; a different version becomes an unverified
+monthly source under the common declaration policy.
+
+PN providers extend `_l10n_sk_fund_source_facts()` and
+`_l10n_sk_fund_capture_metadata()` directly. The older social-only extra-facts
+hook remains available to older installations but is not the active common
+recorder protocol. Concrete source providers load before the final cooperative
+monthly-tax consumer. The current source signature includes medical references,
+reviewed daily bases, retained calculation evidence and dated PN parameters.

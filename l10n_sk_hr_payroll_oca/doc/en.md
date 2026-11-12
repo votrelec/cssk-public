@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll (OCA)
 summary: The Slovak monthly payslip for the OCA payroll app on Odoo Community — a complete salary structure for a pracovný pomer and the three dohody.
-verified: 19.0.1.31.0
+verified: 19.0.1.32.0
 family: l10n_sk_hr_payroll_base#engines
 ---
 
@@ -197,3 +197,7 @@ Record the medical case reference, reviewed daily base and its calculation evide
 PN is a calendar event and may occupy only rest days. This exception does not authorize ordinary holiday on a day without planned work. Payroll uses one compensation method for both medical records and the legacy input path. These fields record reviewed statutory facts; they do not themselves calculate DVZ from an unverified wage or determine every special entitlement under sections4–8 of Act462/2003.
 
 Where the retained monthly-source extension is installed, the native medical records contribute their exact inputs through its cooperative evidence hook. Concurrent leave creation, editing and deletion coordinate with the employee source lock. Confirmation without recomputation rejects a stale draft source, while confirmed payroll retains the original evidence and amounts after later HR changes. No second payroll or absence ledger is introduced. Staff entering medical evidence also need the standard Time Off Officer role; Payroll Officer alone does not grant access to other employees' leave.
+
+Employer compensation uses a daily base rounded **down** under section 8 of Act 462/2003. Its ceilings are 94.0273 for 2025, 100.2082 for 2026 and 106.5205 for 2027. Social Insurance rounds its benefit daily bases upward; those separate amounts are not employer compensation parameters. The 2027 fourteen-day employer maximum is 724.34 before any individual statutory adjustment. The medical onset continues to determine the applicable year and employer-day limit.
+
+Several payments during one month share the applicable monthly limits even when a wage or working-time change creates another native contract version. The recorded legal relationship and relevant insurance/tax profile must match. Missing identity in an older different-version proof produces a named warning and follows the shared correction-review procedure; it never silently becomes an exact new allowance claim. Existing filed copies and confirmed calculations remain retained.

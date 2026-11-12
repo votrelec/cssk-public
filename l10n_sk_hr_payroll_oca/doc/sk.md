@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy (OCA)
 summary: Slovenská mesačná výplatná páska pre aplikáciu OCA payroll v Odoo Community — úplná mzdová štruktúra pre pracovný pomer a tri dohody.
-verified: 19.0.1.31.0
+verified: 19.0.1.32.0
 family: l10n_sk_hr_payroll_base#engines
 ---
 
@@ -191,3 +191,7 @@ Na pôvodnej schválenej absencii zadajte identifikátor medicínskeho prípadu,
 PN je kalendárna udalosť aj počas samotného víkendu. Táto výnimka nepovoľuje bežnú dovolenku bez plánovaného pracovného času. Medicínske záznamy aj pôvodné vstupy používajú jedinú metódu výpočtu náhrady. Polia uchovávajú overené zákonné fakty; samy neurčujú DVZ z neoverenej mzdy ani každý osobitný nárok podľa §4–8 zákona462/2003.
 
 Ak je nainštalované rozšírenie uchovaných mesačných podkladov, medicínske záznamy dopĺňajú presné vstupy jeho spolupracujúcim hookom. Vytvorenie, zmena aj vymazanie absencie koordinujú súbeh zamestnaneckým zámkom. Potvrdenie bez prepočtu odmietne zastaraný návrh, kým potvrdená mzda zachová pôvodné podklady a sumy aj po neskoršej zmene HR údajov. Nevzniká druhá mzdová ani dochádzková kniha. Pracovník zadávajúci medicínske podklady potrebuje aj štandardnú rolu Time Off Officer; samotná rola Payroll Officer nesprístupňuje cudzie absencie.
+
+Náhrada zamestnávateľa používa denný základ zaokrúhlený **nadol** podľa § 8 zákona 462/2003. Stropy sú 94,0273 pre rok 2025, 100,2082 pre rok 2026 a 106,5205 pre rok 2027. Denný základ nemocenskej dávky Sociálnej poisťovne sa zaokrúhľuje nahor; do náhrady zamestnávateľa sa jej vyšší strop neprenáša. Maximálna štrnásťdňová náhrada v roku 2027 je 724,34 € pred individuálnou zákonnou úpravou. Príslušný ročník a hranicu dní naďalej určuje vznik PN.
+
+Viaceré platby za mesiac zdieľajú mesačné hranice aj po vzniku ďalšej natívnej verzie pri zmene mzdy či úväzku. Musí byť preukázaná totožnosť právneho vzťahu a príslušného odvodového alebo daňového profilu. Starý podklad bez identity pri rozdielnej verzii vyvolá pomenované upozornenie a spoločný postup preskúmania opravy. Chýbajúci dôkaz nevytvára nový presný nárok na odpočítanie. Potvrdené výpočty a pôvodné podané súbory zostávajú uchované.

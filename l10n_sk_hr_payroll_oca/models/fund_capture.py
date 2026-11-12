@@ -104,15 +104,42 @@ class FundCapturePayslip(models.Model):
         version = self._l10n_sk_version()
         return {
             "version": version.id,
+            "relationship": self._l10n_sk_fund_relationship_facts(),
             "contract_period": {
-                "start": str(version.contract_date_start) if version.contract_date_start else None,
-                "end": str(version.contract_date_end) if version.contract_date_end else None,
+                "start": str(version.contract_date_start)
+                if version.contract_date_start
+                else None,
+                "end": str(version.contract_date_end)
+                if version.contract_date_end
+                else None,
             },
             "agreement": version.l10n_sk_employment_form(),
             "pension": version.l10n_sk_pension_status(),
             "regular": version.l10n_sk_income_is_regular(),
             "oop": version.l10n_sk_agreement_oop,
             "guarantee_exempt": version.l10n_sk_guarantee_exempt,
+        }
+
+    def _l10n_sk_fund_relationship_facts(self):
+        """Native relationship identity; bridges may append assigned IDs.
+
+        Version IDs and wage changes are not new legal employments. Preserve
+        the complete key in generated evidence rather than reading today's
+        contract or external identifier when consuming prior payroll.
+        """
+        self.ensure_one()
+        version = self._l10n_sk_version()
+        return {
+            "company": self.company_id.id,
+            "employee": self.employee_id.id,
+            "contract_period": {
+                "start": str(version.contract_date_start)
+                if version.contract_date_start
+                else None,
+                "end": str(version.contract_date_end)
+                if version.contract_date_end
+                else None,
+            },
         }
 
     def _get_baselocaldict(self, contracts):
@@ -218,7 +245,11 @@ class FundCapturePayslip(models.Model):
         if not self.credit_note:
             return self.browse()
         original = self.search([("refunded_id", "=", self.id)])
-        if len(original) != 1 or original.credit_note or original.state not in {"done", "paid", "cancel"}:
+        if (
+            len(original) != 1
+            or original.credit_note
+            or original.state not in {"done", "paid", "cancel"}
+        ):
             return self.browse()
         names = (
             "company_id",

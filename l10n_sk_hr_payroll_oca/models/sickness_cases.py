@@ -308,6 +308,17 @@ class Payslip(models.Model):
         facts = parent() if parent else {}
         return dict(facts, pn_cases=self._l10n_sk_pn_source_facts())
 
+    def _l10n_sk_fund_source_facts(self):
+        # The shared per-fund recorder replaced the older social-only hook.
+        # Both protocols consume the same native leave facts; the old hook
+        # remains available for installations retaining that earlier recorder.
+        facts = super()._l10n_sk_fund_source_facts()
+        return dict(facts, pn_cases=self._l10n_sk_pn_source_facts())
+
+    def _l10n_sk_fund_capture_metadata(self):
+        metadata = super()._l10n_sk_fund_capture_metadata()
+        return dict(metadata, pn_cases=self._l10n_sk_pn_source_facts())
+
     def _l10n_sk_pn_source_facts(self):
         leaves = self._l10n_sk_pn_leaves()
         selected = leaves.filtered(
@@ -355,3 +366,21 @@ class Payslip(models.Model):
             }
             for row in selected.sorted("id")
         ]
+
+
+class SicknessStructure(models.Model):
+    _inherit = "hr.payroll.structure"
+
+    def _l10n_sk_fund_parameter_codes(self):
+        codes = super()._l10n_sk_fund_parameter_codes()
+        if "SICK_COMP" in self.get_structure_with_parents().get_all_rules().mapped(
+            "code"
+        ):
+            codes |= {
+                "l10n_sk_pn_tier1_days",
+                "l10n_sk_pn_employer_days",
+                "l10n_sk_pn_max_dvz",
+                "l10n_sk_pn_rate_tier1",
+                "l10n_sk_pn_rate_tier2",
+            }
+        return codes

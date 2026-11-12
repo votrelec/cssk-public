@@ -42,8 +42,16 @@ L10N_SK_FAMILY_LEAVE_CODES = ("MATERSKA", "RODICOVSKA", "OTCOVSKA")
 # employer sick-pay náhrada; family care / unpaid leave / family leave are
 # simply unpaid by the employer.
 L10N_SK_ABSENCE_CODES = (
-    "DOVOLENKA", "PN", "OCR", "NEPLATENE", "OBSTACLE",
-) + L10N_SK_EMPLOYER_OBSTACLE_CODES + L10N_SK_FAMILY_LEAVE_CODES
+    (
+        "DOVOLENKA",
+        "PN",
+        "OCR",
+        "NEPLATENE",
+        "OBSTACLE",
+    )
+    + L10N_SK_EMPLOYER_OBSTACLE_CODES
+    + L10N_SK_FAMILY_LEAVE_CODES
+)
 
 
 class HrPayslip(models.Model):
@@ -118,20 +126,39 @@ class HrPayslip(models.Model):
         Keep this eligibility hook separate from dated statutory parameters.
         """
         self.ensure_one()
-        if version.employee_id != self.employee_id or version.company_id != self.company_id:
-            raise UserError(_("Use the employee and company contract version for the monthly pension tax profile."))
+        if (
+            version.employee_id != self.employee_id
+            or version.company_id != self.company_id
+        ):
+            raise UserError(
+                _(
+                    "Use the employee and company contract version for the monthly pension tax profile."
+                )
+            )
         if not version.l10n_sk_tax_declaration_signed:
             return 0.0
         historical = self.employee_id._l10n_sk_january_tax_version(
-            self.date_to.year, self.company_id, self.date_to)
+            self.date_to.year, self.company_id, self.date_to
+        )
         if historical:
             if historical.company_id != self.company_id:
-                raise UserError(_("Review the employee's 1 January pension version in the payroll company."))
+                raise UserError(
+                    _(
+                        "Review the employee's 1 January pension version in the payroll company."
+                    )
+                )
             if historical.l10n_sk_tax_pensioner:
                 return 0.0
-            if (historical.l10n_sk_pension_type in ("old_age", "early_old_age", "service_at_age")
-                    or historical.l10n_sk_nczd_pension_annual > 0):
-                raise UserError(_("The 1 January version indicates a pension. Review its tax-relevant pension flag against the retained declaration."))
+            if (
+                historical.l10n_sk_pension_type
+                in ("old_age", "early_old_age", "service_at_age")
+                or historical.l10n_sk_nczd_pension_annual > 0
+            ):
+                raise UserError(
+                    _(
+                        "The 1 January version indicates a pension. Review its tax-relevant pension flag against the retained declaration."
+                    )
+                )
         return self.rule_parameter("l10n_sk_nczd_monthly")
 
     def compute_sheet(self):
@@ -229,23 +256,33 @@ class HrPayslip(models.Model):
         """
         self.ensure_one()
         q_start, q_end = self._l10n_sk_previous_quarter()
-        slips = self.search([('employee_id', '=', self.employee_id.id),
-            ('company_id', '=', self.company_id.id), ('date_from', '>=', q_start),
-            ('date_to', '<=', q_end), ('state', '=', 'done'), ('id', 'not in', self._origin.ids)])
+        slips = self.search(
+            [
+                ("employee_id", "=", self.employee_id.id),
+                ("company_id", "=", self.company_id.id),
+                ("date_from", ">=", q_start),
+                ("date_to", "<=", q_end),
+                ("state", "=", "done"),
+                ("id", "not in", self._origin.ids),
+            ]
+        )
         version = self._l10n_sk_version()
         if version.contract_date_start:
             # A wage/version change within one employment keeps its start;
             # a genuine rehire starts a separate employment (§134 ods. 7).
-            slips = slips.filtered(lambda slip:
-                slip._l10n_sk_version().contract_date_start == version.contract_date_start)
+            slips = slips.filtered(
+                lambda slip: slip._l10n_sk_version().contract_date_start
+                == version.contract_date_start
+            )
         return slips
 
     def _l10n_sk_average_counted_wage(self):
         """Wage basis before credit-note sign; cooperative classification hook."""
         self.ensure_one()
-        replacements = ('DOVOLENKA_NAHRADA', 'OBSTACLE_NAHRADA', 'PREKAZKA_NAHRADA')
-        return sum(line.total for line in self.line_ids if line.code == 'GROSS') - sum(
-            line.total for line in self.line_ids if line.code in replacements)
+        replacements = ("DOVOLENKA_NAHRADA", "OBSTACLE_NAHRADA", "PREKAZKA_NAHRADA")
+        return sum(line.total for line in self.line_ids if line.code == "GROSS") - sum(
+            line.total for line in self.line_ids if line.code in replacements
+        )
 
     def _l10n_sk_average_worked_time(self):
         """Worked days/hours before credit-note sign, excluding absences."""
@@ -299,7 +336,11 @@ class HrPayslip(models.Model):
             phz = round(gross / hours, 4)
         else:
             sched_hours = self.l10n_sk_scheduled_hours()
-            phz = round(self._l10n_sk_version().wage / sched_hours, 4) if sched_hours else 0.0
+            phz = (
+                round(self._l10n_sk_version().wage / sched_hours, 4)
+                if sched_hours
+                else 0.0
+            )
         return max(phz, min_hourly)
 
     def l10n_sk_scheduled_days(self):
@@ -366,6 +407,7 @@ class HrPayslip(models.Model):
                 ]
             )
         )
+
     def _l10n_sk_pn_payment_period(self):
         """The employer stops paying when its insured relationship ends."""
         version = self._l10n_sk_version()

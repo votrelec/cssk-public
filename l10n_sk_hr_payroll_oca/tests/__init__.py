@@ -13,3 +13,4 @@ from . import test_health_agreement_exemption
 
 from . import test_health_calendar_profile
 from . import test_monthly_health
+from . import test_monthly_versions

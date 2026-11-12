@@ -5,6 +5,13 @@ Changelog
 Unreleased
 ==========
 
+* Preserve monthly social, health and tax limits across versions of the same
+  proved legal relationship. Retain the complete cooperative identity and
+  keep unknown historical relationships under the shared warning/review policy.
+* Include medical PN cases in the current shared source signature and retained
+  metadata. Use employer DVZ ceilings rounded down under Act 462/2003,
+  independently of the Social Insurance benefit ceilings.
+
 * Validate reviewed health sources before salary-rule evaluation and new
   profile capture; freeze the source contract period independently of later
   wage versions and later changes to the employee card.

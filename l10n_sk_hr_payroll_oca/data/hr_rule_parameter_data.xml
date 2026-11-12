@@ -790,21 +790,20 @@
         <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
     </record>
 
-    <!-- Maximum daily assessment base (max DVZ). 2026 = 100.2083
-         (= 2 × 1524 × 12 / 365); 2025 ≈ 94.0274 (= 2 × 1430 × 12 / 365).
-         Source: podnikajte.sk "Maximálne nemocenské dávky 2026". -->
+    <!-- Employer compensation: §8(7)-(8) Act 462/2003, 2 x VVZ /365,
+         rounded DOWN to four places. SP benefit DVZ rounds UP instead. -->
     <record id="rule_parameter_pn_max_dvz" model="hr.rule.parameter">
         <field name="name">Slovakia: Maximum daily assessment base (max DVZ)</field>
         <field name="code">l10n_sk_pn_max_dvz</field>
         <field name="country_id" ref="base.sk"/>
     </record>
     <record id="rule_parameter_pn_max_dvz_2025" model="hr.rule.parameter.value">
-        <field name="parameter_value">94.0274</field>
+        <field name="parameter_value">94.0273</field>
         <field name="rule_parameter_id" ref="rule_parameter_pn_max_dvz"/>
         <field name="date_from" eval="datetime(2025, 1, 1).date()"/>
     </record>
     <record id="rule_parameter_pn_max_dvz_2026" model="hr.rule.parameter.value">
-        <field name="parameter_value">100.2083</field>
+        <field name="parameter_value">100.2082</field>
         <field name="rule_parameter_id" ref="rule_parameter_pn_max_dvz"/>
         <field name="date_from" eval="datetime(2026, 1, 1).date()"/>
     </record>
@@ -1044,7 +1043,7 @@
         <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
     </record>
     <record id="rule_parameter_pn_max_dvz_2024" model="hr.rule.parameter.value">
-        <field name="parameter_value">79.6274</field>
+        <field name="parameter_value">79.6273</field>
         <field name="rule_parameter_id" ref="rule_parameter_pn_max_dvz"/>
         <field name="date_from" eval="datetime(2024, 1, 1).date()"/>
     </record>
@@ -1140,7 +1139,7 @@
          Social insurance, z. 461/2003: priemerná mzda 2025 = 1 620,
            VVZ 2025 = 19 440 (Sociálna poisťovňa).
            § 138 ods. 9: monthly maximum base 11 × 1 620 = 17 820.
-           Nemocenské: maximum DVZ 2 × 19 440 / 365 = 106.5206.
+           Employer PN compensation: 2 × 19 440 / 365 rounded down = 106.5205.
          Health insurance, z. 580/2004: minimum base = životné minimum
            295.22 (opatrenie 155/2026 Z. z.).
          Income tax, z. 595/2003, from ŽM 295.22:
@@ -1207,7 +1206,7 @@
         <field name="date_from">2027-01-01</field>
     </record>
     <record id="rule_parameter_2027_pn_max_dvz" model="hr.rule.parameter.value">
-        <field name="parameter_value">106.5206</field>
+        <field name="parameter_value">106.5205</field>
         <field name="rule_parameter_id" ref="l10n_sk_hr_payroll_oca.rule_parameter_pn_max_dvz"/>
         <field name="date_from">2027-01-01</field>
     </record>

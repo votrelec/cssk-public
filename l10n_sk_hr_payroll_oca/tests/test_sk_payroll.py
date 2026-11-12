@@ -35,14 +35,15 @@ class TestSkPayroll(TransactionCase):
         Payslip = type(self.env["hr.payslip"])
         if hasattr(Payslip, "_l10n_sk_min_wage_claim_applies"):
             patcher = patch.object(
-                Payslip, "_l10n_sk_min_wage_claim_applies", return_value=False)
+                Payslip, "_l10n_sk_min_wage_claim_applies", return_value=False
+            )
             patcher.start()
             self.addCleanup(patcher.stop)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env = cls.env(context=dict(cls.env.context, lang='en_US'))
+        cls.env = cls.env(context=dict(cls.env.context, lang="en_US"))
         cls.company = cls.env["res.company"].create(
             {
                 "name": "SK Test Co",
@@ -202,17 +203,25 @@ class TestSkPayroll(TransactionCase):
             self.env,
         )
         self.assertEqual(payslip.l10n_sk_basic_salary(self.contract_nodecl, worked), 50)
-        missing_work = WorkedDays(self.employee_nodecl.id, {
-            "DOVOLENKA": SimpleNamespace(number_of_hours=8),
-        }, self.env)
+        missing_work = WorkedDays(
+            self.employee_nodecl.id,
+            {
+                "DOVOLENKA": SimpleNamespace(number_of_hours=8),
+            },
+            self.env,
+        )
         self.assertEqual(
-            payslip.l10n_sk_basic_salary(self.contract_nodecl, missing_work), 0)
-        excess = WorkedDays(self.employee_nodecl.id, {
-            "WORK100": SimpleNamespace(number_of_hours=8),
-            "DOVOLENKA": SimpleNamespace(number_of_hours=-16),
-        }, self.env)
-        self.assertEqual(
-            payslip.l10n_sk_basic_salary(self.contract_nodecl, excess), 0)
+            payslip.l10n_sk_basic_salary(self.contract_nodecl, missing_work), 0
+        )
+        excess = WorkedDays(
+            self.employee_nodecl.id,
+            {
+                "WORK100": SimpleNamespace(number_of_hours=8),
+                "DOVOLENKA": SimpleNamespace(number_of_hours=-16),
+            },
+            self.env,
+        )
+        self.assertEqual(payslip.l10n_sk_basic_salary(self.contract_nodecl, excess), 0)
 
     def test_hourly_wage_excludes_approved_leave_from_basic(self):
         contract, employee, _calendar = self._abs_setup()
@@ -323,16 +332,18 @@ class TestSkPayroll(TransactionCase):
                 "company_id": self.company.id,
                 "hours_per_day": 4.0,
                 "attendance_ids": [
-                    (0, 0, {
-                        "name": day_name,
-                        "dayofweek": str(day),
-                        "hour_from": 8.0,
-                        "hour_to": 12.0,
-                        "day_period": "morning",
-                    })
-                    for day, day_name in enumerate(
-                        ["Mon", "Tue", "Wed", "Thu", "Fri"]
+                    (
+                        0,
+                        0,
+                        {
+                            "name": day_name,
+                            "dayofweek": str(day),
+                            "hour_from": 8.0,
+                            "hour_to": 12.0,
+                            "day_period": "morning",
+                        },
                     )
+                    for day, day_name in enumerate(["Mon", "Tue", "Wed", "Thu", "Fri"])
                 ],
             }
         )
@@ -343,9 +354,7 @@ class TestSkPayroll(TransactionCase):
     def test_health_oop_low_earner(self):
         """Health OOP for a €500 earner (2025): base reduced, employer intact."""
         contract, employee = self._make_low_earner(l10n_sk_health_oop_claim=True)
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         # OOP = 380 - 2*(500-380) = 140 -> health base = 500 - 140 = 360.
         # employee health 4% (2025) of 360 -> -14.40 (vs -20.00 without OOP)
@@ -358,9 +367,7 @@ class TestSkPayroll(TransactionCase):
     def test_health_oop_off_matches_full_base(self):
         """Without the claim the €500 earner pays health on the full base."""
         contract, employee = self._make_low_earner(l10n_sk_health_oop_claim=False)
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         # 4% of the full 500 -> -20.00
         self.assertAlmostEqual(p.get_salary_line_total("HEALTH"), -20.0, places=2)
 
@@ -373,9 +380,7 @@ class TestSkPayroll(TransactionCase):
     def test_dovp_reduced_contributions(self):
         """DoVP (irregular income): no sickness/unemployment; only 7% social."""
         contract, employee = self._make_dohodar(l10n_sk_agreement_type="dovp")
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         # Skipped funds -> no line -> 0.0
         self.assertAlmostEqual(line("SICK"), 0.0, places=2)
@@ -395,9 +400,7 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_dohodar(
             l10n_sk_agreement_type="dovp", l10n_sk_agreement_oop=True
         )
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         # base = 1000 - 200 = 800 -> pension 4% -> -32.00, disability 3% -> -24.00
         self.assertAlmostEqual(line("PENSION"), -32.0, places=2)
@@ -410,9 +413,7 @@ class TestSkPayroll(TransactionCase):
     def test_dopc_matches_standard_social(self):
         """DoPČ (regular income): full social set, unchanged from employment."""
         contract, employee = self._make_dohodar(l10n_sk_agreement_type="dopc")
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         # sickness + unemployment still charged (9.4% social of 1000)
         self.assertAlmostEqual(line("SICK"), -14.0, places=2)
@@ -576,7 +577,9 @@ class TestSkPayroll(TransactionCase):
             date(2026, 6, 30),
             [("GARNISHMENT_PRIORITY", 500.0)],
         )
-        self.assertAlmostEqual(p.get_salary_line_total("GARNISHMENT"), -272.82, places=2)
+        self.assertAlmostEqual(
+            p.get_salary_line_total("GARNISHMENT"), -272.82, places=2
+        )
 
     def test_garnishment_capped_by_debt(self):
         """The deduction never exceeds the outstanding debt."""
@@ -593,9 +596,7 @@ class TestSkPayroll(TransactionCase):
     def test_garnishment_inactive_without_input(self):
         """No garnishment input -> no deduction line."""
         contract, employee = self._make_plain_worker(1000.0)
-        p = self._make_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
         self.assertAlmostEqual(p.get_salary_line_total("GARNISHMENT"), 0.0, places=2)
 
     def test_garnishment_dependents_raise_non_seizable(self):
@@ -725,7 +726,8 @@ class TestSkPayroll(TransactionCase):
             contract, employee, date(2026, 3, 1), date(2026, 3, 31)
         )
         self.assertAlmostEqual(
-            p.get_salary_line_total("GROSS"), original + bonus, places=2)
+            p.get_salary_line_total("GROSS"), original + bonus, places=2
+        )
         # CONFIRM it. §134 counts the wage "zúčtovaná" in the determining
         # period, and compute_sheet leaves the payslip in the engine's
         # "verify" (Waiting) state — computed, not confirmed. A seed left
@@ -737,9 +739,7 @@ class TestSkPayroll(TransactionCase):
         p.action_payslip_done()
         contract.wage = original
         hours = sum(
-            l.number_of_hours
-            for l in p.worked_days_line_ids
-            if l.code == "WORK100"
+            l.number_of_hours for l in p.worked_days_line_ids if l.code == "WORK100"
         )
         self.assertAlmostEqual(hours, 176.0, places=2)
         return p
@@ -870,9 +870,7 @@ class TestSkPayroll(TransactionCase):
             )
         )
         # 100/176 = 0.568 < 5.259 (2026 min hourly) -> raised to 5.259
-        self.assertAlmostEqual(
-            june.l10n_sk_average_hourly_earnings(), 5.259, places=3
-        )
+        self.assertAlmostEqual(june.l10n_sk_average_hourly_earnings(), 5.259, places=3)
 
     def test_holiday_nahrada_no_proration_cut(self):
         """5 dovolenka days: BASIC cut, náhrada at PHZ, GROSS made whole."""
@@ -1036,11 +1034,15 @@ class TestSkPayroll(TransactionCase):
         """The RZD reads the version in force on 1 January, not a later one,
         and an amount corrected on the RZD is kept."""
         version = self.employee_nodecl.version_id
-        version.write({"l10n_sk_tax_pensioner": True, "l10n_sk_nczd_pension_annual": 3000.0})
-        self.employee_nodecl.create_version({
-            "date_version": date(2025, 7, 1),
-            "l10n_sk_nczd_pension_annual": 9000.0,
-        })
+        version.write(
+            {"l10n_sk_tax_pensioner": True, "l10n_sk_nczd_pension_annual": 3000.0}
+        )
+        self.employee_nodecl.create_version(
+            {
+                "date_version": date(2025, 7, 1),
+                "l10n_sk_nczd_pension_annual": 9000.0,
+            }
+        )
         rz = self._rz_2025()
         self.assertAlmostEqual(rz.pension_annual, 3000.0, places=2)
         self.assertAlmostEqual(rz.nczd_taxpayer, 2753.79, places=2)
@@ -1141,7 +1143,8 @@ class TestSkPayroll(TransactionCase):
         self.assertAlmostEqual(
             p.get_salary_line_total("ANNUAL_TAX_SETTLEMENT"), 0.0, places=2
         )
-# -- Multi-company country scoping (config visible only per country) ---
+
+    # -- Multi-company country scoping (config visible only per country) ---
 
     def test_country_scoping_config(self):
         """SK salary structure and leave types are country-scoped: a payroll
@@ -1152,15 +1155,17 @@ class TestSkPayroll(TransactionCase):
         # Our shipped config carries SK and is company-global.
         self.assertEqual(self.structure.country_id, sk)
         self.assertFalse(self.structure.company_id)
-        leave_sk = self.env.ref(
-            "l10n_sk_hr_payroll_oca.l10n_sk_leave_type_dovolenka"
-        )
+        leave_sk = self.env.ref("l10n_sk_hr_payroll_oca.l10n_sk_leave_type_dovolenka")
         self.assertEqual(leave_sk.country_id, sk)
         self.assertFalse(leave_sk.company_id)
         # Foreign (CZ) config created inline to prove isolation.
         cz_struct = self.env["hr.payroll.structure"].create(
-            {"name": "CZ Struct", "code": "CZX",
-             "country_id": cz.id, "company_id": False}
+            {
+                "name": "CZ Struct",
+                "code": "CZX",
+                "country_id": cz.id,
+                "company_id": False,
+            }
         )
         cz_leave = self.env["hr.leave.type"].create(
             {"name": "CZ Leave", "country_id": cz.id, "company_id": False}
@@ -1204,9 +1209,7 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_dohodar(
             l10n_sk_agreement_type="dovp", l10n_sk_income_regular=True
         )
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         self.assertAlmostEqual(line("SICK"), -14.0, places=2)
         self.assertAlmostEqual(line("UNEMPLOYMENT"), -10.0, places=2)
@@ -1220,9 +1223,7 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_dohodar(
             l10n_sk_agreement_type="dopc", l10n_sk_income_regular=False
         )
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         self.assertAlmostEqual(line("SICK"), 0.0, places=2)
         self.assertAlmostEqual(line("UNEMPLOYMENT"), 0.0, places=2)
@@ -1282,10 +1283,10 @@ class TestSkPayroll(TransactionCase):
         line = p.get_salary_line_total
         phz = 11.3636
         expected = round(
-            8 * phz * 1.0        # prestoj      § 142 ods. 1 — 100 %
-            + 8 * phz * 0.5      # weather      § 142 ods. 2 —  50 %
-            + 8 * phz * 1.0      # other        § 142 ods. 3 — 100 %
-            + 8 * phz * 0.6,     # serious ops  § 142 ods. 4 —  60 %
+            8 * phz * 1.0  # prestoj      § 142 ods. 1 — 100 %
+            + 8 * phz * 0.5  # weather      § 142 ods. 2 —  50 %
+            + 8 * phz * 1.0  # other        § 142 ods. 3 — 100 %
+            + 8 * phz * 0.6,  # serious ops  § 142 ods. 4 —  60 %
             2,
         )
         self.assertAlmostEqual(line("PREKAZKA_NAHRADA"), expected, places=2)
@@ -1336,8 +1337,9 @@ class TestSkPayroll(TransactionCase):
             contract, employee, date(2026, 6, 1), date(2026, 6, 30)
         )
         # 40 h x 11.3636 x 80 % = 363.64
-        self.assertAlmostEqual(p.get_salary_line_total("PREKAZKA_NAHRADA"),
-                               363.64, places=2)
+        self.assertAlmostEqual(
+            p.get_salary_line_total("PREKAZKA_NAHRADA"), 363.64, places=2
+        )
 
     # ------------------------------------------------------------------
     # § 166 — materská / rodičovská / otcovská
@@ -1353,9 +1355,7 @@ class TestSkPayroll(TransactionCase):
         ):
             with self.subTest(code=code):
                 contract, employee, _cal = self._abs_setup()
-                self._make_leave(
-                    employee, xmlid, date(2026, 6, 8), date(2026, 6, 12)
-                )
+                self._make_leave(employee, xmlid, date(2026, 6, 8), date(2026, 6, 12))
                 p = self._worked_payslip(
                     contract, employee, date(2026, 6, 1), date(2026, 6, 30)
                 )
@@ -1409,8 +1409,10 @@ class TestSkPayroll(TransactionCase):
         contract, employee, _cal = self._abs_setup()
         self._seed_prior_quarter(contract, employee)
         self._make_leave(
-            employee, "l10n_sk_leave_type_darovanie_krvi",
-            date(2026, 6, 8), date(2026, 6, 12),
+            employee,
+            "l10n_sk_leave_type_darovanie_krvi",
+            date(2026, 6, 8),
+            date(2026, 6, 12),
         )
         p = self._worked_payslip(
             contract, employee, date(2026, 6, 1), date(2026, 6, 30)
@@ -1420,15 +1422,18 @@ class TestSkPayroll(TransactionCase):
         # 40 h x PHZ 13.6364 (the seed runs at 2400) = 545.46
         self.assertGreater(line("OBSTACLE_NAHRADA"), 0.0)
         self.assertAlmostEqual(
-            line("GROSS"), line("BASIC") + line("OBSTACLE_NAHRADA"), places=2)
+            line("GROSS"), line("BASIC") + line("OBSTACLE_NAHRADA"), places=2
+        )
 
     def test_unpaid_study_leave_pays_nothing(self):
         """§ 140 leaves paid study leave to the employer, so the unpaid
         variant must prorate the wage and add nothing back."""
         contract, employee, _cal = self._abs_setup()
         self._make_leave(
-            employee, "l10n_sk_leave_type_vzdelavanie_unpaid",
-            date(2026, 6, 8), date(2026, 6, 12),
+            employee,
+            "l10n_sk_leave_type_vzdelavanie_unpaid",
+            date(2026, 6, 8),
+            date(2026, 6, 12),
         )
         p = self._worked_payslip(
             contract, employee, date(2026, 6, 1), date(2026, 6, 30)
@@ -1443,16 +1448,20 @@ class TestSkPayroll(TransactionCase):
         náhrada exactly as a DPN does."""
         contract, employee, _cal = self._abs_setup()
         self._make_leave(
-            employee, "l10n_sk_leave_type_karantena",
-            date(2026, 6, 8), date(2026, 6, 12),
+            employee,
+            "l10n_sk_leave_type_karantena",
+            date(2026, 6, 8),
+            date(2026, 6, 12),
         )
         p = self._worked_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30),
+            contract,
+            employee,
+            date(2026, 6, 1),
+            date(2026, 6, 30),
             inputs=[("PN_DVZ", 50.0)],
         )
         pn_days = sum(
-            abs(w.number_of_days) for w in p.worked_days_line_ids
-            if w.code == "PN"
+            abs(w.number_of_days) for w in p.worked_days_line_ids if w.code == "PN"
         )
         self.assertAlmostEqual(pn_days, 5.0, places=2)
         self.assertGreater(p.get_salary_line_total("SICK_COMP"), 0.0)
@@ -1461,9 +1470,11 @@ class TestSkPayroll(TransactionCase):
         """§§ 136-138 are paid at priemerný zárobok, so they carry OBSTACLE.
         The separate types exist because the legal reason differs and an
         employer has to record which it was."""
-        for xmlid in ("l10n_sk_leave_type_verejna_funkcia",
-                      "l10n_sk_leave_type_obcianska_povinnost",
-                      "l10n_sk_leave_type_darovanie_krvi"):
+        for xmlid in (
+            "l10n_sk_leave_type_verejna_funkcia",
+            "l10n_sk_leave_type_obcianska_povinnost",
+            "l10n_sk_leave_type_darovanie_krvi",
+        ):
             with self.subTest(xmlid=xmlid):
                 ltype = self.env.ref("l10n_sk_hr_payroll_oca." + xmlid)
                 self.assertEqual(ltype.l10n_sk_payroll_code, "OBSTACLE")
@@ -1504,9 +1515,7 @@ class TestSkPayroll(TransactionCase):
         bands = self.env["hr.rule.parameter"]._get_parameter_value(
             "l10n_sk_income_tax_bands_annual", date(2026, 12, 31)
         )
-        self.assertEqual(
-            [c for _r, c in bands[:3]], [43983.32, 60349.21, 75010.32]
-        )
+        self.assertEqual([c for _r, c in bands[:3]], [43983.32, 60349.21, 75010.32])
 
     def test_child_bonus_taper_applies_per_child(self):
         """§ 33 ods. 11: the 1/10 reduction is taken from EACH child.
@@ -1516,13 +1525,14 @@ class TestSkPayroll(TransactionCase):
         so 2 × (100 − 71) = 58 — not 200 − 71 = 129.
         """
         contract, employee = self._make_contract(
-            "Vysoky Prijem", 3500.0, date(2024, 1, 1), self.calendar,
+            "Vysoky Prijem",
+            3500.0,
+            date(2024, 1, 1),
+            self.calendar,
             l10n_sk_tax_declaration_signed=True,
             l10n_sk_children_under_15=2,
         )
-        p = self._make_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
         self.assertAlmostEqual(p.get_salary_line_total("TAXBASE"), 2996.0, 2)
         self.assertAlmostEqual(p.get_salary_line_total("CHILD_BONUS"), 58.0, 2)
 
@@ -1552,9 +1562,7 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_dohodar(
             l10n_sk_agreement_type="dobps", l10n_sk_income_regular=True
         )
-        p = self._make_payslip(
-            contract, employee, date(2025, 6, 1), date(2025, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
         self.assertAlmostEqual(line("SICK"), 0.0, places=2)
         self.assertAlmostEqual(line("SICKEMPLOYER"), 0.0, places=2)
@@ -1572,13 +1580,17 @@ class TestSkPayroll(TransactionCase):
                 "company_id": self.company.id,
                 "hours_per_day": 2.0,
                 "attendance_ids": [
-                    (0, 0, {
-                        "name": "Mon",
-                        "dayofweek": "0",
-                        "hour_from": 8.0,
-                        "hour_to": 10.0,
-                        "day_period": "morning",
-                    })
+                    (
+                        0,
+                        0,
+                        {
+                            "name": "Mon",
+                            "dayofweek": "0",
+                            "hour_from": 8.0,
+                            "hour_to": 10.0,
+                            "day_period": "morning",
+                        },
+                    )
                 ],
             }
         )
@@ -1593,22 +1605,16 @@ class TestSkPayroll(TransactionCase):
         actual 5,00 + 11,00 → top-up 29,45.
         """
         contract, employee = self._tiny_part_timer()
-        p = self._make_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
-        )
+        p = self._make_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
         self.assertAlmostEqual(p.get_salary_line_total("HEALTH"), -5.0, 2)
-        self.assertAlmostEqual(
-            p.get_salary_line_total("HEALTHDOPLATOK"), -29.45, 2)
+        self.assertAlmostEqual(p.get_salary_line_total("HEALTHDOPLATOK"), -29.45, 2)
 
     def test_health_minimum_preddavok_not_for_ztp(self):
         """§ 16a ods. 2 písm. c): every ZP day removes its share — a ZŤP
         employee for the whole month owes no minimum at all."""
         contract, employee = self._tiny_part_timer(l10n_sk_ztp=True)
-        p = self._make_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
-        )
-        self.assertAlmostEqual(
-            p.get_salary_line_total("HEALTHDOPLATOK"), 0.0, 2)
+        p = self._make_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
+        self.assertAlmostEqual(p.get_salary_line_total("HEALTHDOPLATOK"), 0.0, 2)
 
     def test_health_minimum_preddavok_reduced_by_pn_days(self):
         """§ 16a ods. 2 + § 11 ods. 7: PN days are poistenec-štátu days.
@@ -1617,11 +1623,13 @@ class TestSkPayroll(TransactionCase):
         """
         contract, employee = self._tiny_part_timer()
         p = self._payslip_with_inputs(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30),
+            contract,
+            employee,
+            date(2026, 6, 1),
+            date(2026, 6, 30),
             [("PN_DAYS", 10.0), ("PN_DVZ", 20)],
         )
-        self.assertAlmostEqual(
-            p.get_salary_line_total("HEALTHDOPLATOK"), -14.30, 2)
+        self.assertAlmostEqual(p.get_salary_line_total("HEALTHDOPLATOK"), -14.30, 2)
 
     # ------------------------------------------------------------------
     # Pension status (zákon 461/2003 § 4 ods. 1 písm. b), § 19, § 128)
@@ -1629,36 +1637,52 @@ class TestSkPayroll(TransactionCase):
     def test_oop_2027_uses_300_and_preserves_2026(self):
         """z.461/2003 §138a: OOP300 from2027; historical2026 remains200."""
         contract, employee = self._make_dohodar(
-            l10n_sk_agreement_type="dopc", l10n_sk_income_regular=True,
-            l10n_sk_pension_type="old_age", l10n_sk_agreement_oop=True,
+            l10n_sk_agreement_type="dopc",
+            l10n_sk_income_regular=True,
+            l10n_sk_pension_type="old_age",
+            l10n_sk_agreement_oop=True,
             l10n_sk_health_exempt=True,
         )
         contract.wage = 250.0
         future = self._make_payslip(
-            contract, employee, date(2027, 1, 1), date(2027, 1, 31))
+            contract, employee, date(2027, 1, 1), date(2027, 1, 31)
+        )
         self.assertEqual(future.rule_parameter("l10n_sk_dohoda_oop"), 300)
         for code in ("PENSION", "PENSIONEMPLOYER", "RESERVEFUNDEMPLOYER"):
             self.assertAlmostEqual(future.get_salary_line_total(code), 0.0, places=2)
 
         historical = self._make_payslip(
-            contract, employee, date(2026, 12, 1), date(2026, 12, 31))
+            contract, employee, date(2026, 12, 1), date(2026, 12, 31)
+        )
         self.assertEqual(historical.rule_parameter("l10n_sk_dohoda_oop"), 200)
-        for code, expected in (("PENSION", -2), ("PENSIONEMPLOYER", 7),
-                               ("RESERVEFUNDEMPLOYER", 2.37)):
-            self.assertAlmostEqual(historical.get_salary_line_total(code), expected, places=2)
+        for code, expected in (
+            ("PENSION", -2),
+            ("PENSIONEMPLOYER", 7),
+            ("RESERVEFUNDEMPLOYER", 2.37),
+        ):
+            self.assertAlmostEqual(
+                historical.get_salary_line_total(code), expected, places=2
+            )
 
     def test_old_age_pensioner_on_dopc_is_pension_insured_only(self):
         """§ 4 ods. 1 písm. b): no sickness, no unemployment, regular income
         or not; § 128 ods. 3: no disability premium either side."""
         contract, employee = self._make_dohodar(
-            l10n_sk_agreement_type="dopc", l10n_sk_income_regular=True,
+            l10n_sk_agreement_type="dopc",
+            l10n_sk_income_regular=True,
             l10n_sk_pension_type="old_age",
         )
         p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
-        for code in ("SICK", "SICKEMPLOYER", "UNEMPLOYMENT",
-                     "UNEMPLOYMENTEMPLOYER", "SHORTTIMEEMPLOYER",
-                     "DISABILITY", "DISABILITYEMPLOYER"):
+        for code in (
+            "SICK",
+            "SICKEMPLOYER",
+            "UNEMPLOYMENT",
+            "UNEMPLOYMENTEMPLOYER",
+            "SHORTTIMEEMPLOYER",
+            "DISABILITY",
+            "DISABILITYEMPLOYER",
+        ):
             self.assertAlmostEqual(line(code), 0.0, places=2, msg=code)
         self.assertAlmostEqual(line("PENSION"), -40.0, places=2)
         self.assertAlmostEqual(line("PENSIONEMPLOYER"), 140.0, places=2)
@@ -1669,7 +1693,8 @@ class TestSkPayroll(TransactionCase):
         dohoda (§ 4 ods. 1 písm. b) bod 3) but § 128 ods. 3 does not spare
         the disability premium."""
         contract, employee = self._make_dohodar(
-            l10n_sk_agreement_type="dopc", l10n_sk_income_regular=True,
+            l10n_sk_agreement_type="dopc",
+            l10n_sk_income_regular=True,
             l10n_sk_pension_type="disability",
         )
         p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
@@ -1685,7 +1710,8 @@ class TestSkPayroll(TransactionCase):
         short-time financing is owed for every pracovný pomer (§ 128 ods. 1
         písm. g))."""
         contract, employee = self._make_dohodar(
-            l10n_sk_agreement_type="none", l10n_sk_pension_type="old_age",
+            l10n_sk_agreement_type="none",
+            l10n_sk_pension_type="old_age",
         )
         p = self._make_payslip(contract, employee, date(2025, 6, 1), date(2025, 6, 30))
         line = p.get_salary_line_total
@@ -1700,7 +1726,8 @@ class TestSkPayroll(TransactionCase):
     # ------------------------------------------------------------------
     def test_agreement_below_minimum_hourly_wage_warns(self):
         contract, _employee = self._make_dohodar(
-            l10n_sk_agreement_type="dopc", l10n_sk_hourly_wage=4.50,
+            l10n_sk_agreement_type="dopc",
+            l10n_sk_hourly_wage=4.50,
             contract_date_end=date(2026, 6, 30),
         )
         self.assertIn("5.259", contract.l10n_sk_agreement_wage_warning or "")
@@ -1710,7 +1737,8 @@ class TestSkPayroll(TransactionCase):
     def test_employment_is_not_measured_against_the_hourly_minimum(self):
         """§ 120 minimum wage claims cover a pracovný pomer (surcharges)."""
         contract, _employee = self._make_dohodar(
-            l10n_sk_agreement_type="none", l10n_sk_hourly_wage=4.50,
+            l10n_sk_agreement_type="none",
+            l10n_sk_hourly_wage=4.50,
             contract_date_end=date(2026, 6, 30),
         )
         self.assertFalse(contract.l10n_sk_agreement_wage_warning)
@@ -1721,8 +1749,11 @@ class TestSkPayroll(TransactionCase):
     def test_rule_parameter_code_is_unique(self):
         Param = self.env["hr.rule.parameter"]
         Param.create({"name": "Dup A", "code": "l10n_sk_test_dup"})
-        with mute_logger("odoo.sql_db"), self.assertRaises(IntegrityError), \
-                self.env.cr.savepoint():
+        with (
+            mute_logger("odoo.sql_db"),
+            self.assertRaises(IntegrityError),
+            self.env.cr.savepoint(),
+        ):
             Param.create({"name": "Dup B", "code": "l10n_sk_test_dup"})
 
     def test_one_tax_reconciliation_per_employee_and_year(self):
@@ -1734,8 +1765,11 @@ class TestSkPayroll(TransactionCase):
         }
         Rz = self.env["l10n.sk.tax.reconciliation"]
         Rz.create(vals)
-        with mute_logger("odoo.sql_db"), self.assertRaises(IntegrityError), \
-                self.env.cr.savepoint():
+        with (
+            mute_logger("odoo.sql_db"),
+            self.assertRaises(IntegrityError),
+            self.env.cr.savepoint(),
+        ):
             Rz.create(vals)
 
     # ------------------------------------------------------------------
@@ -1743,15 +1777,23 @@ class TestSkPayroll(TransactionCase):
     # ------------------------------------------------------------------
     def test_slovak_fields_are_on_the_employee_form(self):
         """They used to be on contract TEMPLATES only."""
-        arch = self.env["hr.employee"].get_views([(False, "form")])["views"]["form"]["arch"]
-        for name in ("l10n_sk_agreement_type", "l10n_sk_hourly_wage",
-                     "l10n_sk_pension_type", "l10n_sk_tax_declaration_signed"):
+        arch = self.env["hr.employee"].get_views([(False, "form")])["views"]["form"][
+            "arch"
+        ]
+        for name in (
+            "l10n_sk_agreement_type",
+            "l10n_sk_hourly_wage",
+            "l10n_sk_pension_type",
+            "l10n_sk_tax_declaration_signed",
+        ):
             self.assertIn('name="%s"' % name, arch)
 
     def test_rule_parameters_have_a_menu(self):
         menu = self.env.ref("l10n_sk_hr_payroll_oca.hr_rule_parameter_menu")
         self.assertEqual(menu.action.res_model, "hr.rule.parameter")
-        arch = self.env["hr.rule.parameter"].get_views([(False, "form")])["views"]["form"]["arch"]
+        arch = self.env["hr.rule.parameter"].get_views([(False, "form")])["views"][
+            "form"
+        ]["arch"]
         self.assertIn('name="parameter_value_ids"', arch)
 
     # -- § 138 ods. 13: part-month employee cap ----------------------------
@@ -1776,7 +1818,9 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_contract(
             "Part-month premium", 20000.0, date(2026, 11, 16), self.calendar
         )
-        p = self._make_payslip(contract, employee, date(2026, 11, 1), date(2026, 11, 30))
+        p = self._make_payslip(
+            contract, employee, date(2026, 11, 1), date(2026, 11, 30)
+        )
         self.assertGreater(p.get_salary_line_total("GROSS"), 8382.0)
         # 1.4 % of the halved cap, floored to the cent.
         self.assertAlmostEqual(p.get_salary_line_total("SICK"), -117.34, places=2)
@@ -1785,12 +1829,18 @@ class TestSkPayroll(TransactionCase):
         contract, employee = self._make_contract(
             "Daily rounded premium", 50000.0, date(2026, 1, 16), self.calendar
         )
-        slip = self._make_payslip(contract, employee, date(2026, 1, 1), date(2026, 1, 31))
+        slip = self._make_payslip(
+            contract, employee, date(2026, 1, 1), date(2026, 1, 31)
+        )
         self.assertGreater(slip.get_salary_line_total("GROSS"), 16764)
         # § 138(13): floor(16764 / 31, 2) x 16 = 8652.32.
         # Employee disability: floor(8652.32 x 3%, 2) = 259.56.
-        self.assertAlmostEqual(slip.get_salary_line_total("DISABILITY"), -259.56, places=2)
-        self.assertAlmostEqual(slip.get_salary_line_total("DISABILITYEMPLOYER"), 502.92, places=2)
+        self.assertAlmostEqual(
+            slip.get_salary_line_total("DISABILITY"), -259.56, places=2
+        )
+        self.assertAlmostEqual(
+            slip.get_salary_line_total("DISABILITYEMPLOYER"), 502.92, places=2
+        )
 
     def test_sick_pay_counts_calendar_days(self):
         """Fourteen calendar days span two weekends and still pay 3 + 11 days."""
@@ -1799,7 +1849,10 @@ class TestSkPayroll(TransactionCase):
             employee, "l10n_sk_leave_type_pn", date(2026, 6, 8), date(2026, 6, 21)
         )
         p = self._worked_payslip(
-            contract, employee, date(2026, 6, 1), date(2026, 6, 30),
+            contract,
+            employee,
+            date(2026, 6, 1),
+            date(2026, 6, 30),
             inputs=[("PN_DVZ", 60.0)],
         )
         self.assertAlmostEqual(p.get_salary_line_total("SICK_COMP"), 408.0, places=2)
@@ -1807,50 +1860,82 @@ class TestSkPayroll(TransactionCase):
     def test_health_allowance_reduced_for_a_part_month(self):
         """§ 16 ods. 18: half the month employed halves the allowance."""
         contract, employee = self._make_contract(
-            "Part-month allowance", 400.0, date(2026, 11, 16), self.calendar,
+            "Part-month allowance",
+            400.0,
+            date(2026, 11, 16),
+            self.calendar,
             l10n_sk_health_oop_claim=True,
         )
-        p = self._make_payslip(contract, employee, date(2026, 11, 1), date(2026, 11, 30))
+        p = self._make_payslip(
+            contract, employee, date(2026, 11, 1), date(2026, 11, 30)
+        )
         # Allowance at 400: 380 - 2 x 20 = 340; halved 170; base 230; 5 %.
         self.assertAlmostEqual(p.get_salary_line_total("HEALTH"), -11.5, places=2)
 
     def _monthly_pension_profile(self, **values):
         facts = {
-            "l10n_sk_pension_type": "old_age", "l10n_sk_tax_declaration_signed": True,
+            "l10n_sk_pension_type": "old_age",
+            "l10n_sk_tax_declaration_signed": True,
             "l10n_sk_tax_pensioner": True,
         }
         facts.update(values)
-        return self._make_contract("January tax profile", 500, date(2024, 1, 1), self.calendar, **facts)
+        return self._make_contract(
+            "January tax profile", 500, date(2024, 1, 1), self.calendar, **facts
+        )
 
     def test_monthly_january_small_pension_excludes_allowance(self):
         """FS FAQ 7: a small annual pension leaves a difference for RZD only."""
-        version, employee = self._monthly_pension_profile(l10n_sk_nczd_pension_annual=3600)
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        version, employee = self._monthly_pension_profile(
+            l10n_sk_nczd_pension_annual=3600
+        )
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 0)
         # Gross 500 - social 27 - health 25 = 448; monthly tax 19% = 85.12.
         self.assertAlmostEqual(slip.get_salary_line_total("INCOMETAX"), -85.12, 2)
 
     def test_monthly_midyear_pension_preserves_allowance(self):
         """FS FAQ 3: May award preserves June-December monthly NČZD."""
-        original, employee = self._monthly_pension_profile(l10n_sk_pension_type=False, l10n_sk_tax_pensioner=False)
-        employee.create_version({"date_version": date(2026, 5, 1), "l10n_sk_pension_type": "old_age",
-                                 "l10n_sk_tax_pensioner": True})
+        original, employee = self._monthly_pension_profile(
+            l10n_sk_pension_type=False, l10n_sk_tax_pensioner=False
+        )
+        employee.create_version(
+            {
+                "date_version": date(2026, 5, 1),
+                "l10n_sk_pension_type": "old_age",
+                "l10n_sk_tax_pensioner": True,
+            }
+        )
         version = employee._get_version(date(2026, 6, 1))
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 497.23)
         self.assertEqual(slip.get_salary_line_total("INCOMETAX"), 0)
 
     def test_monthly_contradictory_january_pension_has_plain_error(self):
         version, employee = self._monthly_pension_profile(l10n_sk_tax_pensioner=False)
-        with self.assertRaisesRegex(UserError, '^The 1 January version indicates a pension'):
+        with self.assertRaisesRegex(
+            UserError, "^The 1 January version indicates a pension"
+        ):
             self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
 
     def test_monthly_may_award_rolls_year_without_mutating_december(self):
-        original, employee = self._monthly_pension_profile(l10n_sk_pension_type=False, l10n_sk_tax_pensioner=False)
-        employee.create_version({"date_version": date(2026, 5, 1), "l10n_sk_pension_type": "old_age",
-                                 "l10n_sk_tax_pensioner": True})
+        original, employee = self._monthly_pension_profile(
+            l10n_sk_pension_type=False, l10n_sk_tax_pensioner=False
+        )
+        employee.create_version(
+            {
+                "date_version": date(2026, 5, 1),
+                "l10n_sk_pension_type": "old_age",
+                "l10n_sk_tax_pensioner": True,
+            }
+        )
         may = employee._get_version(date(2026, 12, 1))
-        december = self._make_payslip(may, employee, date(2026, 12, 1), date(2026, 12, 31))
+        december = self._make_payslip(
+            may, employee, date(2026, 12, 1), date(2026, 12, 31)
+        )
         january = self._make_payslip(may, employee, date(2027, 1, 1), date(2027, 1, 31))
         self.assertEqual(january.l10n_sk_monthly_nczd(may), 0)
         december.compute_sheet()
@@ -1859,245 +1944,422 @@ class TestSkPayroll(TransactionCase):
 
     def test_monthly_disability_does_not_imply_tax_pension(self):
         version, employee = self._monthly_pension_profile(
-            l10n_sk_pension_type="disability", l10n_sk_tax_pensioner=False)
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+            l10n_sk_pension_type="disability", l10n_sk_tax_pensioner=False
+        )
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.get_salary_line_total("INCOMETAX"), 0)
 
     def test_monthly_foreign_tax_pension_independent_of_insurance_type(self):
         version, employee = self._monthly_pension_profile(l10n_sk_pension_type=False)
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 0)
         self.assertLess(slip.get_salary_line_total("INCOMETAX"), -70)
 
     def test_monthly_unsigned_checkbox_no_allowance_even_unknown(self):
         version, employee = self._monthly_pension_profile(
-            l10n_sk_tax_pensioner=False, l10n_sk_tax_declaration_signed=False)
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+            l10n_sk_tax_pensioner=False, l10n_sk_tax_declaration_signed=False
+        )
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 0)
 
     def test_monthly_cross_employee_version_is_rejected(self):
         version, employee = self._monthly_pension_profile()
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         with self.assertRaises(UserError):
             slip.l10n_sk_monthly_nczd(self.contract)
 
     def test_monthly_annual_pension_amount_requires_tax_flag(self):
-        with self.assertRaisesRegex(UserError, 'yearly pension amount requires'):
-            self._monthly_pension_profile(l10n_sk_tax_pensioner=False,
-                l10n_sk_pension_type=False, l10n_sk_nczd_pension_annual=3600)
+        with self.assertRaisesRegex(UserError, "yearly pension amount requires"):
+            self._monthly_pension_profile(
+                l10n_sk_tax_pensioner=False,
+                l10n_sk_pension_type=False,
+                l10n_sk_nczd_pension_annual=3600,
+            )
 
     def test_rzd_flag_without_yearly_amount_is_refused(self):
         version, employee = self._monthly_pension_profile()
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
-        with self.assertRaisesRegex(UserError, 'Reconcile the 1 January tax pension flag'):
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
+        with self.assertRaisesRegex(
+            UserError, "Reconcile the 1 January tax pension flag"
+        ):
             rz.action_compute()
 
     def test_rzd_amount_without_january_flag_is_refused(self):
-        version, employee = self._monthly_pension_profile(l10n_sk_tax_pensioner=False, l10n_sk_pension_type=False)
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000, 'pension_annual': 3000})
-        with self.assertRaisesRegex(UserError, 'Reconcile the 1 January tax pension flag'):
+        version, employee = self._monthly_pension_profile(
+            l10n_sk_tax_pensioner=False, l10n_sk_pension_type=False
+        )
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+                "pension_annual": 3000,
+            }
+        )
+        with self.assertRaisesRegex(
+            UserError, "Reconcile the 1 January tax pension flag"
+        ):
             rz.action_compute()
 
     def test_rzd_consistent_small_pension_keeps_annual_difference(self):
-        version, employee = self._monthly_pension_profile(l10n_sk_nczd_pension_annual=3000)
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
+        version, employee = self._monthly_pension_profile(
+            l10n_sk_nczd_pension_annual=3000
+        )
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
         rz.action_compute()
         self.assertAlmostEqual(rz.nczd_taxpayer, 2966.73)
 
     def test_retroactive_january_award_changes_monthly_eligibility(self):
-        version, employee = self._monthly_pension_profile(l10n_sk_tax_pensioner=False, l10n_sk_pension_type=False)
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        version, employee = self._monthly_pension_profile(
+            l10n_sk_tax_pensioner=False, l10n_sk_pension_type=False
+        )
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 497.23)
-        version.write({'l10n_sk_tax_pensioner': True})
+        version.write({"l10n_sk_tax_pensioner": True})
         slip.compute_sheet()
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 0)
 
     def test_monthly_future_version_cannot_establish_january_pension(self):
         version, employee = self._monthly_pension_profile()
         version.date_version = date(2026, 5, 1)
-        with self.assertRaisesRegex(UserError, 'version effective at 1 January'):
+        with self.assertRaisesRegex(UserError, "version effective at 1 January"):
             self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
 
     def _midyear_hire(self, pension=True):
-        return self._make_contract('May hire with declared January status', 500,
-            date(2026, 5, 1), self.calendar, l10n_sk_tax_declaration_signed=True,
-            l10n_sk_tax_pensioner=pension, l10n_sk_pension_type='old_age' if pension else False,
-            l10n_sk_nczd_pension_annual=3000 if pension else 0)
+        return self._make_contract(
+            "May hire with declared January status",
+            500,
+            date(2026, 5, 1),
+            self.calendar,
+            l10n_sk_tax_declaration_signed=True,
+            l10n_sk_tax_pensioner=pension,
+            l10n_sk_pension_type="old_age" if pension else False,
+            l10n_sk_nczd_pension_annual=3000 if pension else 0,
+        )
 
     def test_midyear_hire_already_pensioner_is_paid_without_allowance(self):
         version, employee = self._midyear_hire()
-        slip = self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
+        slip = self._make_payslip(
+            version, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         self.assertEqual(slip.l10n_sk_monthly_nczd(version), 0)
-        self.assertAlmostEqual(slip.get_salary_line_total('INCOMETAX'), -85.12, 2)
+        self.assertAlmostEqual(slip.get_salary_line_total("INCOMETAX"), -85.12, 2)
         self.assertEqual(version.date_version, date(2026, 5, 1))
         self.assertEqual(len(employee.version_ids), 1)
 
     def test_midyear_hire_rzd_uses_declared_january_status(self):
         version, employee = self._midyear_hire()
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
         rz.action_compute()
         self.assertAlmostEqual(rz.nczd_taxpayer, 2966.73)
         self.assertEqual(version.date_version, date(2026, 5, 1))
 
     def test_midyear_hire_later_award_preserves_first_declared_status(self):
         first, employee = self._midyear_hire(pension=False)
-        employee.create_version({'date_version': date(2026, 8, 1),
-            'l10n_sk_pension_type': 'old_age', 'l10n_sk_tax_pensioner': True})
+        employee.create_version(
+            {
+                "date_version": date(2026, 8, 1),
+                "l10n_sk_pension_type": "old_age",
+                "l10n_sk_tax_pensioner": True,
+            }
+        )
         later = employee._get_version(date(2026, 9, 1))
         slip = self._make_payslip(later, employee, date(2026, 9, 1), date(2026, 9, 30))
         self.assertEqual(slip.l10n_sk_monthly_nczd(later), 497.23)
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
         rz.action_compute()
         self.assertAlmostEqual(rz.nczd_taxpayer, 5966.73)
-        january = self._make_payslip(later, employee, date(2027, 1, 1), date(2027, 1, 31))
+        january = self._make_payslip(
+            later, employee, date(2027, 1, 1), date(2027, 1, 31)
+        )
         self.assertEqual(january.l10n_sk_monthly_nczd(later), 0)
         slip.compute_sheet()
         self.assertFalse(first.l10n_sk_tax_pensioner)
 
     def test_rehire_reads_the_new_employment_not_the_ended_one(self):
         """A pensioner rehired in 2026 after an employment that ended in 2023."""
-        old, employee = self._make_contract('Rehired pensioner', 500, date(2020, 1, 1),
-            self.calendar, l10n_sk_tax_declaration_signed=True)
+        old, employee = self._make_contract(
+            "Rehired pensioner",
+            500,
+            date(2020, 1, 1),
+            self.calendar,
+            l10n_sk_tax_declaration_signed=True,
+        )
         old.contract_date_end = date(2023, 6, 30)
-        employee.create_version({'date_version': date(2026, 5, 1),
-            'contract_date_start': date(2026, 5, 1), 'contract_date_end': False,
-            'l10n_sk_pension_type': 'old_age', 'l10n_sk_tax_pensioner': True,
-            'l10n_sk_nczd_pension_annual': 3000})
+        employee.create_version(
+            {
+                "date_version": date(2026, 5, 1),
+                "contract_date_start": date(2026, 5, 1),
+                "contract_date_end": False,
+                "l10n_sk_pension_type": "old_age",
+                "l10n_sk_tax_pensioner": True,
+                "l10n_sk_nczd_pension_annual": 3000,
+            }
+        )
         new = employee._get_version(date(2026, 6, 1))
         self.assertNotEqual(new, old)
         slip = self._make_payslip(new, employee, date(2026, 6, 1), date(2026, 6, 30))
         self.assertEqual(slip.l10n_sk_monthly_nczd(new), 0)
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2026,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2026,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
         self.assertEqual(rz.pension_annual, 3000)
         rz.action_compute()
         self.assertAlmostEqual(rz.nczd_taxpayer, 2966.73)
 
     def test_midyear_hire_future_first_version_refused(self):
         version, employee = self._midyear_hire()
-        with self.assertRaisesRegex(UserError, '^Record the employee'):
+        with self.assertRaisesRegex(UserError, "^Record the employee"):
             self._make_payslip(version, employee, date(2026, 4, 1), date(2026, 4, 30))
-        rz = self.env['l10n.sk.tax.reconciliation'].create({
-            'employee_id': employee.id, 'company_id': self.company.id, 'year': 2025,
-            'gather_from_payslips': False, 'annual_tax_base': 20000})
-        with self.assertRaisesRegex(UserError, '^Record the employee'):
+        rz = self.env["l10n.sk.tax.reconciliation"].create(
+            {
+                "employee_id": employee.id,
+                "company_id": self.company.id,
+                "year": 2025,
+                "gather_from_payslips": False,
+                "annual_tax_base": 20000,
+            }
+        )
+        with self.assertRaisesRegex(UserError, "^Record the employee"):
             rz.action_compute()
 
     def test_monthly_actual_slip_structure_runs_plain_precheck(self):
         version, employee = self._monthly_pension_profile(l10n_sk_tax_pensioner=False)
         version.struct_id = False
-        with self.assertRaisesRegex(UserError, '^The 1 January version indicates a pension'):
+        with self.assertRaisesRegex(
+            UserError, "^The 1 January version indicates a pension"
+        ):
             self._make_payslip(version, employee, date(2026, 6, 1), date(2026, 6, 30))
 
     def _average_short_day_fixture(self, days=21, daily_hours=4):
-        calendar = self.env['resource.calendar'].create({'name': 'Average short working days',
-            'company_id': self.company.id, 'tz': 'Europe/Bratislava',
-            'attendance_ids': [(5, 0, 0)] + [(0, 0, {'name': str(day), 'dayofweek': str(day),
-                'hour_from': 8, 'hour_to': 8+daily_hours, 'day_period': 'morning'}) for day in range(5)]})
-        contract, employee = self._make_contract('Average part-time employee', 2400,
-            date(2026, 1, 1), calendar)
+        calendar = self.env["resource.calendar"].create(
+            {
+                "name": "Average short working days",
+                "company_id": self.company.id,
+                "tz": "Europe/Bratislava",
+                "attendance_ids": [(5, 0, 0)]
+                + [
+                    (
+                        0,
+                        0,
+                        {
+                            "name": str(day),
+                            "dayofweek": str(day),
+                            "hour_from": 8,
+                            "hour_to": 8 + daily_hours,
+                            "day_period": "morning",
+                        },
+                    )
+                    for day in range(5)
+                ],
+            }
+        )
+        contract, employee = self._make_contract(
+            "Average part-time employee", 2400, date(2026, 1, 1), calendar
+        )
         # March 3–31 has exactly 21 working days; March 4–31 has 20.
-        source = self._worked_payslip(contract, employee, date(2026, 3, 24-days), date(2026, 3, 31))
+        source = self._worked_payslip(
+            contract, employee, date(2026, 3, 24 - days), date(2026, 3, 31)
+        )
         source.action_payslip_done()
-        self.assertAlmostEqual(source.get_salary_line_total('GROSS'), 2400)
-        worked = source.worked_days_line_ids.filtered(lambda line: line.code == 'WORK100')
-        self.assertAlmostEqual(sum(worked.mapped('number_of_days')), days)
-        self.assertAlmostEqual(sum(worked.mapped('number_of_hours')), days*daily_hours)
+        self.assertAlmostEqual(source.get_salary_line_total("GROSS"), 2400)
+        worked = source.worked_days_line_ids.filtered(
+            lambda line: line.code == "WORK100"
+        )
+        self.assertAlmostEqual(sum(worked.mapped("number_of_days")), days)
+        self.assertAlmostEqual(
+            sum(worked.mapped("number_of_hours")), days * daily_hours
+        )
         contract.wage = 2000
-        target = self._make_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
+        target = self._make_payslip(
+            contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+        )
         return source, target
 
     def test_average_21_short_days_uses_actual_wage_with_fewer_than_168_hours(self):
         source, target = self._average_short_day_fixture()
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(), 28.5714, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 28.5714, places=4
+        )
 
     def test_average_20_short_days_uses_probable_earnings(self):
         source, target = self._average_short_day_fixture(days=20)
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(),
-            round(2000/target.l10n_sk_scheduled_hours(), 4), places=4)
-        self.assertNotAlmostEqual(target.l10n_sk_average_hourly_earnings(), 30, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(),
+            round(2000 / target.l10n_sk_scheduled_hours(), 4),
+            places=4,
+        )
+        self.assertNotAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 30, places=4
+        )
 
     def test_average_168_hours_counts_even_with_fewer_than_21_days(self):
         source, target = self._average_short_day_fixture(days=20, daily_hours=8.4)
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(), 14.2857, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 14.2857, places=4
+        )
 
     def test_average_other_company_history_is_excluded(self):
         source, target = self._average_short_day_fixture()
-        other = self.env['res.company'].create({'name': 'Other average company'})
+        other = self.env["res.company"].create({"name": "Other average company"})
         self.env.user.company_ids |= other
-        foreign = self.env['hr.payslip'].create({'name': 'Foreign-company average source',
-            'company_id': other.id, 'employee_id': source.employee_id.id,
-            'date_from': source.date_from, 'date_to': source.date_to, 'state': 'done'})
-        rule = source.line_ids.filtered(lambda line: line.code == 'GROSS').salary_rule_id
-        self.env['hr.payslip.line'].create({'name': 'Foreign gross', 'slip_id': foreign.id,
-            'company_id': other.id, 'employee_id': source.employee_id.id, 'contract_id': source.contract_id.id,
-            'salary_rule_id': rule.id, 'code': 'GROSS', 'category_id': rule.category_id.id,
-            'amount': 99999, 'quantity': 1, 'rate': 100})
+        foreign = self.env["hr.payslip"].create(
+            {
+                "name": "Foreign-company average source",
+                "company_id": other.id,
+                "employee_id": source.employee_id.id,
+                "date_from": source.date_from,
+                "date_to": source.date_to,
+                "state": "done",
+            }
+        )
+        rule = source.line_ids.filtered(
+            lambda line: line.code == "GROSS"
+        ).salary_rule_id
+        self.env["hr.payslip.line"].create(
+            {
+                "name": "Foreign gross",
+                "slip_id": foreign.id,
+                "company_id": other.id,
+                "employee_id": source.employee_id.id,
+                "contract_id": source.contract_id.id,
+                "salary_rule_id": rule.id,
+                "code": "GROSS",
+                "category_id": rule.category_id.id,
+                "amount": 99999,
+                "quantity": 1,
+                "rate": 100,
+            }
+        )
         self.assertNotIn(foreign, target._l10n_sk_average_payslips())
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(), 28.5714, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 28.5714, places=4
+        )
 
     def test_average_native_refund_cancels_wage_and_worked_time(self):
         source, target = self._average_short_day_fixture()
         contract = source.contract_id
         contract.wage = 2400
-        refund = source.copy({'credit_note': True})
+        refund = source.copy({"credit_note": True})
         refund.compute_sheet()
         refund.action_payslip_done()
         contract.wage = 2000
-        self.assertAlmostEqual(refund.get_salary_line_total('GROSS'), 2400)
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(),
-            round(2000/target.l10n_sk_scheduled_hours(), 4), places=4)
+        self.assertAlmostEqual(refund.get_salary_line_total("GROSS"), 2400)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(),
+            round(2000 / target.l10n_sk_scheduled_hours(), 4),
+            places=4,
+        )
         # An actual replacement then supplies only its own wage and time.
         contract.wage = 2800
-        replacement = source.copy({'credit_note': False})
+        replacement = source.copy({"credit_note": False})
         replacement.compute_sheet()
         replacement.action_payslip_done()
         contract.wage = 2000
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(), 33.3333, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 33.3333, places=4
+        )
 
     def test_average_rehire_does_not_reuse_previous_employment(self):
         source, target = self._average_short_day_fixture()
         source.contract_id.contract_date_end = date(2026, 3, 31)
-        target.employee_id.create_version({'date_version': date(2026, 4, 1),
-            'contract_date_start': date(2026, 4, 1), 'contract_date_end': False, 'wage': 2000})
+        target.employee_id.create_version(
+            {
+                "date_version": date(2026, 4, 1),
+                "contract_date_start": date(2026, 4, 1),
+                "contract_date_end": False,
+                "wage": 2000,
+            }
+        )
         target.contract_id = target.employee_id._get_version(date(2026, 6, 1))
         self.assertNotIn(source, target._l10n_sk_average_payslips())
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(),
-            round(2000/target.l10n_sk_scheduled_hours(), 4), places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(),
+            round(2000 / target.l10n_sk_scheduled_hours(), 4),
+            places=4,
+        )
 
     def test_average_wage_version_change_preserves_same_employment(self):
         source, target = self._average_short_day_fixture()
-        target.employee_id.create_version({'date_version': date(2026, 4, 1), 'wage': 1800})
+        target.employee_id.create_version(
+            {"date_version": date(2026, 4, 1), "wage": 1800}
+        )
         target.contract_id = target.employee_id._get_version(date(2026, 6, 1))
         self.assertIn(source, target._l10n_sk_average_payslips())
-        self.assertAlmostEqual(target.l10n_sk_average_hourly_earnings(), 28.5714, places=4)
+        self.assertAlmostEqual(
+            target.l10n_sk_average_hourly_earnings(), 28.5714, places=4
+        )
 
     def test_leave_starter_upgrade_preserves_approved_absence_and_configuration(self):
         checked_fields = ["date_from", "date_to", "state", "number_of_days"]
         for data_file, xmlid in (
-                ("data/hr_leave_type_data.xml", "l10n_sk_leave_type_pn"),
-                ("data/hr_leave_type_data.xml", "l10n_sk_leave_type_dovolenka"),
-                ("data/hr_leave_options_data.xml", "l10n_sk_leave_type_obstacle_exam")):
+            ("data/hr_leave_type_data.xml", "l10n_sk_leave_type_pn"),
+            ("data/hr_leave_type_data.xml", "l10n_sk_leave_type_dovolenka"),
+            ("data/hr_leave_options_data.xml", "l10n_sk_leave_type_obstacle_exam"),
+        ):
             with self.subTest(leave_type=xmlid):
                 _contract, employee, _calendar = self._abs_setup(wage=1500)
                 leave_type = self.env.ref("l10n_sk_hr_payroll_oca.%s" % xmlid)
                 if leave_type.requires_allocation:
-                    self.env["hr.leave.allocation"].create({
-                        "name": "Upgrade test", "holiday_status_id": leave_type.id,
-                        "employee_id": employee.id, "number_of_days": 10,
-                        "date_from": date(2026, 1, 1),
-                    }).action_approve()
+                    self.env["hr.leave.allocation"].create(
+                        {
+                            "name": "Upgrade test",
+                            "holiday_status_id": leave_type.id,
+                            "employee_id": employee.id,
+                            "number_of_days": 10,
+                            "date_from": date(2026, 1, 1),
+                        }
+                    ).action_approve()
                 leave = self._make_leave(
                     employee, xmlid, date(2026, 6, 5), date(2026, 6, 9)
                 )
@@ -2115,6 +2377,57 @@ class TestSkPayroll(TransactionCase):
                 leave.invalidate_recordset()
                 self.assertEqual(leave.read(checked_fields), original)
                 self.assertEqual(leave_type.name, "Company reviewed absence type")
+
+    def test_pn_completion_changed_case_is_stale(self):
+        calendar = self._make_mon_fri_calendar()
+        contract, employee = self._make_contract(
+            "Reviewed PN source",
+            2000,
+            date(2024, 1, 1),
+            calendar,
+        )
+        leave = self._reviewed_pn_case(
+            employee,
+            date(2026, 6, 5),
+            date(2026, 6, 9),
+            "PN-SOURCE",
+            20,
+        )
+        slip = self._worked_payslip(
+            contract,
+            employee,
+            date(2026, 6, 1),
+            date(2026, 6, 30),
+        )
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 37)
+        leave.l10n_sk_pn_daily_base = 40
+        with self.assertRaises(UserError):
+            slip.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertNotEqual(slip.state, "done")
+        slip.compute_sheet()
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 74)
+        slip.with_context(without_compute_sheet=True).action_payslip_done()
+        self.assertEqual(slip.state, "done")
+
+    def test_pn_completion_2027_employer_cap_is_rounded_down(self):
+        contract, employee, _calendar = self._abs_setup(wage=3000)
+        self._reviewed_pn_case(
+            employee,
+            date(2027, 1, 1),
+            date(2027, 1, 31),
+            "PN-2027-CAP",
+            500,
+        )
+        slip = self._worked_payslip(
+            contract,
+            employee,
+            date(2027, 1, 1),
+            date(2027, 1, 31),
+        )
+        # §8(8) employer DVZ is DOWN: 2 * 19,440 / 365 => 106.5205.
+        # SP's 106.5206 and its 10-cent benefit rounding do not apply here.
+        # 106.5205 * (3*.25 + 11*.55) = 724.33940, then cents UP.
+        self.assertEqual(slip.get_salary_line_total("SICK_COMP"), 724.34)
 
     def test_sickness_calendar_weekend_is_paid_for_five_calendar_days(self):
         contract, employee, _calendar = self._abs_setup(wage=1500)
@@ -2255,7 +2568,9 @@ class TestSkPayroll(TransactionCase):
         self._reviewed_pn_case(employee, date(2026, 6, 5), date(2026, 6, 9), " ", 20)
         self._reviewed_pn_case(employee, date(2026, 6, 10), date(2026, 6, 12), "\t", 40)
         with self.assertRaisesRegex(UserError, "Identify adjoining"):
-            self._worked_payslip(contract, employee, date(2026, 6, 1), date(2026, 6, 30))
+            self._worked_payslip(
+                contract, employee, date(2026, 6, 1), date(2026, 6, 30)
+            )
 
     def test_sickness_calendar_employer_stops_at_employment_end(self):
         contract, employee, _calendar = self._abs_setup(wage=1500)

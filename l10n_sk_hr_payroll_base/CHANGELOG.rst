@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ----------
 
+* Compare complete retained monthly relationship identities across native
+  contract versions, preserving the same-version compatibility of older proofs.
+
 * Validate new payroll calendar sources against effective ordinary contracts,
   keeping benefit days, explicit 2N exclusions and actual 2D/2Y roles distinct.
   Retain employment dates separately from premium days.
