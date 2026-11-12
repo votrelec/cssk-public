@@ -23,6 +23,152 @@ from odoo.tools import file_path
 
 @tagged("post_install", "-at_install")
 class TestPrehlad(TransactionCase):
+    def _archive_order_fixture(self, *, same_time=True, legacy=(0, 1)):
+        baseline = self._bonus_quarter()
+        records = self.env["l10n.sk.prehlad"]
+        for index, amount in enumerate((20, 40)):
+            report = self._prehlad(month="1", prepared_on="2026-02-20",
+                foreign_receipt_month="2026-02-01", foreign_advance_amount=amount,
+                foreign_advance_source="additional", form_inputs_evidence="Reviewed archived foreign income",
+                **({"correction_type": "corrective", "correction_discovered_on": "2026-02-20"} if index else {}))
+            report.action_review_form_inputs()
+            report.action_generate()
+            with patch.object(fields.Datetime, "now", return_value=datetime(2028, 2, 20 + (0 if same_time else index), 12, 0)):
+                report.action_submit()
+            records |= report
+        originals = [base64.b64decode(record.submitted_attachment_id.datas) for record in records]
+        if legacy:
+            imported = records.browse([records[index].id for index in legacy])
+            imported.flush_recordset()
+            # Actual generated/filed XML stays intact. Pre-upgrade imports
+            # do not have the newly introduced protected snapshot fields.
+            self.env.cr.execute("UPDATE l10n_sk_prehlad SET filed_form_facts=NULL, generated_form_facts=NULL WHERE id IN %s", [tuple(imported.ids)])
+            imported.invalidate_recordset()
+        return baseline, records, originals
+
+    def _review_archive(self, record, order):
+        record.write({"legacy_filed_foreign_source": "additional", "legacy_filed_premium_own": 0,
+            "legacy_filed_order": order, "legacy_filed_evidence": "Reviewed chronological archive evidence"})
+        record.action_review_legacy_filed_facts()
+
+    def test_partial_legacy_order_requires_complete_tied_evidence(self):
+        baseline, records, originals = self._archive_order_fixture()
+        older, newer = records
+        march = self._prehlad(request_bonus_refund=True)
+        self._review_archive(older, 1)
+        with self.assertRaises(UserError):
+            march.action_generate()
+        self.assertFalse(march.xml_attachment_id)
+        self._review_archive(newer, 2)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+        for record, raw in zip(records, originals):
+            self.assertEqual(base64.b64decode(record.submitted_attachment_id.datas), raw)
+            self.assertEqual(record.filed_form_facts["local_filing_sequence"], 0)
+        for component in ("child", "interest", "premium"):
+            self.assertEqual(march._prehlad_quarter_component(1, component), newer.filed_form_facts["quarter_components"][component])
+        self.assertEqual(march._prehlad_quarter_proof(1)["attachment_id"], newer.submitted_attachment_id.id)
+
+    def test_distinct_legacy_dates_do_not_promote_an_older_review(self):
+        baseline, records, originals = self._archive_order_fixture(same_time=False)
+        older, newer = records
+        self._review_archive(older, 10)
+        march = self._prehlad(request_bonus_refund=True)
+        # Timestamp alone establishes which source is latest; unknown
+        # classification still requires the normal facts review.
+        self.assertEqual(march._prehlad_quarter_retained(1)["attachment_id"], newer.submitted_attachment_id.id)
+        self._review_archive(newer, 11)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+
+    def test_conflicting_review_order_has_an_audited_repair(self):
+        baseline, records, originals = self._archive_order_fixture(same_time=False)
+        older, newer = records
+        self._review_archive(older, 10)
+        self._review_archive(newer, 1)
+        march = self._prehlad(request_bonus_refund=True)
+        with self.assertRaises(UserError):
+            march.action_generate()
+        before = dict(newer.filed_form_facts)
+        newer.write({"legacy_filed_order": 11, "legacy_filed_evidence": "Corrected relative order from both archived receipts"})
+        newer.action_review_filing_order()
+        self.assertEqual(newer.filed_form_facts["filing_order_review_history"], [before["legacy_review"]])
+        for key in ("form_facts", "quarter_components", "attachment_id", "xml_sha256", "local_filing_sequence"):
+            self.assertEqual(newer.filed_form_facts[key], before[key], key)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+        with self.assertRaises(UserError):
+            newer.write({"filed_form_facts": before})
+
+    def test_duplicate_legacy_orders_are_not_resolved_by_document_id(self):
+        baseline, records, originals = self._archive_order_fixture()
+        for record in records:
+            self._review_archive(record, 1)
+        march = self._prehlad(request_bonus_refund=True)
+        with self.assertRaises(UserError):
+            march.action_generate()
+        records[1].write({"legacy_filed_order": 2, "legacy_filed_evidence": "Reviewed distinct archive receipts"})
+        records[1].action_review_filing_order()
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+        proof = march._prehlad_quarter_proof(1)
+        records[1].write({"legacy_filed_order": 3, "legacy_filed_evidence": "Further qualifying chronological evidence"})
+        records[1].action_review_filing_order()
+        self.assertNotEqual(proof, march._prehlad_quarter_proof(1))
+        self.assertEqual(len(records[1].filed_form_facts["filing_order_review_history"]), 2)
+
+    def test_later_imported_legacy_is_not_older_than_every_native_sequence(self):
+        baseline, records, originals = self._archive_order_fixture(same_time=False, legacy=(1,))
+        older, newer = records
+        self.assertGreater(older.filed_form_facts["local_filing_sequence"], 0)
+        self._review_archive(newer, 0)
+        march = self._prehlad(request_bonus_refund=True)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+
+    def test_mixed_same_second_order_can_be_qualified_without_a_new_filing(self):
+        baseline, records, originals = self._archive_order_fixture(legacy=(1,))
+        older, newer = records
+        before = dict(older.filed_form_facts)
+        self._review_archive(newer, 2)
+        march = self._prehlad(request_bonus_refund=True)
+        with self.assertRaises(UserError):
+            march.action_generate()
+        older.write({"legacy_filed_order": 1, "legacy_filed_evidence": "Both retained receipts establish the same-second order"})
+        older.action_review_filing_order()
+        for key, value in before.items():
+            self.assertEqual(older.filed_form_facts[key], value, key)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+        self.assertEqual([base64.b64decode(record.submitted_attachment_id.datas) for record in records], originals)
+
+    def test_reviewed_chronology_cannot_override_native_sequence(self):
+        baseline, records, originals = self._archive_order_fixture(legacy=())
+        for record, order in zip(records, (2, 1)):
+            record.write({"legacy_filed_order": order, "legacy_filed_evidence": "Deliberately conflicting manual chronology"})
+            record.action_review_filing_order()
+        march = self._prehlad(request_bonus_refund=True)
+        with self.assertRaises(UserError):
+            march.action_generate()
+        records[1].write({"legacy_filed_order": 3, "legacy_filed_evidence": "Corrected to match retained native sequence"})
+        records[1].action_review_filing_order()
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+
+    def test_earlier_unresolved_tie_does_not_block_a_later_native_filing(self):
+        baseline, records, originals = self._archive_order_fixture()
+        later = self._prehlad(month="1", correction_type="corrective",
+            correction_discovered_on="2026-02-20", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=60,
+            foreign_advance_source="additional", form_inputs_evidence="Proven later recorded filing")
+        later.action_review_form_inputs()
+        later.action_generate()
+        with patch.object(fields.Datetime, "now", return_value=datetime(2028, 2, 21, 12, 0)):
+            later.action_submit()
+        march = self._prehlad(request_bonus_refund=True)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 60, 2)
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

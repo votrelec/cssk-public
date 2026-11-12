@@ -242,3 +242,21 @@ A document with filed history remains undeletable after a local reset; its filed
 
 
 Internal virtual months ignore UI default_* creation values. Only actual saved or archived reviewed facts can supply a foreign advance to an earlier month; defaults on the current form do not create past financial facts.
+
+### Qualifying archived chronology {#filed-chronology}
+
+A missing relative order is unknown, not evidence of an earlier filing.
+Distinct archived local timestamps establish the order between legacy or
+mixed legacy/native filings. Native sequences order native filings only.
+When the latest candidates have indistinguishable timestamps, review every
+competing candidate's relative order and evidence. Earlier unresolved ties
+do not block a provably later filing. Conflicting known orders require review.
+
+After reviewing legacy form facts, use **Review archived filing order** to
+qualify or correct a positive relative order from retained evidence. This
+also resolves a same-second legacy/native tie. Previous chronology reviews
+remain in the protected snapshot; XML, form facts, source proof and the native
+filing sequence do not change. A manual review cannot override the order of
+native sequence-numbered filings. This action records no new filing,
+authority receipt or acceptance. Quarterly components and their source proof
+use the same selection; a changed chronology requires fresh quarterly work.

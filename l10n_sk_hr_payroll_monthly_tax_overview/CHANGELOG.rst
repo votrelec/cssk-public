@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+* 19.0.2.3.1: Require proved chronology when selecting archived monthly
+  facts. Partial legacy ordering cannot promote an older filing; a native
+  sequence does not order an imported legacy filing. Qualify tied archive
+  chronology through an audited native action, preserving prior reviews,
+  exact XML, form facts and the original native sequence.
+
 * 19.0.2.3.0: Retain exact monthly filed form/quarter facts with the native
   archived XML. Reset/edit/unfiled correction preserves the last locally
   filed source until a new filing is recorded. Coordinate scoped Prehľad

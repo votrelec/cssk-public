@@ -82,6 +82,12 @@
                         <button name="action_review_legacy_filed_facts" type="object"
                                 string="Review archived form facts"/>
                     </group>
+                    <group string="Archived filing chronology" invisible="not filed_form_facts">
+                        <field name="legacy_filed_order"/>
+                        <field name="legacy_filed_evidence"/>
+                        <button name="action_review_filing_order" type="object"
+                                string="Review archived filing order"/>
+                    </group>
                     <field name="line_ids">
                         <list>
                             <field name="sequence"/>

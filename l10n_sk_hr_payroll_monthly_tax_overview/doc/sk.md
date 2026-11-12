@@ -233,3 +233,21 @@ Dokument s históriou podaní nemožno vymazať ani po lokálnom resete, ktorý 
 
 
 Interné virtuálne mesiace ignorujú UI hodnoty default_* pre vytváranie záznamov. Zahraničný preddavok za skorší mesiac dodajú len skutočne uložené alebo archivované overené údaje; predvoľby aktuálneho formulára nevytvárajú minulé peňažné fakty.
+
+### Overenie chronológie archívov {#filed-chronology}
+
+Chýbajúce vzájomné poradie je neznámy údaj, nie dôkaz skoršieho podania.
+Rozlíšiteľné lokálne časy určujú poradie historických podaní aj kombinácie
+historického a nového podania. Natívna sekvencia porovnáva iba nové podania.
+Ak posledných kandidátov nerozlišuje čas, overte vzájomné poradie všetkých
+konkurujúcich archívov. Skoršia nerozlíšená dvojica neblokuje preukázateľne
+neskoršie podanie. Rozporné známe poradia vyžadujú opravu.
+
+Po overení historických údajov formulára použite **Overiť poradie archivovaných
+podaní** s kladným vzájomným poradím a dôkazom. Možno tak doplniť či opraviť
+chronológiu, aj pri rovnakom čase historického a nového podania. Predchádzajúce
+overenia zostávajú v chránenej snímke; XML, údaje formulára, zdrojový dôkaz ani
+natívna sekvencia sa nemenia. Manuálne poradie nesmie prebiť poradie podaní
+s natívnou sekvenciou. Akcia nevytvára nové podanie, potvrdenku ani prijatie
+úradom. Všetky štvrťročné komponenty a ich dôkaz používajú rovnaký výber;
+zmena chronológie vyžaduje nové overenie rozpracovaného štvrťročného výstupu.

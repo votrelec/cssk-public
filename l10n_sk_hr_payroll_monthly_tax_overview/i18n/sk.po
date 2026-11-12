@@ -895,3 +895,51 @@ msgid ""
 msgstr ""
 "Prehľad s históriou podaní nemožno vymazať. Zachovajte ho a pripravte "
 "opravu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Archived filing chronology"
+msgstr "Chronológia archivovaných podaní"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Record a positive relative filing order and the reviewed chronology "
+"evidence."
+msgstr "Zadajte kladné vzájomné poradie podaní a dôkaz overenej chronológie."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Review archived filing order"
+msgstr "Overiť poradie archivovaných podaní"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Review the archived form facts before qualifying their filing order."
+msgstr "Pred overením poradia podaní overte archivované údaje formulára."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Review the conflicting relative order of the archived filings for this "
+"month."
+msgstr ""
+"Overte rozporné vzájomné poradie archivovaných podaní za tento mesiac."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Review the relative order of all indistinguishable archived filings for this"
+" month before using their quarterly facts."
+msgstr ""
+"Pred použitím štvrťročných údajov overte vzájomné poradie všetkých "
+"nerozlíšiteľných archivovaných podaní za tento mesiac."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_order
+msgid "Reviewed archived filing order"
+msgstr "Overené poradie archivovaných podaní"

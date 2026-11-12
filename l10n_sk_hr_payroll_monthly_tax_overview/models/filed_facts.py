@@ -37,7 +37,7 @@ class PrehladFiledFacts(models.Model):
         string="Archived employee premium paid from own funds", copy=False)
     legacy_filed_evidence = fields.Text(string="Archived form facts evidence", copy=False)
     legacy_filed_order = fields.Integer(
-        string="Reviewed legacy filing order", copy=False,
+        string="Reviewed archived filing order", copy=False,
         help="Relative order of archived filings for this company and month, from reviewed evidence. Only needed when old local timestamps cannot distinguish their order; not an authority reference.")
 
     @api.model_create_multi
@@ -226,13 +226,75 @@ class PrehladFiledFacts(models.Model):
         candidates = []
         for record in records:
             snapshot = record.filed_form_facts or record._prehlad_snapshot(record.submitted_attachment_id, legacy=True)
-            candidates.append((int(snapshot.get("local_filing_sequence", 0)), int(snapshot.get("legacy_review", {}).get("order", 0)), str(record.submitted_date),
-                               record._prehlad_check_snapshot(snapshot)))
-        if candidates:
-            best = max(item[:3] for item in candidates)
-            if sum(item[:3] == best for item in candidates) > 1:
-                raise UserError(_("Review the relative order of the archived filings for this month; their local timestamps are identical."))
-        return max(candidates, key=lambda item: item[:3])[3] if candidates else None
+            snapshot = record._prehlad_check_snapshot(snapshot)
+            review = snapshot.get("filing_order_review", snapshot.get("legacy_review", {}))
+            candidates.append({
+                "sequence": int(snapshot.get("local_filing_sequence", 0)),
+                "order": int(review.get("order", 0)),
+                "date": fields.Datetime.to_datetime(snapshot.get("submitted_on") or record.submitted_date),
+                "snapshot": snapshot,
+            })
+        return self._prehlad_latest_filed_candidate(candidates)
+
+    def _prehlad_latest_filed_candidate(self, candidates):
+        """Select a proved latest filing, never treating an unknown order as first.
+
+        A native sequence compares native filings only. A legacy import may
+        have a later real timestamp. Written relative-order evidence resolves
+        a tied/missing timestamp, including a mixed legacy/native tie. Earlier
+        unresolved ties do not prevent selecting a provably later filing.
+        """
+        def comparison(left, right):
+            native = left["sequence"] and right["sequence"]
+            dated = left["date"] and right["date"] and left["date"] != right["date"]
+            reviewed = left["order"] and right["order"]
+            sequence_sign = (left["sequence"] > right["sequence"]) - (left["sequence"] < right["sequence"])
+            date_sign = ((left["date"] > right["date"]) - (left["date"] < right["date"])) if dated else 0
+            order_sign = (left["order"] > right["order"]) - (left["order"] < right["order"])
+            if ((native and not sequence_sign)
+                    or (reviewed and (not order_sign
+                        or (native and sequence_sign != order_sign)
+                        or (not native and dated and date_sign != order_sign)))):
+                raise UserError(_("Review the conflicting relative order of the archived filings for this month."))
+            if native:
+                return sequence_sign
+            if dated:
+                return date_sign
+            return order_sign if reviewed else 0
+
+        # Validate known evidence even when a newer candidate exists. A
+        # contradictory reviewed order must not silently disappear on reset.
+        for index, left in enumerate(candidates):
+            for right in candidates[index + 1:]:
+                comparison(left, right)
+        latest = [candidate for candidate in candidates if all(
+            other is candidate or comparison(candidate, other) > 0
+            for other in candidates)]
+        if candidates and len(latest) != 1:
+            raise UserError(_("Review the relative order of all indistinguishable archived filings for this month before using their quarterly facts."))
+        return latest[0]["snapshot"] if latest else None
+
+    def action_review_filing_order(self):
+        """Qualify archive chronology, without recording a new authority filing."""
+        with self.env.cr.savepoint():
+            self._prehlad_lock_scope()
+            for record in self:
+                snapshot = record._prehlad_check_snapshot(record.filed_form_facts) if record.filed_form_facts else None
+                if snapshot is None:
+                    raise UserError(_("Review the archived form facts before qualifying their filing order."))
+                if record.legacy_filed_order <= 0 or not (record.legacy_filed_evidence or "").strip():
+                    raise UserError(_("Record a positive relative filing order and the reviewed chronology evidence."))
+                old = snapshot.get("filing_order_review", snapshot.get("legacy_review"))
+                history = list(snapshot.get("filing_order_review_history", []))
+                if old:
+                    history.append(copy.deepcopy(old))
+                snapshot["filing_order_review_history"] = history
+                snapshot["filing_order_review"] = {
+                    "order": record.legacy_filed_order, "evidence": record.legacy_filed_evidence,
+                    "user": self.env.user.id, "on": str(fields.Datetime.now()),
+                }
+                super(PrehladFiledFacts, record).write({"filed_form_facts": snapshot})
+        return True
 
     def _prehlad_quarter_component(self, month, component):
         snapshot = self._prehlad_quarter_retained(month)
