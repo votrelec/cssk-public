@@ -25,7 +25,7 @@ NS = {"m": "http://socpoist.sk/xsd/mvpp2026"}
 
 
 @tagged("post_install", "-at_install")
-class TestMvp(TransactionCase):
+class MvpCase(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -62,7 +62,7 @@ class TestMvp(TransactionCase):
         return "ee"
 
     def _employee_payslip(self, wage=2000.0, agreement="none", regular=None,
-                          identification="8501011234"):
+                          identification="8501011234", period=None):
         emp_vals = {
             "name": "Jozko Mrkvicka",
             "company_id": self.company.id,
@@ -99,8 +99,8 @@ class TestMvp(TransactionCase):
             "employee_id": employee.id,
             "struct_id": structure.id,
             "company_id": self.company.id,
-            "date_from": date(2026, 3, 1),
-            "date_to": date(2026, 3, 31),
+            "date_from": period[0] if period else date(2026, 3, 1),
+            "date_to": period[1] if period else date(2026, 3, 31),
         })
         if self.engine == "ee":
             slip = slip.with_context(salary_simulation=True)
@@ -108,6 +108,8 @@ class TestMvp(TransactionCase):
         confirm_payslips(slip)
         return employee, slip
 
+
+class TestMvp(MvpCase):
     def test_generate_and_validate(self):
         employee, slip = self._employee_payslip()
         totals = {line.code: line.total for line in slip.line_ids}
@@ -369,14 +371,14 @@ class TestMvp(TransactionCase):
             archived = base64.b64decode(original.xml_attachment_id.datas)
             original.action_submit()
             correction = self._mvp()
-            # Exercise the shared correction evidence protocol directly. MVP
-            # does not advertise a new authority correction type in this fix.
-            correction.is_correction = True
+            correction.write({
+                "correction_type": "corrective", "replaced_mvp_id": original.id,
+            })
             with self.assertRaises(UserError):
-                correction._mvp_employee_fund_bases(slip)
+                correction.action_generate()
             correction.fund_bases_fallback_reason = "Reviewed original historical payroll without a sickness record."
             correction.action_confirm_legacy_fund_bases()
-            correction._mvp_employee_fund_bases(slip)
+            correction.action_generate()
             self.assertEqual(base64.b64decode(original.submitted_attachment_id.datas), archived)
 
     def test_engine_without_recorder_keeps_original_gross_workflow(self):

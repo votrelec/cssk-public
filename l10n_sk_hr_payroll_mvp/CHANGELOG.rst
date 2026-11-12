@@ -5,6 +5,11 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+* Add full corrective MVP export (O), tied to a retained filing for the same
+  company and payroll period. Preserve native full source selection and
+  archived XML; clear predecessor selection on copy and require explicit
+  selection when several filed candidates exist.
+
 * Read every MVP employee/employer assessment base from validated retained
   fund records, including partial-month employee caps, agreement deductions
   and uncapped accident insurance. Preserve named legacy fallback and native

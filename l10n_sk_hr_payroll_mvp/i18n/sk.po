@@ -522,3 +522,31 @@ msgstr "Príloha XML"
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_mvp.field_l10n_sk_mvp__year
 msgid "Year"
 msgstr "Rok"
+
+#. module: l10n_sk_hr_payroll_mvp
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_mvp/models/mvp_correction.py:0
+msgid "A regular MVP cannot replace a filed MVP. Select Corrective."
+msgstr "Riadny MVP nemôže nahrádzať podaný MVP. Vyberte opravný výkaz."
+
+#. module: l10n_sk_hr_payroll_mvp
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_mvp/models/mvp_correction.py:0
+msgid ""
+"Choose the retained filed MVP for this exact company and payroll period."
+msgstr "Vyberte uchovaný podaný MVP pre túto firmu a presné mzdové obdobie."
+
+#. module: l10n_sk_hr_payroll_mvp
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_mvp.field_l10n_sk_mvp__replaced_mvp_id
+msgid "Replaces filed MVP"
+msgstr "Nahrádza podaný MVP"
+
+#. module: l10n_sk_hr_payroll_mvp
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_mvp/models/mvp_correction.py:0
+msgid ""
+"Reset the MVP to draft before changing its period or correction identity. "
+"The filed copy is retained."
+msgstr ""
+"Pred zmenou obdobia alebo identity opravy vráťte MVP do návrhu. Podaná kópia"
+" zostáva zachovaná."

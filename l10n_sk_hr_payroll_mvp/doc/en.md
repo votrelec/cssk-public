@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Social Insurance Statement (MVP)
 summary: The monthly výkaz poistného a príspevkov for the Sociálna poisťovňa, built from the month's payslips — fund totals and a per-employee annex, exported as XML checked against the official schema.
-verified: 19.0.1.2.0
+verified: 19.0.1.3.0
 ---
 
 ## What it is for {#purpose}
@@ -131,3 +131,20 @@ already filed wages merely to manufacture evidence.
   employment relationships needing an exception require separate verification.
 - The shipped form is MVPP 2026. XML validation checks structure, not authority
   acceptance. Retain the actual portal receipt when recording submission.
+
+## Correcting a filed monthly statement {#corrective}
+
+Select **Corrective** and the retained filed MVP for the same company and
+payroll period. A single retained candidate is proposed automatically; with
+multiple candidates, select the intended filing explicitly. Generating the
+correction exports **O** and all current period employees, not a difference.
+The shared declaration framework owns generation, reset, filing evidence and
+legacy fund review. The original filed XML remains in its archive.
+
+Copying a correction clears its original-filing selection. Reset a generated
+record before changing its correction identity. This operation prepares an
+electronic replacement; correcting payroll, settling a receivable and making
+or recovering a payment remain separate accounting operations.
+
+Sources: [SP instructions](https://www.socpoist.sk/api/idsp/download/d360c51e-c8c8-4554-8a3f-4a7344765bf5)
+and [current annex instructions](https://www.socpoist.sk/api/idsp/download/35cd0fa0-ef07-4adb-b296-a4c66b855904).

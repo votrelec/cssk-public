@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 {
     "name": "Slovakia — MVP (Mesačný výkaz poistného a príspevkov)",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "category": "Human Resources/Payroll",
     "countries": ["sk"],
     "summary": "Monthly Slovak social-insurance statement (MVP/MVPP) for the "
@@ -21,6 +21,7 @@
         "data/mvpp_version_data.xml",
         "views/l10n_sk_mvp_views.xml",
         "views/fund_bases_review_views.xml",
+        "views/mvp_correction_views.xml",
     ],
     "installable": True,
 }
