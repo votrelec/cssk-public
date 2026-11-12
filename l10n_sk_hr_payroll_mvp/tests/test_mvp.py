@@ -391,6 +391,20 @@ class TestMvp(TransactionCase):
 
 
 @tagged("post_install", "-at_install")
+class TestRetainedAnnexWithoutEngine(TransactionCase):
+    def test_retained_sheet_lines_keep_original_rendering_without_engine(self):
+        company = self.env["res.company"].create({"name": "Retained MVP", "country_id": self.env.ref("base.sk").id})
+        self.env.user.company_ids |= company
+        employee = self.env["hr.employee"].with_company(company).create({"name": "Retained employee", "company_id": company.id, "identification_id": "8501011234"})
+        declaration = self.env["l10n.sk.mvp"].with_company(company).create({"company_id": company.id, "year": "2026", "month": "3"})
+        self.env["cssk.payroll.employee.declaration"].create({"res_model": declaration._name, "res_id": declaration.id, "employee_id": employee.id, "company_id": company.id, "vz_base": 1234.56})
+        with patch.object(type(declaration), "_get_period_payslips", return_value=None):
+            row = declaration._build_annex()[0]
+        self.assertTrue(row["bases"])
+        self.assertEqual(set(row["bases"].values()), {"1234.56"})
+
+
+@tagged("post_install", "-at_install")
 class TestSchemaPins(TransactionCase):
     """The bundled schemas must match data/SCHEMA_VERSION.
 

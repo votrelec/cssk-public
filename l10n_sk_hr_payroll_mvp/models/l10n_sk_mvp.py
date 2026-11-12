@@ -148,6 +148,10 @@ class L10nSkMvp(models.Model):
         exact known fragments even when another fragment needs its disclosed
         historical gross fallback. Native refund direction is bridge-owned.
         """
+        if slips is None:
+            # Rendering retained sheet lines without an installed engine keeps
+            # their original gross-based data; there is no live source to read.
+            return None
         mapping = {key: field for key, (field, _code) in FUND_BASE_MAP.items()}
         recorded = self._collect_payslip_fund_bases(slips)
         totals = {}
@@ -293,6 +297,10 @@ class L10nSkMvp(models.Model):
             def t(code):
                 return "%.2f" % abs(round(totals.get(code, 0.0), 2))
 
+            bases = bases_by_employee[employee.id] if bases_by_employee is not None else {
+                field: "%.2f" % abs(round(line.vz_base, 2))
+                for field, _code in FUND_BASE_MAP.values()
+            }
             rows.append({
                 "pc": pc,
                 "rc": rc,
@@ -300,7 +308,7 @@ class L10nSkMvp(models.Model):
                 "typ_zec": TYP_ZEC.get(
                     agreement_by_employee.get(employee.id), "ZEC"),
                 "vynimka_vz": "0",
-                "bases": bases_by_employee[employee.id],
+                "bases": bases,
                 "poc_hodin": "%.2f" % abs(round(line.worked_hours, 2)),
                 "np_zamtel": t("SICKEMPLOYER"),
                 "np_zamnec": t("SICK"),
