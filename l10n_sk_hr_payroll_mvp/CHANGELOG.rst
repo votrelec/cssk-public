@@ -5,6 +5,14 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+* Read every MVP employee/employer assessment base from validated retained
+  fund records, including partial-month employee caps, agreement deductions
+  and uncapped accident insurance. Preserve named legacy fallback and native
+  full-refund/replacement selection without reconstructing bases from gross.
+
+  *18.0 carry-over:* port the form mapping with the shared recorder adapter
+  and the native engine refund hook; do not infer bases from premiums.
+
 * **Fixed: irregular-income dohody are no longer reported on the MVP too.**
   The MVP took every payslip, so an irregular DoVP or DoPČ was filed here and
   on the VPP. It now excludes exactly what the VPP takes (cssk-public#12),

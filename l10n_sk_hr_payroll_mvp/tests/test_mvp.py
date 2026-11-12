@@ -6,7 +6,10 @@ engines. Detects whichever SK payroll engine is installed (the ``payroll`` engin
 computed payslip, generates the MVP declaration and validates the produced XML
 against the shipped ``MVPP-v2026.xsd``."""
 import base64
+from copy import deepcopy
 from datetime import date
+from decimal import Decimal, ROUND_DOWN
+import json
 from unittest.mock import patch
 
 from lxml import etree
@@ -15,6 +18,7 @@ from odoo.addons.l10n_cssk_payroll_declaration_base.tests.common import (
     confirm_payslips,
 )
 from odoo.tests import TransactionCase, tagged
+from odoo.exceptions import UserError
 from odoo.tools import file_path
 
 NS = {"m": "http://socpoist.sk/xsd/mvpp2026"}
@@ -188,7 +192,12 @@ class TestMvp(TransactionCase):
         if self.engine != "oca":
             self.skipTest("OCA owns this record writer")
         _employee, slip = self._employee_payslip()
-        slip.line_ids.filtered(lambda line: line.code == "SICK").amount = -99
+        # Model historical database drift without bypassing today's public
+        # source guards through a normal salary-line write.
+        evidence = deepcopy(slip.l10n_sk_fund_assessment)
+        evidence["identity"]["date_to"] = "2026-04-30"
+        self.env.cr.execute("UPDATE hr_payslip SET l10n_sk_fund_assessment=%s::jsonb WHERE id=%s", [json.dumps(evidence), slip.id])
+        slip.invalidate_recordset(["l10n_sk_fund_assessment"])
         original = self._mvp()
         original.action_generate()
         self.assertIn(slip.display_name, original.fund_bases_warning)
@@ -238,6 +247,101 @@ class TestMvp(TransactionCase):
             "company_id": self.company.id, "year": "2026", "month": "3"})
         decl.sp_vs = "9988776655"
         self.assertEqual(self.company.l10n_sk_sp_vs, "9988776655")
+
+    def _assert_recorded_wire_bases(self, declaration, slips):
+        from ..models.l10n_sk_mvp import FUND_BASE_MAP
+        declaration.action_generate()
+        tree = etree.fromstring(base64.b64decode(declaration.xml_attachment_id.datas))
+        row = tree.find(".//m:poistneZamestnanca", NS)
+        expected = {field: Decimal(0) for field, _code in FUND_BASE_MAP.values()}
+        for slip in slips:
+            for record in slip._cssk_recorded_fund_bases():
+                key = record["fund"], record["side"]
+                if key in FUND_BASE_MAP:
+                    expected[FUND_BASE_MAP[key][0]] += Decimal(record["base"])
+        for field, value in expected.items():
+            self.assertEqual(Decimal(row.get(field)), abs(value).quantize(Decimal(".01"), rounding=ROUND_DOWN), field)
+        return declaration, row
+
+    def test_recorded_fund_bases_reach_every_annex_field(self):
+        if self.engine != "oca":
+            self.skipTest("Recorded OCA source fixture")
+        employee, slip = self._employee_payslip(20000)
+        _declaration, row = self._assert_recorded_wire_bases(self._mvp(), slip)
+        self.assertEqual(row.get("vzNp"), "16764.00")
+        self.assertEqual(row.get("vzUp"), "20000.00")
+        employee.create_version({"date_version": date(2026, 4, 1), "wage": 100})
+        self._assert_recorded_wire_bases(self._mvp(), slip)
+
+    def test_native_refund_replacement_uses_only_effective_sources(self):
+        if self.engine != "oca":
+            self.skipTest("Native OCA refund linkage")
+        _employee, original = self._employee_payslip(20000)
+        frozen = deepcopy(original.l10n_sk_fund_assessment)
+        original.refund_sheet()
+        replacement = original.copy({"name": "Replacement original remuneration"})
+        replacement.compute_sheet()
+        confirm_payslips(replacement)
+        declaration = self._mvp()
+        self.assertEqual(declaration._get_period_payslips(), replacement)
+        self._assert_recorded_wire_bases(declaration, replacement)
+        self.assertEqual(original.l10n_sk_fund_assessment, frozen)
+
+    def test_partial_month_preserves_distinct_employee_and_employer_caps(self):
+        if self.engine != "oca":
+            self.skipTest("Recorded OCA source fixture")
+        employee = self.env["hr.employee"].with_company(self.company).create({
+            "name": "Mid-month high income", "company_id": self.company.id,
+            "identification_id": "8501011234", "struct_id": self.structure.id,
+            "date_version": date(2026, 3, 15), "contract_date_start": date(2026, 3, 15),
+            "wage": 60000, "resource_calendar_id": self.calendar.id,
+        })
+        slip = self.env["hr.payslip"].with_company(self.company).create({
+            "name": "Partial month native source", "company_id": self.company.id,
+            "employee_id": employee.id, "contract_id": employee.version_id.id,
+            "struct_id": self.structure.id, "date_from": date(2026, 3, 1), "date_to": date(2026, 3, 31),
+        })
+        slip.compute_sheet()
+        confirm_payslips(slip)
+        _declaration, row = self._assert_recorded_wire_bases(self._mvp(), slip)
+        self.assertEqual(row.get("vzNp"), "16764.00")
+        daily = (Decimal("16764") / 31).quantize(Decimal(".01"), rounding=ROUND_DOWN)
+        self.assertEqual(Decimal(row.get("vzZecNp")), daily * 17)
+        self.assertGreater(Decimal(row.get("vzUp")), Decimal("16764"))
+
+    def test_missing_charged_fund_uses_shared_original_and_correction_policy(self):
+        if self.engine != "oca":
+            self.skipTest("Recorded OCA source fixture")
+        _employee, slip = self._employee_payslip(20000)
+        rows = deepcopy(slip._cssk_recorded_fund_bases())
+        incomplete = [row for row in rows if (row["fund"], row["side"]) != ("sickness", "employee")]
+        self.assertLess(len(incomplete), len(rows))
+        original = self._mvp()
+        with patch.object(type(slip), "_cssk_recorded_fund_bases", return_value=incomplete):
+            original.action_generate()
+            self.assertIn(slip.display_name, original.fund_bases_warning)
+            archived = base64.b64decode(original.xml_attachment_id.datas)
+            original.action_submit()
+            correction = self._mvp()
+            # Exercise the shared correction evidence protocol directly. MVP
+            # does not advertise a new authority correction type in this fix.
+            correction.is_correction = True
+            with self.assertRaises(UserError):
+                correction._mvp_employee_fund_bases(slip)
+            correction.fund_bases_fallback_reason = "Reviewed original historical payroll without a sickness record."
+            correction.action_confirm_legacy_fund_bases()
+            correction._mvp_employee_fund_bases(slip)
+            self.assertEqual(base64.b64decode(original.submitted_attachment_id.datas), archived)
+
+    def test_engine_without_recorder_keeps_original_gross_workflow(self):
+        _employee, slip = self._employee_payslip(20000)
+        declaration = self._mvp()
+        with patch.object(type(slip), "_cssk_recorded_fund_bases", None, create=True):
+            declaration.action_generate()
+            self.assertFalse(declaration.fund_bases_warning)
+        tree = etree.fromstring(base64.b64decode(declaration.xml_attachment_id.datas))
+        row = tree.find(".//m:poistneZamestnanca", NS)
+        self.assertEqual(row.get("vzNp"), "20000.00")
 
 
 @tagged("post_install", "-at_install")

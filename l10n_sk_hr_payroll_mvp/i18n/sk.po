@@ -20,10 +20,10 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_mvp.field_res_company__l10n_sk_sp_vs
 msgid ""
 "10-digit identification number assigned to the employer by the Sociálna "
-"poisťovňa — the <variabilnySymbol> element of the SP overviews (MVP / VPP)."
+"poisťovňa — the <variabilnySymbol> element of the MVP overview."
 msgstr ""
 "10-miestne identifikačné číslo pridelené zamestnávateľovi Sociálnou "
-"poisťovňou — element <variabilnySymbol> výkazov SP (MVP / VPP)."
+"poisťovňou — prvok <variabilnySymbol> v prehľade MVP."
 
 #. module: l10n_sk_hr_payroll_mvp
 #: model:ir.model.fields,help:l10n_sk_hr_payroll_mvp.field_l10n_sk_mvp__sp_vs

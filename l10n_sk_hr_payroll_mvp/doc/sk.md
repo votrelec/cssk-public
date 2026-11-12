@@ -1,7 +1,7 @@
 ---
 title: SK MVP — mesačný výkaz poistného a príspevkov
 summary: Mesačný výkaz poistného a príspevkov pre Sociálnu poisťovňu zostavený z výplatných pások mesiaca — sumy za fondy a príloha po zamestnancoch, export do XML overený voči oficiálnej schéme.
-verified: 19.0.1.1.2
+verified: 19.0.1.2.0
 ---
 
 ## Na čo slúži {#purpose}
@@ -103,28 +103,26 @@ pravidla:
 je — vykazuje sa zdravotnej poisťovni v dávke 514
 ([module:l10n_sk_hr_payroll_health](module:l10n_sk_hr_payroll_health)).
 
-Riadok prílohy obsahuje rodné číslo, vymeriavací základ (*GROSS* zamestnanca
-za mesiac), počet dní, počet hodín z odpracovaných dní na výplatných páskach
-a sumy zamestnanca za jednotlivé fondy.
+Riadok prílohy obsahuje rodné číslo, dni poistenia, odpracované hodiny, poistné
+a samostatné vymeriavacie základy fondov zamestnanca a zamestnávateľa. Základy
+číta z uchovaného mzdového výpočtu: rozlišuje denný strop zamestnanca pri časti
+mesiaca, strop zamestnávateľa, odpočítateľnú položku dohody a nestropovaný
+úrazový základ. Neodvodzuje ich z hrubej mzdy ani z poistného. Natívne úplné
+storno sa vylúči spolu s pôvodnou páskou; zdrojom zostane náhrada.
+
+Ak historické fondové dôkazy chýbajú alebo nesúhlasia, riadny výkaz zachová pre
+tieto podklady pôvodný postup z hrubej mzdy a pomenuje ich v upozornení. Presné
+známe časti zachovajú skutočné základy. Engine bez voliteľnej evidencie pokračuje
+pôvodným postupom. Pred tvrdením o presnom rozdelení fondov overte uvedené
+historické podklady; už podané mzdy neprepočítavajte iba na vytvorenie dôkazov.
 
 ## Obmedzenia {#limitations}
 
-- **Len riadny výkaz** (`typVykazu` R). Opravný výkaz modul nevytvorí; opravy
-  podajte cez portál.
-- **Započíta sa každá výplatná páska mesiaca** vrátane konceptov — vynechajú
-  sa len zrušené. Výkaz generujte až po uzavretí miezd. Výplatná páska, ktorej
-  obdobie presahuje hranicu mesiaca, sa nezapočíta vôbec.
-- **Dohody sa nevylučujú.** MVP berie každého zamestnanca s výplatnou páskou,
-  VPP berie každú DoVP a DoPČ. Dohodár vyplatený v mesiaci sa tak objaví na
-  oboch výkazoch; duplicitu pred podaním odstráňte.
-- Každý riadok prílohy má typ vzťahu *ZEC* (zamestnanec s pravidelným
-  príjmom), príznak výnimky z vymeriavacieho základu `vynimkaVZ` 0 a plný
-  počet kalendárnych dní mesiaca, aj pri zamestnancovi, ktorý počas mesiaca
-  nastúpil alebo skončil.
-- Vymeriavací základ je *GROSS* z výplatnej pásky, nie suma vypočítaná podľa
-  zákona o sociálnom poistení; maximálny vymeriavací základ sa tu
-  neuplatňuje.
-- Dodáva sa len vzor MVPP 2026 (platný od 1. 1. 2026); aj staršie obdobie sa
-  vyexportuje v tomto tvare.
-- Overenie voči schéme kontroluje tvar súboru, nie sumy. Prvý podaný výkaz
-  odsúhlaste s výplatnými páskami ručne.
+- Modul ponúka len riadny výkaz (`typVykazu` R); úradné opravy zostávajú mimo
+  jeho aktuálneho pracovného postupu.
+- Potvrdené pásky sa vyberajú podľa koncového dátumu. Dohody s pravidelným
+  príjmom patria do MVP, s nepravidelným príjmom do VPP.
+- Príznak výnimky `vynimkaVZ` zostáva 0. Súbežné pracovné vzťahy vyžadujúce
+  výnimku treba overiť osobitne.
+- Dodáva sa formulár MVPP 2026. XML validácia overuje štruktúru, nie prijatie
+  úradom. Pri evidencii podania uchovajte skutočnú potvrdenku portálu.

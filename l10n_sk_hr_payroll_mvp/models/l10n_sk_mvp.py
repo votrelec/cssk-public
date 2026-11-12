@@ -25,6 +25,8 @@ pfp     skrátená práca (kurzarbeit)       SHORTTIMEEMPLOYER      — (n/a)
 
 ``spoluPoistne`` ← ``SOCIALEMPLOYERTOTAL`` + ``SOCIALEMPLOYEETOTAL``.
 """
+from decimal import ROUND_DOWN, Decimal
+
 from odoo import _, fields, models
 from odoo.exceptions import UserError
 
@@ -38,6 +40,24 @@ FUND_MAP = [
     ("gp", "GUARANTEEEMPLOYER", None),
     ("rfs", "RESERVEFUNDEMPLOYER", None),
 ]
+
+# Wire fields belong to this form; the shared adapter validates and reads the
+# actual bases. A legally absent rule is zero, a present rule without its
+# recorded base is missing evidence and follows the framework's legacy policy.
+FUND_BASE_MAP = {
+    ("sickness", "employer"): ("vzNp", "SICKEMPLOYER"),
+    ("pension", "employer"): ("vzSp", "PENSIONEMPLOYER"),
+    ("disability", "employer"): ("vzIp", "DISABILITYEMPLOYER"),
+    ("unemployment", "employer"): ("vzPvn", "UNEMPLOYMENTEMPLOYER"),
+    ("accident", "employer"): ("vzUp", "ACCIDENT"),
+    ("guarantee", "employer"): ("vzGp", "GUARANTEEEMPLOYER"),
+    ("reserve", "employer"): ("vzRfs", "RESERVEFUNDEMPLOYER"),
+    ("sickness", "employee"): ("vzZecNp", "SICK"),
+    ("pension", "employee"): ("vzZecSp", "PENSION"),
+    ("disability", "employee"): ("vzZecIp", "DISABILITY"),
+    ("unemployment", "employee"): ("vzZecPvn", "UNEMPLOYMENT"),
+    ("shorttime", "employer"): ("vzPfp", "SHORTTIMEEMPLOYER"),
+}
 
 # Dohoda agreement types. Their payslips belong here only with REGULAR income;
 # irregular-income dohody are reported on the VPP. l10n_sk_hr_payroll_vpp holds
@@ -101,7 +121,62 @@ class L10nSkMvp(models.Model):
         slips = super()._get_period_payslips()
         if not slips:
             return slips
-        return slips.filtered(self._l10n_sk_reports_on_mvp)
+        return self._effective_fund_payslips(slips).filtered(
+            self._l10n_sk_reports_on_mvp
+        )
+
+    def _payslip_fund_records(self, slips):
+        recorded, missing = super()._payslip_fund_records(slips)
+        for slip in slips:
+            if not recorded[slip.id]:
+                continue
+            charged_codes = set(slip.line_ids.mapped("code"))
+            required = {
+                key for key, (_field, code) in FUND_BASE_MAP.items()
+                if code in charged_codes
+            }
+            present = {(row["fund"], row["side"]) for row in recorded[slip.id]}
+            if not required.issubset(present):
+                recorded[slip.id] = False
+                missing |= slip
+        return recorded, missing
+
+    def _mvp_employee_fund_bases(self, slips):
+        """Sum actual bases, never derive a cap or OOP from gross or premiums.
+
+        The common framework owns missing evidence and correction review. Keep
+        exact known fragments even when another fragment needs its disclosed
+        historical gross fallback. Native refund direction is bridge-owned.
+        """
+        mapping = {key: field for key, (field, _code) in FUND_BASE_MAP.items()}
+        recorded = self._collect_payslip_fund_bases(slips)
+        totals = {}
+        for slip in slips:
+            bucket = totals.setdefault(
+                slip.employee_id.id,
+                {field: Decimal(0) for field in mapping.values()},
+            )
+            bases = self._sum_recorded_fund_bases(slip, recorded, mapping)
+            if bases is False:
+                direction_hook = getattr(slip, "_cssk_fund_record_direction", None)
+                direction = direction_hook() if direction_hook else 1
+                gross = sum(
+                    (Decimal(str(line.total)) for line in slip.line_ids
+                     if line.code == "GROSS"),
+                    Decimal(0),
+                )
+                bases = {field: direction * gross for field in mapping.values()}
+            for field, base in bases.items():
+                bucket[field] += base
+        return {
+            employee: {
+                field: format(
+                    abs(value).quantize(Decimal(".01"), rounding=ROUND_DOWN), ".2f"
+                )
+                for field, value in values.items()
+            }
+            for employee, values in totals.items()
+        }
 
     def _preflight(self):
         super()._preflight()
@@ -196,9 +271,11 @@ class L10nSkMvp(models.Model):
     def _build_annex(self):
         """Per-employee annex rows (pre-formatted for the QWeb template)."""
         self.ensure_one()
+        payslips = self._get_period_payslips()
+        bases_by_employee = self._mvp_employee_fund_bases(payslips)
         agreement_by_employee = {
             slip.employee_id.id: self._l10n_sk_relationship(slip)[0]
-            for slip in self._get_period_payslips() or []
+            for slip in payslips or []
         }
         rows = []
         pc = 0
@@ -216,7 +293,6 @@ class L10nSkMvp(models.Model):
             def t(code):
                 return "%.2f" % abs(round(totals.get(code, 0.0), 2))
 
-            vz = "%.2f" % abs(round(line.vz_base, 2))
             rows.append({
                 "pc": pc,
                 "rc": rc,
@@ -224,7 +300,7 @@ class L10nSkMvp(models.Model):
                 "typ_zec": TYP_ZEC.get(
                     agreement_by_employee.get(employee.id), "ZEC"),
                 "vynimka_vz": "0",
-                "vz": vz,
+                "bases": bases_by_employee[employee.id],
                 "poc_hodin": "%.2f" % abs(round(line.worked_hours, 2)),
                 "np_zamtel": t("SICKEMPLOYER"),
                 "np_zamnec": t("SICK"),

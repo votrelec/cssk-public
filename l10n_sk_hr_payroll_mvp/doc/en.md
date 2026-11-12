@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Social Insurance Statement (MVP)
 summary: The monthly výkaz poistného a príspevkov for the Sociálna poisťovňa, built from the month's payslips — fund totals and a per-employee annex, exported as XML checked against the official schema.
-verified: 19.0.1.1.2
+verified: 19.0.1.2.0
 ---
 
 ## What it is for {#purpose}
@@ -107,27 +107,27 @@ The total (`spoluPoistne`) is the sum of these rows. Health insurance is not
 part of it — it goes to the health insurer on the dávka 514
 ([module:l10n_sk_hr_payroll_health](module:l10n_sk_hr_payroll_health)).
 
-Each annex row carries the birth number, the assessment base (the employee's
-*GROSS* for the month), the number of days, the hours from the payslips' worked
-days, and the employee's amounts per fund.
+Each annex row carries the birth number, insured days, worked hours, fund
+premiums and separate assessment bases for each employee/employer fund. Bases
+come from the retained payroll calculation, including the employee's partial-month
+cap, employer cap, agreement deduction and uncapped accident base. The statement
+does not derive them from gross pay or premiums. Effective native refund pairs
+are excluded, leaving their replacement as the source.
+
+When historical fund evidence is missing or inconsistent, an original statement
+keeps the disclosed gross fallback for those source fragments and names them in
+the warning. Exact known fragments retain their actual bases. A payroll engine
+without the optional recorder keeps its existing workflow. Check the named
+historical sources before claiming an exact fund allocation; do not recompute
+already filed wages merely to manufacture evidence.
 
 ## Limitations {#limitations}
 
-- **Only a regular statement** (`typVykazu` R). An *opravný výkaz* cannot be
-  produced; file corrections through the portal.
-- **Every payslip of the month counts**, including drafts — only cancelled
-  payslips are left out. Generate the statement once payroll is final. A
-  payslip whose period crosses the month boundary is not picked up at all.
-- **Work agreements are not left out.** The MVP takes every employee with a
-  payslip, while the VPP takes every DoVP and DoPČ. An agreement worker paid in
-  the month therefore appears on both statements; remove the duplicate before
-  filing.
-- Every annex row uses the relationship type *ZEC* (employee with a regular
-  income), the assessment-base exception flag `vynimkaVZ` set to 0, and the full number of
-  calendar days in the month, even for someone who joined or left during it.
-- The assessment base is the payslip's *GROSS*, not a figure computed under
-  the Social Insurance Act; the maximum assessment base is not applied here.
-- The only form vintage shipped is MVPP 2026 (valid from 1 January 2026); an
-  earlier period is also exported in that layout.
-- Schema validation checks the shape of the file, not the figures. Reconcile
-  the first statement you file with the payslips by hand.
+- Only a regular statement (`typVykazu` R) is offered; authority corrections
+  remain outside this module's current workflow.
+- Confirmed payslips are selected by their end date. Regular-income work
+  agreements belong here; irregular-income agreements belong to VPP.
+- The assessment-base exception flag `vynimkaVZ` remains 0. Several concurrent
+  employment relationships needing an exception require separate verification.
+- The shipped form is MVPP 2026. XML validation checks structure, not authority
+  acceptance. Retain the actual portal receipt when recording submission.
