@@ -208,6 +208,14 @@ class PrehladFiledFacts(models.Model):
             finally:
                 _RETENTION_OPERATION.reset(token)
 
+    def unlink(self):
+        with self.env.cr.savepoint():
+            self._prehlad_lock_scope()
+            if any(record.filed_form_facts or record.submitted_attachment_id or record.filed_history_ids
+                   for record in self):
+                raise UserError(_("An overview with filed history cannot be deleted. Preserve it and prepare a correction."))
+            return super().unlink()
+
     def _prehlad_quarter_retained(self, month):
         """Last actual local filing wins, irrespective of today's draft state."""
         self.ensure_one()

@@ -413,6 +413,8 @@ class TestPrehlad(TransactionCase):
         duplicate = january.copy()
         self.assertFalse(duplicate.filed_form_facts)
         self.assertFalse(duplicate.generated_form_facts)
+        duplicate.unlink()
+        self.assertFalse(duplicate.exists())
         for name in ("filed_form_facts", "generated_form_facts"):
             with self.assertRaises(UserError):
                 january.write({name: False})
@@ -422,6 +424,8 @@ class TestPrehlad(TransactionCase):
                 self.env["l10n.sk.prehlad"].with_company(self.company).with_context(
                     **{"default_" + name: False}).create({"year": "2026", "month": "1"})
         january.action_reset_to_draft()
+        with self.assertRaises(UserError):
+            january.unlink()
         with self.assertRaises(UserError):
             january.month = "2"
 

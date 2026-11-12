@@ -11,6 +11,7 @@ Unreleased
   operations, use native local audit order for same-second filings, reject
   forged retention API/defaults, and support evidenced legacy archive review.
   Preserve every superseded filed facts/source snapshot alongside XML history.
+  Keep ever-filed documents undeletable after reset; allow unfiled draft copies.
 
 * 19.0.2.2.0: Native reviewed discovery/preparation dates and conditional
   foreign-employment row 1a / prior excess-remittance row 8b inputs, UI and

@@ -236,3 +236,6 @@ proof; `_prehlad_quarter_component` / `_prehlad_quarter_retained` expose the sam
 canonical source for all quarterly components.
 
 When a new filing supersedes an older one, its full prior facts/source snapshot is appended inside the protected retained-facts history beside the existing XML archive. Old classification and own-funded premium evidence are not reconstructed from wire or discarded.
+
+
+A document with filed history remains undeletable after a local reset; its filed source has not been cancelled. Never-filed drafts and copies can still be deleted normally.

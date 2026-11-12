@@ -227,3 +227,6 @@ rozšírenia; `_prehlad_quarter_component` / `_prehlad_quarter_retained` poskytu
 rovnaký účinný zdroj všetkým štvrťročným komponentom.
 
 Pri novom podaní sa celá predchádzajúca snímka údajov a zdrojového dôkazu pridá do chránenej histórie uchovaných údajov popri existujúcom XML archíve. Staré zatriedenie a podklady prémie z vlastných prostriedkov sa neodvodzujú z XML ani nezahadzujú.
+
+
+Dokument s históriou podaní nemožno vymazať ani po lokálnom resete, ktorý podaný zdroj neruší. Nikdy nepodané návrhy a kópie sa naďalej dajú bežne vymazať.

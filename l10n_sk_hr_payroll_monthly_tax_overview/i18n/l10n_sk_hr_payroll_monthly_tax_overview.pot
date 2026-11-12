@@ -826,3 +826,11 @@ msgstr ""
 #: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
 msgid "Use the native overview actions to record or reset a filing."
 msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"An overview with filed history cannot be deleted. Preserve it and prepare a "
+"correction."
+msgstr ""
