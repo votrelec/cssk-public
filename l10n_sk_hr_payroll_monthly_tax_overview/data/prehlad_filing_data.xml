@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Local audit ordering only, never a Financial Administration reference. -->
+    <record id="prehlad_local_filing_sequence" model="ir.sequence">
+        <field name="name">Prehľad local filing facts</field>
+        <field name="code">l10n.sk.prehlad.local_filing</field>
+        <field name="padding">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

@@ -159,6 +159,10 @@ class L10nSkPrehlad(models.Model):
         Payslip = self.env["hr.payslip"]
         total = 0.0
         for month in range(last - 2, last + 1):
+            retained = self._prehlad_quarter_component(month, "child")
+            if retained is not None:
+                total += retained
+                continue
             slips = Payslip.search([
                 ("company_id", "=", self.company_id.id),
                 ("date_from", ">=", date(year, month, 1)),

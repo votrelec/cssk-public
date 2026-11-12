@@ -671,3 +671,158 @@ msgid ""
 "Report the foreign document receipt in the month following the reporting "
 "month."
 msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_premium_own
+msgid "Archived employee premium paid from own funds"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_foreign_source
+msgid "Archived foreign advance source"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_evidence
+msgid "Archived form facts evidence"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Archived monthly facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model,name:l10n_sk_hr_payroll_monthly_tax_overview.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Copy the filed overview to prepare a different company or reporting period."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__filed_form_facts
+msgid "Filed Form Facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Generate or record a filing to retain its form facts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__generated_form_facts
+msgid "Generated Form Facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_res_company__prehlad_filing_epoch
+msgid "Prehlad Filing Epoch"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Record the reviewed evidence for the archived filing."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Regenerate the current overview before recording its filing facts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_order
+msgid ""
+"Relative order of archived filings for this company and month, from reviewed"
+" evidence. Only needed when old local timestamps cannot distinguish their "
+"order; not an authority reference."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Review archived form facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Review legacy facts only for an existing archived filing without a facts "
+"snapshot."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Review the archived foreign advance classification."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Review the archived monthly premium facts before requesting their quarterly "
+"refund."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid ""
+"Review the relative order of the archived filings for this month; their "
+"local timestamps are identical."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__legacy_filed_order
+msgid "Reviewed legacy filing order"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "The overview scope changed; retry the complete operation."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "The retained overview facts do not match their archived XML."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "The reviewed archived facts must match their retained source proof."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Use a finite nonnegative archived employee premium amount."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Use a nonnegative reviewed legacy filing order."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Use an allowed company for the overview's filing facts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/filed_facts.py:0
+msgid "Use the native overview actions to record or reset a filing."
+msgstr ""

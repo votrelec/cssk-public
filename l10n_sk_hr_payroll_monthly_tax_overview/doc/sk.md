@@ -190,3 +190,38 @@ nepublikovaná budúca XML verzia sa nevymýšľa.
   obdobie potrebuje svoj publikovaný vzor.
 - Úradu sa nič neposiela: *Označiť ako odoslané* len zaznamená, že ste
   prehľad podali.
+
+## Uchované mesačné údaje štvrťročných žiadostí {#filed-facts}
+
+Lokálny reset, úprava návrhu ani vygenerovaná nepodaná oprava nerušia skoršie
+podanie. Štvrťročná žiadosť používa poslednú lokálne evidovanú podanú snímku
+každého predchádzajúceho mesiaca: rozdiel bonusu na deti (C), na úroky (F)
+a prípadnú zamestnaneckú prémiu z vlastných prostriedkov dodanú rozšírením.
+Presné údaje formulára a zdrojový dôkaz zostávajú viazané na prílohu a SHA256.
+Účinné podané údaje mesiaca nahradí až **Označiť ako odoslané**; práve
+pripravovaný mesiac používa svoj aktuálny výpočet. Reset a kópia zostávajú
+bežnými operáciami. Spoločnosť ani obdobie podaného dokumentu nemožno
+prepriradiť; pre iný rozsah vytvorte kópiu.
+
+Generovanie zachytí aktuálne údaje pri existujúcom XML. Evidencia podania
+a uchovanie údajov prebehnú atómovo v rovnakej transakcii a savepointe.
+Priame API ani defaulty nemôžu podvrhnúť podanú prílohu, stav či snímku.
+Archív naďalej tvoria natívne podané XML a história; nevzniká paralelný register
+podaní ani ďalšia mzdová či daňová kniha. Natívna `ir.sequence` určuje lokálne
+auditné poradie podaní v rovnakej sekunde. Nie je referenciou úradu ani dôkazom
+prijatia. Relevantné operácie Prehľadu koordinujú povolené spoločnosti a všetky
+zoradené rodičovské dokumenty cez skutočnú zmenu verzie rozsahu; zastaraná
+transakcia REPEATABLE READ sa zopakuje. Iné typy výkazov sa nemenia.
+
+Pri podaniach spred aktualizácie bez novej snímky pochádzajú C/F a dostupné
+údaje hlavičky z archivovaného XML, nikdy z dnešného zmeneného návrhu.
+XML neobsahuje zatriedenie už zahrnutého či dodatočného preddavku ani mesačnú
+prémiu z vlastných prostriedkov. Rozšírenie môže poskytnúť zhodný archivovaný
+zdrojový dôkaz. Inak použite **Overiť archivované údaje formulára**, doložené
+zatriedenie a overenú sumu prémie vrátane výslovne overenej nuly. Ak staré
+lokálne časy nerozlišujú účinné podanie, uveďte overené vzájomné poradie
+historických podaní. Toto overenie nevytvára nové podanie ani udalosť úradu.
+Nejednoznačné alebo chýbajúce archivované údaje sa potichu nenahrádzajú nulou.
+Hooks `_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` uchovajú dôkaz
+rozšírenia; `_prehlad_quarter_component` / `_prehlad_quarter_retained` poskytujú
+rovnaký účinný zdroj všetkým štvrťročným komponentom.

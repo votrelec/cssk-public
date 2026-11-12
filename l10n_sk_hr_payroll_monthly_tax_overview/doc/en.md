@@ -198,3 +198,39 @@ an empty optional date. XSD success is not authority acceptance. Verified
   periods require their published edition.
 - Nothing is sent to the authority: *Mark Submitted* only records that you
   filed it.
+
+## Retained monthly facts for quarterly requests {#filed-facts}
+
+A local reset, an edited draft and a generated unfiled correction do not cancel
+an earlier filing. Quarterly requests use the last locally recorded filed
+snapshot for each earlier month: child difference (C), interest difference (F),
+and any extension-supplied employee premium paid from own funds. Its exact form
+facts, source proof, attachment and SHA256 stay associated. Only **Mark
+Submitted** replaces that month's effective filed facts; the current month
+being prepared still uses its current calculation. Reset and copy remain normal
+operations. A filed document's company and period cannot be reassigned; copy it
+for another reporting scope.
+
+Generation captures the current facts beside the existing XML. Recording the
+filing and retaining its facts are atomic in the same transaction/savepoint.
+Direct API/default writes cannot invent a submitted pointer, state or facts
+snapshot. Existing native retained XML/history fields remain the archive; there
+is no parallel filing register or payroll/tax ledger. Native `ir.sequence` gives
+local audit order when two filings share the same second; it is never a tax
+administrator reference or evidence of acceptance. Relevant Prehľad operations
+coordinate allowed companies and sorted document parents with a real scoped
+epoch update so stale REPEATABLE READ work retries. Other declaration types are
+not changed.
+
+For pre-upgrade filings without the new snapshot, C/F and the available header
+facts come from the archived XML, never today's edited draft. XML does not
+record included/additional classification or a monthly own-funded premium
+amount. Extensions can supply an existing matching archived source proof.
+Otherwise use **Review archived form facts**, evidenced foreign classification
+and any reviewed premium amount (including an explicitly reviewed zero). If old
+local timestamps cannot identify the effective filing, enter its reviewed
+relative legacy order. This review records no new filing or authority event.
+Ambiguous or missing archival facts are never silently turned into zero. Hooks
+`_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` retain extension
+proof; `_prehlad_quarter_component` / `_prehlad_quarter_retained` expose the same
+canonical source for all quarterly components.

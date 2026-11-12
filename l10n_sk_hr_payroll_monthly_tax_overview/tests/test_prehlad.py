@@ -7,9 +7,11 @@ computed payslip, generates the monthly Prehľad and validates the produced XML
 against the shipped ``prehlad2026.xsd``."""
 import base64
 import unittest
-from datetime import date
+from datetime import date, datetime
+from unittest.mock import patch
 
 from lxml import etree
+from odoo import fields
 
 from odoo.exceptions import UserError, ValidationError
 from odoo.addons.l10n_cssk_payroll_declaration_base.tests.common import (
@@ -318,6 +320,160 @@ class TestPrehlad(TransactionCase):
         # A later unfiled draft is not a replacement for the completed month.
         self._prehlad(month="1", foreign_advance_amount=90)
         self.assertAlmostEqual(march._quarter_bonus_difference(), difference - 20, 2)
+
+    def test_reset_filed_month_keeps_quarter_capacity(self):
+        baseline = self._bonus_quarter()
+        january = self._prehlad(month='1', prepared_on='2026-02-20',
+            foreign_receipt_month='2026-02-01', foreign_advance_amount=20,
+            foreign_advance_source='additional', form_inputs_evidence='Reviewed foreign advance 20')
+        january.action_review_form_inputs()
+        january.action_generate()
+        january.action_submit()
+        archived = january.submitted_attachment_id
+        original = base64.b64decode(archived.datas)
+        march = self._prehlad(request_bonus_refund=True)
+        march.action_generate()
+        before = float(self._cast3(march).findtext('suma'))
+        self.assertAlmostEqual(before, baseline - 20, 2)
+        march.action_reset_to_draft()
+        january.action_reset_to_draft()
+        # Reset is a local preparation action, not a cancellation at FS.
+        self.assertEqual(base64.b64decode(archived.datas), original)
+        self.assertEqual(january.state, 'draft')
+        march.action_generate()
+        after = float(self._cast3(march).findtext('suma'))
+        self.assertAlmostEqual(after, before, 2,
+            'Merely resetting a filed January increased the actual quarterly refund XML')
+
+    def test_repeat_filing_order_does_not_follow_document_id(self):
+        baseline = self._bonus_quarter()
+        original = self._prehlad(month="1")
+        original.action_generate()
+        original.action_submit()
+        first = self._prehlad(month="1", correction_type="corrective",
+            correction_discovered_on="2026-02-17", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=30,
+            foreign_advance_source="additional", form_inputs_evidence="Synthetic earlier document filed later")
+        second = self._prehlad(month="1", correction_type="corrective",
+            correction_discovered_on="2026-02-17", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=40,
+            foreign_advance_source="additional", form_inputs_evidence="Synthetic later document filed first")
+        first.action_review_form_inputs()
+        second.action_review_form_inputs()
+        first.action_generate()
+        second.action_generate()
+        with patch.object(fields.Datetime, "now", return_value=datetime(2028, 2, 20, 12, 0)):
+            second.action_submit()
+            first.action_submit()
+        self.assertEqual(first.submitted_date, second.submitted_date)
+        self.assertLess(first.id, second.id)
+        march = self._prehlad(request_bonus_refund=True)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 30, 2)
+
+    def test_filed_facts_survive_edit_generated_and_effective_correction(self):
+        baseline = self._bonus_quarter()
+        january = self._prehlad(month="1", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=20,
+            foreign_advance_source="additional", prior_advance_offset=True,
+            form_inputs_evidence="Synthetic first filed foreign advance")
+        january.action_review_form_inputs()
+        january.action_generate()
+        january.action_submit()
+        archived = january.submitted_attachment_id
+        original = base64.b64decode(archived.datas)
+        sequence = january.filed_form_facts["local_filing_sequence"]
+        march = self._prehlad(request_bonus_refund=True)
+        january.action_reset_to_draft()
+        january.write({"correction_type": "corrective", "correction_discovered_on": "2026-02-18",
+            "foreign_advance_amount": 40, "prior_advance_offset": False,
+            "form_inputs_evidence": "Synthetic reviewed correction, not yet filed"})
+        january.action_review_form_inputs()
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 20, 2)
+        january.action_generate()
+        self.assertEqual(january.generated_form_facts["form_facts"]["foreign_advance_amount"], 40)
+        self.assertEqual(january.filed_form_facts["form_facts"]["foreign_advance_amount"], 20)
+        self.assertTrue(january.filed_form_facts["form_facts"]["prior_advance_offset"])
+        march.action_reset_to_draft()
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 20, 2)
+        january.action_submit()
+        self.assertGreater(january.filed_form_facts["local_filing_sequence"], sequence)
+        self.assertEqual(january.filed_form_facts["form_facts"]["correction_discovered_on"], "2026-02-18")
+        march.action_reset_to_draft()
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 40, 2)
+        self.assertEqual(base64.b64decode(archived.datas), original)
+        duplicate = january.copy()
+        self.assertFalse(duplicate.filed_form_facts)
+        self.assertFalse(duplicate.generated_form_facts)
+        for name in ("filed_form_facts", "generated_form_facts"):
+            with self.assertRaises(UserError):
+                january.write({name: False})
+            with self.assertRaises(UserError):
+                self._prehlad(**{name: False})
+            with self.assertRaises(UserError):
+                self.env["l10n.sk.prehlad"].with_company(self.company).with_context(
+                    **{"default_" + name: False}).create({"year": "2026", "month": "1"})
+        january.action_reset_to_draft()
+        with self.assertRaises(UserError):
+            january.month = "2"
+
+    def test_filing_facts_failure_rolls_back_native_submission(self):
+        self._employee_payslip()
+        report = self._prehlad()
+        report.action_generate()
+        with patch.object(type(report), "_prehlad_next_filing_sequence", side_effect=UserError("Synthetic snapshot failure")):
+            with self.assertRaisesRegex(UserError, "Synthetic snapshot failure"):
+                report.action_submit()
+        self.assertEqual(report.state, "generated")
+        self.assertFalse(report.submitted_attachment_id)
+        self.assertFalse(report.filed_form_facts)
+        self.assertFalse(report.filed_history_ids)
+        report.action_submit()
+        self.assertEqual(report.state, "submitted")
+        self.assertEqual(report.filed_form_facts["attachment_id"], report.submitted_attachment_id.id)
+
+    def test_api_cannot_invent_a_filed_pointer_or_filing_state(self):
+        self._employee_payslip()
+        report = self._prehlad()
+        report.action_generate()
+        with self.assertRaises(UserError):
+            report.write({"submitted_attachment_id": report.xml_attachment_id.id})
+        with self.assertRaises(UserError):
+            report.write({"state": "submitted"})
+        with self.assertRaises(UserError):
+            self._prehlad(submitted_attachment_id=False)
+        with self.assertRaises(UserError):
+            self.env["l10n.sk.prehlad"].with_company(self.company).with_context(
+                default_submitted_attachment_id=False).create({"year": "2026", "month": "3"})
+
+    def test_legacy_quarter_uses_archived_xml_and_reviewed_classification(self):
+        baseline = self._bonus_quarter()
+        january = self._prehlad(month="1", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=20,
+            foreign_advance_source="additional", form_inputs_evidence="Synthetic legacy original")
+        january.action_review_form_inputs()
+        january.action_generate()
+        january.action_submit()
+        # Import fixture for a pre-upgrade filed record without the new field.
+        self.env.cr.execute("UPDATE l10n_sk_prehlad SET filed_form_facts = NULL WHERE id = %s", [january.id])
+        january.invalidate_recordset()
+        january.action_reset_to_draft()
+        january.foreign_advance_amount = 99
+        march = self._prehlad(request_bonus_refund=True)
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline - 20, 2)
+        with self.assertRaises(UserError):
+            march._prehlad_quarter_inputs(1)
+        january.write({"legacy_filed_evidence": "Synthetic review of the archived foreign income document",
+                       "legacy_filed_foreign_source": "additional"})
+        january.action_review_legacy_filed_facts()
+        facts = march._prehlad_quarter_inputs(1)
+        self.assertEqual(facts["foreign_advance_amount"], 20)
+        self.assertEqual(facts["foreign_advance_source"], "additional")
+        self.assertEqual(january.filed_form_facts["local_filing_sequence"], 0)
 
     def test_correction_needs_something_to_correct(self):
         """An opravný for a period never filed is a rejection at best and a

@@ -72,6 +72,16 @@
                             <field name="form_inputs_reviewed_at"/>
                         </group>
                     </group>
+                    <group string="Archived monthly facts" invisible="not submitted_attachment_id or filed_form_facts">
+                        <field name="submitted_attachment_id" invisible="1"/>
+                        <field name="filed_form_facts" invisible="1"/>
+                        <field name="legacy_filed_foreign_source"/>
+                        <field name="legacy_filed_premium_own"/>
+                        <field name="legacy_filed_evidence"/>
+                        <field name="legacy_filed_order"/>
+                        <button name="action_review_legacy_filed_facts" type="object"
+                                string="Review archived form facts"/>
+                    </group>
                     <field name="line_ids">
                         <list>
                             <field name="sequence"/>
