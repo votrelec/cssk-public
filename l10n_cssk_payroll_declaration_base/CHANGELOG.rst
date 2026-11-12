@@ -8,6 +8,11 @@ Unreleased
 * Derive amendment preflight, rendering and fund-evidence policy from the
   constrained filing type rather than a writable stored UI projection.
 
+* Keep missing-fund warnings in a virtual declaration's cache and write
+  chatter only for a persistent business document. Preview/source consumers
+  can use ordinary fallback without a ``message_post`` error; unconfirmed
+  corrective declarations still reject missing fund evidence.
+
 * Preserve known fund amounts when a form lacks an additional retained profile
   fact, while keeping shared original/corrective review policy and a specific
   warning hook. Bind legacy review to the retained profile as well as salary.

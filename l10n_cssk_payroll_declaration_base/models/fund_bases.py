@@ -333,9 +333,11 @@ class DeclarationFundBases(models.AbstractModel):
         warning = self._missing_fund_evidence_warning(missing) if missing else False
         if self.fund_bases_warning != warning:
             self.fund_bases_warning = warning
-            if warning:
+            if warning and self.id:
                 # Plain text goes through mail.thread's escaping. Do not make
                 # employee-supplied names into trusted markup.
+                # A virtual declaration retains its warning in cache; NewId
+                # is false and has no persistent business-document chatter.
                 self.message_post(body=warning)
         return result
 

@@ -191,6 +191,10 @@ Zákonné výkazy → Doručenia*. Pozri
 
 ## Staršie mzdy bez uchovaných poistných základov {#recorded-funds}
 
+Neuložený náhľad alebo pomocný výpočet zachová rovnaké upozornenie vo svojej
+pracovnej pamäti. Do diskusie sa upozornenie zapíše až pri uloženom doklade.
+Pravidlá podkladov pôvodných a opravných výkazov sa tým nemenia.
+
 Poistný výkaz vymenuje pásky, pri ktorých chýbajú podrobné poistné základy
 alebo už nezodpovedajú mzde. Upozornenie je vo formulári aj v histórii
 komunikácie. Pôvodný výkaz môže použiť doterajší výpočet z hrubej odmeny;

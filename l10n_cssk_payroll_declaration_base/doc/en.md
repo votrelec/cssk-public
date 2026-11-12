@@ -194,6 +194,9 @@ Statutory Reports → Submissions*. See
 
 An insurance declaration names payslips whose detailed bases were not kept or
 no longer match the payroll. Read the warning in the form and its chatter.
+An unsaved preview/source calculation retains the same warning in its cache;
+chatter is written only for a saved business document. This does not change
+the original/corrective evidence policy.
 An original declaration can use the previous gross-based calculation; a
 correction normally stops until the precise payroll information is available.
 
