@@ -234,3 +234,5 @@ Ambiguous or missing archival facts are never silently turned into zero. Hooks
 `_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` retain extension
 proof; `_prehlad_quarter_component` / `_prehlad_quarter_retained` expose the same
 canonical source for all quarterly components.
+
+When a new filing supersedes an older one, its full prior facts/source snapshot is appended inside the protected retained-facts history beside the existing XML archive. Old classification and own-funded premium evidence are not reconstructed from wire or discarded.

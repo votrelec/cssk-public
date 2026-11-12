@@ -225,3 +225,5 @@ Nejednoznačné alebo chýbajúce archivované údaje sa potichu nenahrádzajú 
 Hooks `_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` uchovajú dôkaz
 rozšírenia; `_prehlad_quarter_component` / `_prehlad_quarter_retained` poskytujú
 rovnaký účinný zdroj všetkým štvrťročným komponentom.
+
+Pri novom podaní sa celá predchádzajúca snímka údajov a zdrojového dôkazu pridá do chránenej histórie uchovaných údajov popri existujúcom XML archíve. Staré zatriedenie a podklady prémie z vlastných prostriedkov sa neodvodzujú z XML ani nezahadzujú.

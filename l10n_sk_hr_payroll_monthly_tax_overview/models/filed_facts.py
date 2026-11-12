@@ -165,6 +165,7 @@ class PrehladFiledFacts(models.Model):
         with self.env.cr.savepoint():
             self._prehlad_lock_scope()
             snapshots = {}
+            previous = {}
             for record in self:
                 snapshot = record.generated_form_facts
                 if not snapshot:
@@ -173,6 +174,10 @@ class PrehladFiledFacts(models.Model):
                 if snapshot["attachment_id"] != record.xml_attachment_id.id:
                     raise UserError(_("Regenerate the current overview before recording its filing facts."))
                 snapshots[record.id] = snapshot
+                old = record.filed_form_facts
+                if not old and record.submitted_attachment_id:
+                    old = record._prehlad_snapshot(record.submitted_attachment_id, legacy=True)
+                previous[record.id] = record._prehlad_check_snapshot(old) if old else None
             token = _RETENTION_OPERATION.set(True)
             try:
                 result = super().action_submit()
@@ -182,6 +187,11 @@ class PrehladFiledFacts(models.Model):
                 snapshot = snapshots[record.id]
                 snapshot["local_filing_sequence"] = record._prehlad_next_filing_sequence()
                 snapshot["submitted_on"] = str(record.submitted_date)
+                old = previous[record.id]
+                history = old.pop("previous_filed_facts", []) if old else []
+                if old:
+                    history.append(old)
+                snapshot["previous_filed_facts"] = history
                 super(PrehladFiledFacts, record).write({"filed_form_facts": snapshot})
             return result
 
