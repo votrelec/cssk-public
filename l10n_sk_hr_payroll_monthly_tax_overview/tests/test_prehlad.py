@@ -345,6 +345,15 @@ class TestPrehlad(TransactionCase):
         self.assertAlmostEqual(after, before, 2,
             'Merely resetting a filed January increased the actual quarterly refund XML')
 
+    def test_internal_quarter_months_ignore_creation_defaults(self):
+        baseline = self._bonus_quarter()
+        march = self._prehlad(request_bonus_refund=True).with_context(
+            default_foreign_advance_amount=-20,
+            default_foreign_advance_source="additional")
+        march.action_generate()
+        self.assertAlmostEqual(float(self._cast3(march).findtext("suma")), baseline, 2,
+            "UI creation defaults are not reviewed facts for earlier virtual months")
+
     def test_repeat_filing_order_does_not_follow_document_id(self):
         baseline = self._bonus_quarter()
         original = self._prehlad(month="1")

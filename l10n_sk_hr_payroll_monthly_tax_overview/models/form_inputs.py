@@ -149,7 +149,11 @@ class PrehladFormInputs(models.Model):
             order="state desc, submitted_date desc, id desc", limit=1)
         if record and (record.foreign_advance_amount or record.foreign_receipt_month):
             record._prehlad_validate_form_facts()
-        return record or self.new({"company_id": self.company_id.id,
+        # UI defaults belong to a newly entered real form, never to an
+        # unrelated virtual historical month used for a quarter calculation.
+        clean_context = {key: value for key, value in self.env.context.items()
+                         if not key.startswith("default_")}
+        return record or self.with_context(clean_context).new({"company_id": self.company_id.id,
                                   "year": self.year, "month": str(month),
                                   "prepared_on": self.prepared_on})
 

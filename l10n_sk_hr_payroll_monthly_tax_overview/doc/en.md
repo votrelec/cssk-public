@@ -239,3 +239,6 @@ When a new filing supersedes an older one, its full prior facts/source snapshot 
 
 
 A document with filed history remains undeletable after a local reset; its filed source has not been cancelled. Never-filed drafts and copies can still be deleted normally.
+
+
+Internal virtual months ignore UI default_* creation values. Only actual saved or archived reviewed facts can supply a foreign advance to an earlier month; defaults on the current form do not create past financial facts.

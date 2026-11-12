@@ -230,3 +230,6 @@ Pri novom podaní sa celá predchádzajúca snímka údajov a zdrojového dôkaz
 
 
 Dokument s históriou podaní nemožno vymazať ani po lokálnom resete, ktorý podaný zdroj neruší. Nikdy nepodané návrhy a kópie sa naďalej dajú bežne vymazať.
+
+
+Interné virtuálne mesiace ignorujú UI hodnoty default_* pre vytváranie záznamov. Zahraničný preddavok za skorší mesiac dodajú len skutočne uložené alebo archivované overené údaje; predvoľby aktuálneho formulára nevytvárajú minulé peňažné fakty.
