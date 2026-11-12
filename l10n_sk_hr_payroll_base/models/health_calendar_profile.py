@@ -85,7 +85,7 @@ class HealthCalendarProfile(models.Model):
             )
         if facts and self.l10n_sk_health_minimum_opt_out:
             self.l10n_sk_health_minimum_is_opted_out()
-            if not facts["concurrent_other_employment"]:
+            if not facts["minimum_concurrent_other_employment"]:
                 raise UserError(
                     _(
                         "A minimum opt-out requires concurrent employers in the reviewed health calendar."

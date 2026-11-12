@@ -98,6 +98,11 @@ def month_context(intervals, month):
         "disability_in_month": bool(days["disabled"]),
         "concurrent_self_employment": bool(op_employment & days["self_employed"]),
         "concurrent_other_employment": bool(op_employment & days["other_employment"]),
+        # Section 16a(5) also covers insured agreements; OP eligibility
+        # remains limited to employment above (section 13a).
+        "minimum_concurrent_other_employment": bool(
+            employed & days["other_employment"]
+        ),
         "same_employer_other_reason": bool(days["2P"]),
         "same_employer_other_reason_dates": sorted(
             value.isoformat() for value in days["2P"]
