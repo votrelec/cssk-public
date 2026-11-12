@@ -20,7 +20,7 @@
                     <mesiac t-out="p['mesiac']"/>
                     <rok t-out="p['rok']"/>
                 </zdanovacieObdobie>
-                <datumZisteniaOP/>
+                <datumZisteniaOP t-out="p['discovered_on']"/>
                 <fo>
                     <priezvisko/>
                     <meno/>
@@ -65,18 +65,18 @@
                         <suma t-out="p['r01_suma']"/>
                     </r01>
                     <r01a>
-                        <mesiacRok/>
-                        <suma/>
+                        <mesiacRok t-out="p['r01a_month']"/>
+                        <suma t-out="p['r01a_suma']"/>
                     </r01a>
                     <r01b/>
                     <r02/>
                     <r03/>
                     <r04 t-out="p['r04']"/>
-                    <r05 t-out="p['r05']"/>
+                    <r05 t-out="prehlad_reduction(p['r05'])"/>
                     <r06/>
                     <r07/>
                     <r08 t-out="p['r08']"/>
-                    <r08b>0</r08b>
+                    <r08b t-out="p['r08b']"/>
                 </cast1>
                 <cast2>
                     <rA t-out="p['rA']"/>

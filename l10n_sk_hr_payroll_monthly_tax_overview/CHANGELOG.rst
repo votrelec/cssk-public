@@ -5,6 +5,35 @@ Changelog
 Unreleased
 ==========
 
+* 19.0.2.3.1: Require proved chronology when selecting archived monthly
+  facts. Partial legacy ordering cannot promote an older filing; a native
+  sequence does not order an imported legacy filing. Qualify tied archive
+  chronology through an audited native action, preserving prior reviews,
+  exact XML, form facts and the original native sequence.
+
+* 19.0.2.3.0: Retain exact monthly filed form/quarter facts with the native
+  archived XML. Reset/edit/unfiled correction preserves the last locally
+  filed source until a new filing is recorded. Coordinate scoped Prehľad
+  operations, use native local audit order for same-second filings, reject
+  forged retention API/defaults, and support evidenced legacy archive review.
+  Preserve every superseded filed facts/source snapshot alongside XML history.
+  Keep ever-filed documents undeletable after reset; allow unfiled draft copies.
+  Isolate virtual historical quarter months from unrelated UI creation defaults.
+
+* 19.0.2.2.0: Native reviewed discovery/preparation dates and conditional
+  foreign-employment row 1a / prior excess-remittance row 8b inputs, UI and
+  signed wire mapping. Bind review to exact facts, clear it on edit/reset,
+  preserve filed bytes and reset copies. Expose cooperative advance and
+  quarterly/source hooks; keep payroll and accounting calculations native.
+
+* Emit the covered child bonus as a negative reduction on row 05. The
+  published PREHLADv26 wire adds signed rows 05–07 to row 04; positive
+  coverage made otherwise schema-valid XML disagree with row 08. Keep
+  internal coverage, positive recap amounts and refund calculations intact.
+  A shared output formatter also supports extensions supplying rows 06/07.
+  The FS explicitly permits this wire for both 2026 and 2027; no invented
+  new XML edition or changed official schema is supplied.
+
 * **Renamed from ``l10n_sk_hr_payroll_prehlad`` to ``l10n_sk_hr_payroll_monthly_tax_overview``.** The technical
   name is English now, like every other module here; the statutory form keeps its
   Slovak name in the module title, in the models and in the data files, exactly as

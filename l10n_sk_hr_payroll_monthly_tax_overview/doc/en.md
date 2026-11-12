@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Tax Overview (Prehľad)
 summary: The monthly overview of income-tax advances withheld from employees and the child tax bonus paid, generated from the month's payslips as XML for the Slovak financial administration.
-verified: 19.0.2.1.2
+verified: 19.0.2.1.3
 ---
 
 ## What it is for {#purpose}
@@ -88,14 +88,29 @@ per-employee data.
 | r. 00 — úhrn zúčtovaných a vyplatených zdaniteľných príjmov | the sum of the `GROSS` rule over the month's payslips |
 | r. 01 — preddavky na daň (date and amount) | *Payment Date*, and the withheld advance before the bonus: `INCOMETAX19` + `INCOMETAX25` on Enterprise, `INCOMETAX` on the OCA engine |
 | r. 04 | equal to r. 01 (rows 02 and 03 are left empty) |
-| r. 05 — vyplatený daňový bonus | the sum of `CHILD_BONUS`, **capped at r. 04** |
-| r. 08 — odvodová povinnosť | r. 04 − r. 05 |
+| r. 05 — vyplatený daňový bonus | the sum of `CHILD_BONUS`, **capped at r. 04**, emitted as a negative reduction |
+| r. 08 — odvodová povinnosť | r. 04 + the signed wire rows 05, 06 and 07 |
 | Part II, r. A / B / C | the bonus paid in total / the part covered by r. 05 / the remainder |
 
-Rows 01a, 01b, 02, 03, 06, 07 and 08b, rows D–F of Part II and the Part III
+Rows 01b, 02, 03, 06 and 07, rows D–F of Part II and the Part III
 requests to remit the employee premium or the interest bonus are left empty
 or zero. The request to remit the child bonus is filled only when you ask for
 it — see below.
+
+The published eForm adds signed rows 05–07: a paid/covered bonus reduces
+the remittance and is negative; a recovery is positive. Internal covered
+amounts, positive Part II recap amounts and refund calculations keep their
+existing convention. Extensions serializing rows 06/07 can use the same
+`prehlad_reduction` template formatter. Already retained filed XML is not
+rewritten; any correction follows the existing native corrective workflow.
+
+The Financial Administration explicitly permits PREHLADv26 for both 2026
+and 2027. Its electronic schema already contains every row of the published
+PREHLADv27 paper pattern. The 2027 paper wording broadens row 1b to signed
+parent-tax adjustments by the special public employers; an ordinary private
+employer leaves that row unused. A different paper label does not rename
+the wire schema. Source links and exact hashes are recorded in
+`data/SCHEMA_VERSION`; later published changes require the normal refresh.
 
 ## Claiming the bonus difference back {#bonus-refund}
 
@@ -123,6 +138,42 @@ module refuses to generate a corrective overview unless a regular one for the
 same company, year and month is already marked submitted. A *dodatočný* or
 cancelling overview cannot be produced.
 
+## Reviewed form facts {#form-facts}
+
+Set **Prepared on** to the date written on the form. A corrective overview
+requires **Correction discovered on**, the actual evidenced discovery date,
+from the first day of its reporting month through the preparation date.
+A regular overview must leave discovery empty. No discovery date is inferred
+from creation time or today's clock. Enter **Form facts evidence** and click
+**Review form facts** before generating a conditional form. The review records
+the user, time and exact input digest. Editing its period, type or facts clears
+review; reset to draft before editing generated records. Copies start in draft
+without XML, discovery or conditional facts/review. Filed bytes remain retained.
+
+For row 1a under section 5(4), enter the evidenced foreign-employment advance,
+the first day of the document receipt month (the month immediately after the reporting month, exported as MM.YYYY), and its
+source: either **Already included** reclassifies that amount from row 1 to 1a,
+or **Additional** adds an externally documented advance. Row 4 and covered
+bonuses use the resulting total exactly once. Payroll and accounting stay
+unchanged. Quarter requests reuse completed monthly facts (latest locally
+filed record, otherwise latest generated record); a draft does not replace a
+completed month. Extensions can reuse `_prehlad_advance_rows`,
+`_prehlad_quarter_inputs` and `_prehlad_form_facts` in their own tax/source hooks.
+
+Tick row 8b only for an actual reduction of this month's remittance by earlier
+over-remitted advances under section 40(8). This is a reviewed flag, not an
+automatic refund or payment calculation; an authority refund request does not
+set it. Row 1b is reserved for the statutory public/military employer profiles
+and remains blank for ordinary private employers.
+
+The [FS FAQ](https://podpora.financnasprava.sk/879943-Pod%C3%A1vanie-mesa%C4%8Dn%C3%BDch-preh%C4%BEadov)
+permits wire PREHLADv26 for 2026 and 2027. The published 2027 paper form and
+instructions are [MF/014307/2026-721](https://www.mfsr.sk/files/archiv/70/oznamenie_mfsr_mf_014307.zip).
+The actual [official eForm](https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/form.624.html)
+requires discovery for a corrective form even though the unchanged XSD allows
+an empty optional date. XSD success is not authority acceptance. Verified
+12 November 2026; no unpublished future wire edition is invented.
+
 ## Limitations {#limitations}
 
 - **Check the figures before filing.** The schema check proves the shape of
@@ -143,9 +194,69 @@ cancelling overview cannot be produced.
   corrections from the annual reconciliation (rows 02 and 03) have no source
   in the payroll and must be added by hand.
 - The **legal form** element of the header is the *Právna forma* recorded on the company's contact by `l10n_sk_trade_registry`; without that module, or with the field empty, the element stays empty.
-- The *opravný* overview leaves the date the correction was discovered
-  (*dátum zistenia*) empty.
-- The form vintage is picked by **today's date**, not by the period; an
-  overview for a 2025 month is produced on the 2026 vintage.
+- The form vintage is selected by the reporting period; unsupported historical
+  periods require their published edition.
 - Nothing is sent to the authority: *Mark Submitted* only records that you
   filed it.
+
+## Retained monthly facts for quarterly requests {#filed-facts}
+
+A local reset, an edited draft and a generated unfiled correction do not cancel
+an earlier filing. Quarterly requests use the last locally recorded filed
+snapshot for each earlier month: child difference (C), interest difference (F),
+and any extension-supplied employee premium paid from own funds. Its exact form
+facts, source proof, attachment and SHA256 stay associated. Only **Mark
+Submitted** replaces that month's effective filed facts; the current month
+being prepared still uses its current calculation. Reset and copy remain normal
+operations. A filed document's company and period cannot be reassigned; copy it
+for another reporting scope.
+
+Generation captures the current facts beside the existing XML. Recording the
+filing and retaining its facts are atomic in the same transaction/savepoint.
+Direct API/default writes cannot invent a submitted pointer, state or facts
+snapshot. Existing native retained XML/history fields remain the archive; there
+is no parallel filing register or payroll/tax ledger. Native `ir.sequence` gives
+local audit order when two filings share the same second; it is never a tax
+administrator reference or evidence of acceptance. Relevant Prehľad operations
+coordinate allowed companies and sorted document parents with a real scoped
+epoch update so stale REPEATABLE READ work retries. Other declaration types are
+not changed.
+
+For pre-upgrade filings without the new snapshot, C/F and the available header
+facts come from the archived XML, never today's edited draft. XML does not
+record included/additional classification or a monthly own-funded premium
+amount. Extensions can supply an existing matching archived source proof.
+Otherwise use **Review archived form facts**, evidenced foreign classification
+and any reviewed premium amount (including an explicitly reviewed zero). If old
+local timestamps cannot identify the effective filing, enter its reviewed
+relative legacy order. This review records no new filing or authority event.
+Ambiguous or missing archival facts are never silently turned into zero. Hooks
+`_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` retain extension
+proof; `_prehlad_quarter_component` / `_prehlad_quarter_retained` expose the same
+canonical source for all quarterly components.
+
+When a new filing supersedes an older one, its full prior facts/source snapshot is appended inside the protected retained-facts history beside the existing XML archive. Old classification and own-funded premium evidence are not reconstructed from wire or discarded.
+
+
+A document with filed history remains undeletable after a local reset; its filed source has not been cancelled. Never-filed drafts and copies can still be deleted normally.
+
+
+Internal virtual months ignore UI default_* creation values. Only actual saved or archived reviewed facts can supply a foreign advance to an earlier month; defaults on the current form do not create past financial facts.
+
+### Qualifying archived chronology {#filed-chronology}
+
+A missing relative order is unknown, not evidence of an earlier filing.
+Distinct archived local timestamps establish the order between legacy or
+mixed legacy/native filings. Native sequences order native filings only.
+When the latest candidates have indistinguishable timestamps, review every
+competing candidate's relative order and evidence. Earlier unresolved ties
+do not block a provably later filing. Conflicting known orders require review.
+
+After reviewing legacy form facts, use **Review archived filing order** to
+qualify or correct a positive relative order from retained evidence. This
+also resolves a same-second legacy/native tie. Previous chronology reviews
+remain in the protected snapshot; XML, form facts, source proof and the native
+filing sequence do not change. A manual review cannot override the order of
+native sequence-numbered filings. This action records no new filing,
+authority receipt or acceptance. Quarterly components and their source proof
+use the same selection; a changed chronology requires fresh quarterly work.

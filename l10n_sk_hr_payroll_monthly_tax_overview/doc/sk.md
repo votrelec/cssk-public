@@ -1,7 +1,7 @@
 ---
 title: SK Prehľad o zrazených a odvedených preddavkoch na daň
 summary: Mesačný prehľad o preddavkoch na daň zrazených zamestnancom a o vyplatenom daňovom bonuse, zostavený z výplatných pások mesiaca ako XML pre finančnú správu.
-verified: 19.0.2.1.2
+verified: 19.0.2.1.3
 ---
 
 ## Na čo slúži {#purpose}
@@ -45,7 +45,7 @@ Odkazy sú na [zákon o dani z príjmov](law:sk/2003/595).
 - **DIČ spoločnosti.** Na spoločnosti vyplňte *DIČ* (10-miestne daňové
   identifikačné číslo). Kým chýba, generovanie skončí chybou.
 - **Adresa, telefón a e-mail spoločnosti** idú do hlavičky prehľadu. Číslo domu sa
-  berie z konca poľa *Ulica* (*Hlavná 12*, *Hlavná 1141/11*); *Ulica2* sa
+  berie z konca poľa *Ulica* (*Hlavná 12*, *Hlavná 1141/11*); *Ulica 2* sa
   použije, len ak obsahuje iba číslo — budova, poschodie či c/o sa ako číslo
   domu nikdy nepodávajú.
 - **Bankový účet.** Do III. časti sa ako účet na vrátenie zapíše prvý bankový
@@ -84,14 +84,29 @@ zamestnancoch neobsahuje.
 | r. 00 — úhrn zúčtovaných a vyplatených zdaniteľných príjmov | súčet pravidla `GROSS` z výplatných pások mesiaca |
 | r. 01 — preddavky na daň (dátum a suma) | *Dátum výplaty* a zrazený preddavok pred bonusom: `INCOMETAX19` + `INCOMETAX25` pri Enterprise, `INCOMETAX` pri jadre OCA |
 | r. 04 | rovná sa r. 01 (r. 02 a 03 zostanú prázdne) |
-| r. 05 — vyplatený daňový bonus | súčet `CHILD_BONUS`, **najviac do výšky r. 04** |
-| r. 08 — odvodová povinnosť | r. 04 − r. 05 |
+| r. 05 — vyplatený daňový bonus | súčet `CHILD_BONUS`, **najviac do výšky r. 04**, v XML ako záporné zníženie |
+| r. 08 — odvodová povinnosť | r. 04 + riadky 05, 06 a 07 so znamienkami XML |
 | II. časť, r. A / B / C | bonus vyplatený spolu / časť pokrytá v r. 05 / zvyšok |
 
-Riadky 01a, 01b, 02, 03, 06, 07 a 08b, riadky D – F II. časti a žiadosti
+Riadky 01b, 02, 03, 06 a 07, riadky D – F II. časti a žiadosti
 III. časti o poukázanie zamestnaneckej prémie a daňového bonusu na zaplatené
 úroky zostanú prázdne alebo nulové. Žiadosť o poukázanie daňového bonusu sa
 vyplní len na požiadanie — pozri nižšie.
+
+Úradný elektronický formulár sčítava riadky 05–07 so znamienkami: vyplatený
+bonus znižuje odvod a je záporný; vybratá suma je kladná. Vnútorné sumy
+pokrytia, kladné rekapitulácie II. časti a výpočty žiadostí sa nemenia.
+Rozšírenia riadkov 06/07 môžu použiť rovnaký formátovač šablóny
+`prehlad_reduction`. Uchované podané XML sa neprepisuje; prípadná oprava
+použije existujúci natívny opravný postup.
+
+Finančná správa výslovne povoľuje PREHLADv26 pre roky 2026 aj 2027.
+Elektronická schéma už obsahuje všetky riadky publikovaného papierového
+vzoru PREHLADv27. Papierové znenie 2027 rozširuje riadok 1b na úpravy
+podielu dane pre rodičov so znamienkom pri osobitných verejných zamestnávateľoch;
+bežný súkromný zamestnávateľ ho nevyplní. Odlišné označenie papierového
+vzoru nemení názov XML schémy. Primárne zdroje a presné hashe obsahuje
+`data/SCHEMA_VERSION`; neskoršie publikované zmeny vyžadujú bežnú aktualizáciu.
 
 ## Vrátenie rozdielu daňového bonusu {#bonus-refund}
 
@@ -118,6 +133,40 @@ Prehľad pozná dva druhy: *riadny* a *opravný*. Na opravný prehľad nastavte
 riadny prehľad za tú istú spoločnosť, rok a mesiac označený ako odoslaný.
 Dodatočný ani stornovací prehľad vytvoriť nemožno.
 
+## Overené údaje formulára {#form-facts}
+
+Zadajte **Dátum vyhotovenia** uvedený na prehľade. Opravný prehľad vyžaduje
+skutočný **Dátum zistenia chyby**, od prvého dňa vykazovaného mesiaca do dátumu
+vyhotovenia. Pri riadnom prehľade zostáva prázdny. Dátum zistenia sa nikdy
+neodvodzuje zo systémového času ani vytvorenia záznamu. Uveďte **Podklady údajov
+formulára** a zvoľte **Overiť údaje formulára**. Akcia uchová používateľa, čas
+a odtlačok vstupov. Zmena obdobia, typu alebo údajov overenie zruší. Vygenerovaný
+prehľad pred úpravou vráťte do návrhu; kópia začína v návrhu bez XML, dátumu
+zistenia a podmienených údajov či overenia. Podané bajty zostávajú zachované.
+
+Pre riadok 1a podľa § 5 ods. 4 zadajte overený preddavok, prvý deň mesiaca
+prijatia dokladu (bezprostredne nasledujúci mesiac; XML uvedie MM.RRRR) a zdroj sumy. Voľba **Už zahrnutý** presunie
+sumu z riadka 1 do 1a; voľba **Navyše** pridá preddavok z externého dokladu.
+Riadok 4 a krytie bonusov používajú výsledný súčet len raz. Mzdy a účtovníctvo
+sa nemenia. Štvrťročná žiadosť použije dokončené mesačné údaje: posledný lokálne
+evidovaný podaný prehľad, prípadne posledný vygenerovaný. Návrh nenahrádza
+dokončený mesiac. Rozšírenia môžu použiť spoločné hooks
+`_prehlad_advance_rows`, `_prehlad_quarter_inputs` a `_prehlad_form_facts`.
+
+Riadok 8b zaškrtnite len pri skutočnom znížení odvodu za tento mesiac o skoršie
+nadmerné odvody podľa § 40 ods. 8. Ide o overený príznak, nie automatický výpočet
+vratky alebo platby. Žiadosť o vrátenie od úradu ho nevyznačuje. Riadok 1b je
+vyhradený zákonným verejným a vojenským profilom zamestnávateľa; pri bežnej
+súkromnej spoločnosti zostáva prázdny.
+
+[FS výslovne povoľuje](https://podpora.financnasprava.sk/879943-Pod%C3%A1vanie-mesa%C4%8Dn%C3%BDch-preh%C4%BEadov)
+XML PREHLADv26 na roky 2026 aj 2027. Listinný vzor a poučenie 2027 vydáva
+[MF/014307/2026-721](https://www.mfsr.sk/files/archiv/70/oznamenie_mfsr_mf_014307.zip).
+[Úradný eForm](https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/form.624.html)
+vyžaduje dátum zistenia pri opravnom prehľade, hoci nezmenené XSD dovolí prázdny
+nepovinný dátum. XSD nie je prijatie úradom. Overené 12. novembra 2026; nijaká
+nepublikovaná budúca XML verzia sa nevymýšľa.
+
 ## Obmedzenia {#limitations}
 
 - **Sumy pred podaním skontrolujte.** Kontrola voči schéme overí tvar súboru,
@@ -137,9 +186,68 @@ Dodatočný ani stornovací prehľad vytvoriť nemožno.
   ročného zúčtovania (r. 02 a 03) nemajú v mzdách zdroj a treba ich doplniť
   ručne.
 - Element **právnej formy** v hlavičke: *Právna forma* zapísaná na kontakte spoločnosti modulom `l10n_sk_trade_registry`; bez tohto modulu alebo pri prázdnom poli zostáva element prázdny.
-- Opravný prehľad nechá prázdny dátum zistenia dôvodov na podanie opravného
-  prehľadu.
-- Verzia tlačiva sa vyberá podľa **dnešného dátumu**, nie podľa obdobia;
-  prehľad za mesiac roku 2025 sa vytvorí na vzore 2026.
+- Verzia tlačiva sa vyberá podľa vykazovaného obdobia; nepodporované historické
+  obdobie potrebuje svoj publikovaný vzor.
 - Úradu sa nič neposiela: *Označiť ako odoslané* len zaznamená, že ste
   prehľad podali.
+
+## Uchované mesačné údaje štvrťročných žiadostí {#filed-facts}
+
+Lokálny reset, úprava návrhu ani vygenerovaná nepodaná oprava nerušia skoršie
+podanie. Štvrťročná žiadosť používa poslednú lokálne evidovanú podanú snímku
+každého predchádzajúceho mesiaca: rozdiel bonusu na deti (C), na úroky (F)
+a prípadnú zamestnaneckú prémiu z vlastných prostriedkov dodanú rozšírením.
+Presné údaje formulára a zdrojový dôkaz zostávajú viazané na prílohu a SHA256.
+Účinné podané údaje mesiaca nahradí až **Označiť ako odoslané**; práve
+pripravovaný mesiac používa svoj aktuálny výpočet. Reset a kópia zostávajú
+bežnými operáciami. Spoločnosť ani obdobie podaného dokumentu nemožno
+prepriradiť; pre iný rozsah vytvorte kópiu.
+
+Generovanie zachytí aktuálne údaje pri existujúcom XML. Evidencia podania
+a uchovanie údajov prebehnú atómovo v rovnakej transakcii a savepointe.
+Priame API ani defaulty nemôžu podvrhnúť podanú prílohu, stav či snímku.
+Archív naďalej tvoria natívne podané XML a história; nevzniká paralelný register
+podaní ani ďalšia mzdová či daňová kniha. Natívna `ir.sequence` určuje lokálne
+auditné poradie podaní v rovnakej sekunde. Nie je referenciou úradu ani dôkazom
+prijatia. Relevantné operácie Prehľadu koordinujú povolené spoločnosti a všetky
+zoradené rodičovské dokumenty cez skutočnú zmenu verzie rozsahu; zastaraná
+transakcia REPEATABLE READ sa zopakuje. Iné typy výkazov sa nemenia.
+
+Pri podaniach spred aktualizácie bez novej snímky pochádzajú C/F a dostupné
+údaje hlavičky z archivovaného XML, nikdy z dnešného zmeneného návrhu.
+XML neobsahuje zatriedenie už zahrnutého či dodatočného preddavku ani mesačnú
+prémiu z vlastných prostriedkov. Rozšírenie môže poskytnúť zhodný archivovaný
+zdrojový dôkaz. Inak použite **Overiť archivované údaje formulára**, doložené
+zatriedenie a overenú sumu prémie vrátane výslovne overenej nuly. Ak staré
+lokálne časy nerozlišujú účinné podanie, uveďte overené vzájomné poradie
+historických podaní. Toto overenie nevytvára nové podanie ani udalosť úradu.
+Nejednoznačné alebo chýbajúce archivované údaje sa potichu nenahrádzajú nulou.
+Hooks `_prehlad_snapshot_extra` / `_prehlad_legacy_snapshot_extra` uchovajú dôkaz
+rozšírenia; `_prehlad_quarter_component` / `_prehlad_quarter_retained` poskytujú
+rovnaký účinný zdroj všetkým štvrťročným komponentom.
+
+Pri novom podaní sa celá predchádzajúca snímka údajov a zdrojového dôkazu pridá do chránenej histórie uchovaných údajov popri existujúcom XML archíve. Staré zatriedenie a podklady prémie z vlastných prostriedkov sa neodvodzujú z XML ani nezahadzujú.
+
+
+Dokument s históriou podaní nemožno vymazať ani po lokálnom resete, ktorý podaný zdroj neruší. Nikdy nepodané návrhy a kópie sa naďalej dajú bežne vymazať.
+
+
+Interné virtuálne mesiace ignorujú UI hodnoty default_* pre vytváranie záznamov. Zahraničný preddavok za skorší mesiac dodajú len skutočne uložené alebo archivované overené údaje; predvoľby aktuálneho formulára nevytvárajú minulé peňažné fakty.
+
+### Overenie chronológie archívov {#filed-chronology}
+
+Chýbajúce vzájomné poradie je neznámy údaj, nie dôkaz skoršieho podania.
+Rozlíšiteľné lokálne časy určujú poradie historických podaní aj kombinácie
+historického a nového podania. Natívna sekvencia porovnáva iba nové podania.
+Ak posledných kandidátov nerozlišuje čas, overte vzájomné poradie všetkých
+konkurujúcich archívov. Skoršia nerozlíšená dvojica neblokuje preukázateľne
+neskoršie podanie. Rozporné známe poradia vyžadujú opravu.
+
+Po overení historických údajov formulára použite **Overiť poradie archivovaných
+podaní** s kladným vzájomným poradím a dôkazom. Možno tak doplniť či opraviť
+chronológiu, aj pri rovnakom čase historického a nového podania. Predchádzajúce
+overenia zostávajú v chránenej snímke; XML, údaje formulára, zdrojový dôkaz ani
+natívna sekvencia sa nemenia. Manuálne poradie nesmie prebiť poradie podaní
+s natívnou sekvenciou. Akcia nevytvára nové podanie, potvrdenku ani prijatie
+úradom. Všetky štvrťročné komponenty a ich dôkaz používajú rovnaký výber;
+zmena chronológie vyžaduje nové overenie rozpracovaného štvrťročného výstupu.
