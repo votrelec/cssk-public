@@ -17,6 +17,54 @@ from .test_mvp import NS, MvpCase
 
 
 class TestMvpCorrective(MvpCase):
+    def test_forged_period_projection_is_rejected_before_export(self):
+        self._employee_payslip()
+        original = self._report()
+        original.action_generate()
+        original.action_submit()
+        corrective = self._report(
+            month="4", correction_type="corrective", replaced_mvp_id=original.id
+        )
+        corrective.write({"date_from": date(2026, 3, 1), "date_to": date(2026, 3, 31)})
+        with self.assertRaises(UserError):
+            corrective.action_generate()
+        self.assertFalse(corrective.xml_attachment_id)
+        self.assertEqual(corrective.state, "draft")
+
+    def test_explicit_context_false_preserves_unselected_predecessor(self):
+        self._employee_payslip()
+        original = self._report()
+        original.action_generate()
+        original.action_submit()
+        model = self.env["l10n.sk.mvp"].with_context(default_replaced_mvp_id=False)
+        corrective = model.create(
+            {
+                "company_id": self.company.id,
+                "year": "2026",
+                "month": "3",
+                "correction_type": "corrective",
+            }
+        )
+        self.assertFalse(corrective.replaced_mvp_id)
+        with self.assertRaises(UserError):
+            corrective.action_generate()
+        corrective.replaced_mvp_id = original
+        corrective.action_generate()
+        for field in ("date_from", "date_to"):
+            with self.assertRaises(UserError):
+                corrective.write({field: date(2026, 4, 1)})
+
+    def test_annual_projection_uses_native_annual_override(self):
+        annual = self.env["l10n.sk.hlasenie"].new(
+            {"company_id": self.company.id, "year": "2026", "month": "4"}
+        )
+        self.assertEqual(annual.date_from, date(2026, 1, 1))
+        self.assertEqual(annual.date_to, date(2026, 12, 31))
+        annual._check_period_projection()
+        annual.date_to = date(2026, 4, 30)
+        with self.assertRaises(UserError):
+            annual._check_period_projection()
+
     def test_readonly_projection_cannot_disable_strict_correction_review(self):
         _employee, slip = self._employee_payslip()
         original = self._report()

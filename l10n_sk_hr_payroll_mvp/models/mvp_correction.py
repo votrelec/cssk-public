@@ -49,7 +49,10 @@ class Mvp(models.Model):
     def create(self, values_list):
         reports = super().create(values_list)
         for report, values in zip(reports, values_list):
-            if "replaced_mvp_id" not in values:
+            if (
+                "replaced_mvp_id" not in values
+                and "default_replaced_mvp_id" not in self.env.context
+            ):
                 report._prefill_replaced_mvp()
         return reports
 
@@ -67,6 +70,8 @@ class Mvp(models.Model):
             "month",
             "version_id",
             "payment_date",
+            "date_from",
+            "date_to",
             "correction_type",
             "correction_reference",
             "replaced_mvp_id",
