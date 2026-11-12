@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ==========
 
+* Validate stored period projections with each form's native computation,
+  including annual overrides, before version selection and amendment lookup.
+
 * Derive amendment preflight, rendering and fund-evidence policy from the
   constrained filing type rather than a writable stored UI projection.
 

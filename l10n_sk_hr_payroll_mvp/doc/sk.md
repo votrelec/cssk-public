@@ -1,7 +1,7 @@
 ---
 title: SK MVP — mesačný výkaz poistného a príspevkov
 summary: Mesačný výkaz poistného a príspevkov pre Sociálnu poisťovňu zostavený z výplatných pások mesiaca — sumy za fondy a príloha po zamestnancoch, export do XML overený voči oficiálnej schéme.
-verified: 19.0.1.3.0
+verified: 19.0.1.3.1
 ---
 
 ## Na čo slúži {#purpose}
@@ -143,3 +143,7 @@ alebo vrátenie peňazí sú samostatné účtovné operácie.
 
 Zdroje: [poučenie SP](https://www.socpoist.sk/api/idsp/download/d360c51e-c8c8-4554-8a3f-4a7344765bf5)
 a [aktuálne poučenie prílohy](https://www.socpoist.sk/api/idsp/download/35cd0fa0-ef07-4adb-b296-a4c66b855904).
+
+Uložené dátumy musia súhlasiť s obdobím výkazu. Dátumy vygenerovanej opravy
+sú chránené spolu s identitou podania. Výslovne prázdny predvolený odkaz
+zostane nevybraný, kým operátor neurčí podaný výkaz.

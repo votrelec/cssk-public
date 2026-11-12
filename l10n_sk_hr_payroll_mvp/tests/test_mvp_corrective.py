@@ -55,6 +55,8 @@ class TestMvpCorrective(MvpCase):
                 corrective.write({field: date(2026, 4, 1)})
 
     def test_annual_projection_uses_native_annual_override(self):
+        if "l10n.sk.hlasenie" not in self.env:
+            self.skipTest("Optional annual form is not installed")
         annual = self.env["l10n.sk.hlasenie"].new(
             {"company_id": self.company.id, "year": "2026", "month": "4"}
         )

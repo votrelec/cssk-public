@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Social Insurance Statement (MVP)
 summary: The monthly výkaz poistného a príspevkov for the Sociálna poisťovňa, built from the month's payslips — fund totals and a per-employee annex, exported as XML checked against the official schema.
-verified: 19.0.1.3.0
+verified: 19.0.1.3.1
 ---
 
 ## What it is for {#purpose}
@@ -148,3 +148,7 @@ or recovering a payment remain separate accounting operations.
 
 Sources: [SP instructions](https://www.socpoist.sk/api/idsp/download/d360c51e-c8c8-4554-8a3f-4a7344765bf5)
 and [current annex instructions](https://www.socpoist.sk/api/idsp/download/35cd0fa0-ef07-4adb-b296-a4c66b855904).
+
+Stored dates must match the form's canonical period. Generated correction
+dates are protected with the filing identity. An explicit empty predecessor
+default remains unselected until the operator selects a filed statement.

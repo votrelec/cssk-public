@@ -504,7 +504,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
             if (rec.date_from, rec.date_to) != (expected.date_from, expected.date_to):
                 raise UserError(_(
                     "The stored declaration dates do not match its period inputs. "
-                    "Correct the year and month before generating the declaration."
+                    "Correct the period inputs before generating the declaration."
                 ))
 
     @api.depends("line_ids")
