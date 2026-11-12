@@ -191,7 +191,7 @@ class DeclarationFundBases(models.AbstractModel):
                         "Use an allowed company when reviewing the declaration's legacy payroll."
                     )
                 )
-            if record.state != "draft" or not record.is_correction:
+            if record.state != "draft" or not record._is_amending_declaration():
                 raise UserError(
                     _(
                         "Confirm the legacy calculation on a draft corrective declaration."
@@ -320,7 +320,7 @@ class DeclarationFundBases(models.AbstractModel):
                     missing |= slip
         if (
             missing
-            and self.is_correction
+            and self._is_amending_declaration()
             and not self._legacy_fund_fallback_is_confirmed(slips)
         ):
             raise UserError(

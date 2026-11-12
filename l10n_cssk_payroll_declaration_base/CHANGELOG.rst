@@ -5,6 +5,9 @@ Changelog
 Unreleased
 ==========
 
+* Derive amendment preflight, rendering and fund-evidence policy from the
+  constrained filing type rather than a writable stored UI projection.
+
 * Preserve known fund amounts when a form lacks an additional retained profile
   fact, while keeping shared original/corrective review policy and a specific
   warning hook. Bind legacy review to the retained profile as well as salary.

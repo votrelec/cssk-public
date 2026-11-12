@@ -1,7 +1,7 @@
 ---
 title: CZ/SK Payroll Declarations
 summary: The common ground of the Czech and Slovak payroll filings — the Payroll Declarations menu, the Generate / Mark Submitted workflow, corrections, form versions, and how payslips are read from either payroll engine.
-verified: 19.0.1.8.0
+verified: 19.0.1.9.2
 ---
 
 ## What it is for {#purpose}
@@ -211,3 +211,9 @@ changing them or the reason requires another confirmation. Repeating the same
 confirmation does not create another approval entry. The original filed copy
 is preserved. A payroll system that does not yet keep detailed bases uses its
 existing workflow without this warning or confirmation.
+
+
+Correction validation, legacy approval and template context derive from the
+constrained filing type. The stored is_correction field is a UI projection;
+direct ORM writes to that projection cannot turn a correction into a regular
+filing or bypass the requirement for precise fund evidence.

@@ -311,7 +311,16 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
     @api.depends("correction_type")
     def _compute_is_correction(self):
         for rec in self:
-            rec.is_correction = rec.correction_type in AMENDING_CORRECTION_TYPES
+            rec.is_correction = rec._is_amending_declaration()
+
+    def _is_amending_declaration(self):
+        """The stored UI projection is not authority for validation or XML.
+
+        ORM callers can write a readonly computed field. Derive the policy
+        from the constrained filing type, including during source review.
+        """
+        self.ensure_one()
+        return self.correction_type in AMENDING_CORRECTION_TYPES
 
     def _prior_submitted(self):
         """Filings for the same company and period that were already sent.
@@ -362,7 +371,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         being finished.
         """
         for rec in self:
-            if not rec.is_correction:
+            if not rec._is_amending_declaration():
                 continue
             if not rec._prior_submitted():
                 raise UserError(_(
@@ -482,7 +491,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
 
     def _sheet_lines(self):
         self.ensure_one()
-        return self.line_ids.filtered(lambda l: l.res_model == self._name)
+        return self.line_ids.filtered(lambda line: line.res_model == self._name)
 
     # ------------------------------------------------------------------
     # Engine-neutral payslip adapter
@@ -770,7 +779,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
             "declaration": self,
             # Templates emit the authority's own spelling from this.
             "correction_type": self.correction_type,
-            "is_correction": self.is_correction,
+            "is_correction": self._is_amending_declaration(),
             "correction_reference": self.correction_reference or "",
             "company": self.company_id,
             "aggregate": data["aggregate"],
