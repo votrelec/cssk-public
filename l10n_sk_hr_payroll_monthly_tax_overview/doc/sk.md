@@ -45,7 +45,7 @@ Odkazy sú na [zákon o dani z príjmov](law:sk/2003/595).
 - **DIČ spoločnosti.** Na spoločnosti vyplňte *DIČ* (10-miestne daňové
   identifikačné číslo). Kým chýba, generovanie skončí chybou.
 - **Adresa, telefón a e-mail spoločnosti** idú do hlavičky prehľadu. Číslo domu sa
-  berie z konca poľa *Ulica* (*Hlavná 12*, *Hlavná 1141/11*); *Ulica2* sa
+  berie z konca poľa *Ulica* (*Hlavná 12*, *Hlavná 1141/11*); *Ulica 2* sa
   použije, len ak obsahuje iba číslo — budova, poschodie či c/o sa ako číslo
   domu nikdy nepodávajú.
 - **Bankový účet.** Do III. časti sa ako účet na vrátenie zapíše prvý bankový
@@ -88,7 +88,7 @@ zamestnancoch neobsahuje.
 | r. 08 — odvodová povinnosť | r. 04 + riadky 05, 06 a 07 so znamienkami XML |
 | II. časť, r. A / B / C | bonus vyplatený spolu / časť pokrytá v r. 05 / zvyšok |
 
-Riadky 01a, 01b, 02, 03, 06, 07 a 08b, riadky D – F II. časti a žiadosti
+Riadky 01b, 02, 03, 06 a 07, riadky D – F II. časti a žiadosti
 III. časti o poukázanie zamestnaneckej prémie a daňového bonusu na zaplatené
 úroky zostanú prázdne alebo nulové. Žiadosť o poukázanie daňového bonusu sa
 vyplní len na požiadanie — pozri nižšie.
@@ -133,6 +133,40 @@ Prehľad pozná dva druhy: *riadny* a *opravný*. Na opravný prehľad nastavte
 riadny prehľad za tú istú spoločnosť, rok a mesiac označený ako odoslaný.
 Dodatočný ani stornovací prehľad vytvoriť nemožno.
 
+## Overené údaje formulára {#form-facts}
+
+Zadajte **Dátum vyhotovenia** uvedený na prehľade. Opravný prehľad vyžaduje
+skutočný **Dátum zistenia chyby**, od prvého dňa vykazovaného mesiaca do dátumu
+vyhotovenia. Pri riadnom prehľade zostáva prázdny. Dátum zistenia sa nikdy
+neodvodzuje zo systémového času ani vytvorenia záznamu. Uveďte **Podklady údajov
+formulára** a zvoľte **Overiť údaje formulára**. Akcia uchová používateľa, čas
+a odtlačok vstupov. Zmena obdobia, typu alebo údajov overenie zruší. Vygenerovaný
+prehľad pred úpravou vráťte do návrhu; kópia začína v návrhu bez XML, dátumu
+zistenia a podmienených údajov či overenia. Podané bajty zostávajú zachované.
+
+Pre riadok 1a podľa § 5 ods. 4 zadajte overený preddavok, prvý deň mesiaca
+prijatia dokladu (bezprostredne nasledujúci mesiac; XML uvedie MM.RRRR) a zdroj sumy. Voľba **Už zahrnutý** presunie
+sumu z riadka 1 do 1a; voľba **Navyše** pridá preddavok z externého dokladu.
+Riadok 4 a krytie bonusov používajú výsledný súčet len raz. Mzdy a účtovníctvo
+sa nemenia. Štvrťročná žiadosť použije dokončené mesačné údaje: posledný lokálne
+evidovaný podaný prehľad, prípadne posledný vygenerovaný. Návrh nenahrádza
+dokončený mesiac. Rozšírenia môžu použiť spoločné hooks
+`_prehlad_advance_rows`, `_prehlad_quarter_inputs` a `_prehlad_form_facts`.
+
+Riadok 8b zaškrtnite len pri skutočnom znížení odvodu za tento mesiac o skoršie
+nadmerné odvody podľa § 40 ods. 8. Ide o overený príznak, nie automatický výpočet
+vratky alebo platby. Žiadosť o vrátenie od úradu ho nevyznačuje. Riadok 1b je
+vyhradený zákonným verejným a vojenským profilom zamestnávateľa; pri bežnej
+súkromnej spoločnosti zostáva prázdny.
+
+[FS výslovne povoľuje](https://podpora.financnasprava.sk/879943-Pod%C3%A1vanie-mesa%C4%8Dn%C3%BDch-preh%C4%BEadov)
+XML PREHLADv26 na roky 2026 aj 2027. Listinný vzor a poučenie 2027 vydáva
+[MF/014307/2026-721](https://www.mfsr.sk/files/archiv/70/oznamenie_mfsr_mf_014307.zip).
+[Úradný eForm](https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/form.624.html)
+vyžaduje dátum zistenia pri opravnom prehľade, hoci nezmenené XSD dovolí prázdny
+nepovinný dátum. XSD nie je prijatie úradom. Overené 12. novembra 2026; nijaká
+nepublikovaná budúca XML verzia sa nevymýšľa.
+
 ## Obmedzenia {#limitations}
 
 - **Sumy pred podaním skontrolujte.** Kontrola voči schéme overí tvar súboru,
@@ -152,9 +186,7 @@ Dodatočný ani stornovací prehľad vytvoriť nemožno.
   ročného zúčtovania (r. 02 a 03) nemajú v mzdách zdroj a treba ich doplniť
   ručne.
 - Element **právnej formy** v hlavičke: *Právna forma* zapísaná na kontakte spoločnosti modulom `l10n_sk_trade_registry`; bez tohto modulu alebo pri prázdnom poli zostáva element prázdny.
-- Opravný prehľad nechá prázdny dátum zistenia dôvodov na podanie opravného
-  prehľadu.
-- Verzia tlačiva sa vyberá podľa **dnešného dátumu**, nie podľa obdobia;
-  prehľad za mesiac roku 2025 sa vytvorí na vzore 2026.
+- Verzia tlačiva sa vyberá podľa vykazovaného obdobia; nepodporované historické
+  obdobie potrebuje svoj publikovaný vzor.
 - Úradu sa nič neposiela: *Označiť ako odoslané* len zaznamená, že ste
   prehľad podali.

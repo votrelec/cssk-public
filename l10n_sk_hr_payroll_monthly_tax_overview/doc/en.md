@@ -92,7 +92,7 @@ per-employee data.
 | r. 08 — odvodová povinnosť | r. 04 + the signed wire rows 05, 06 and 07 |
 | Part II, r. A / B / C | the bonus paid in total / the part covered by r. 05 / the remainder |
 
-Rows 01a, 01b, 02, 03, 06, 07 and 08b, rows D–F of Part II and the Part III
+Rows 01b, 02, 03, 06 and 07, rows D–F of Part II and the Part III
 requests to remit the employee premium or the interest bonus are left empty
 or zero. The request to remit the child bonus is filled only when you ask for
 it — see below.
@@ -138,6 +138,42 @@ module refuses to generate a corrective overview unless a regular one for the
 same company, year and month is already marked submitted. A *dodatočný* or
 cancelling overview cannot be produced.
 
+## Reviewed form facts {#form-facts}
+
+Set **Prepared on** to the date written on the form. A corrective overview
+requires **Correction discovered on**, the actual evidenced discovery date,
+from the first day of its reporting month through the preparation date.
+A regular overview must leave discovery empty. No discovery date is inferred
+from creation time or today's clock. Enter **Form facts evidence** and click
+**Review form facts** before generating a conditional form. The review records
+the user, time and exact input digest. Editing its period, type or facts clears
+review; reset to draft before editing generated records. Copies start in draft
+without XML, discovery or conditional facts/review. Filed bytes remain retained.
+
+For row 1a under section 5(4), enter the evidenced foreign-employment advance,
+the first day of the document receipt month (the month immediately after the reporting month, exported as MM.YYYY), and its
+source: either **Already included** reclassifies that amount from row 1 to 1a,
+or **Additional** adds an externally documented advance. Row 4 and covered
+bonuses use the resulting total exactly once. Payroll and accounting stay
+unchanged. Quarter requests reuse completed monthly facts (latest locally
+filed record, otherwise latest generated record); a draft does not replace a
+completed month. Extensions can reuse `_prehlad_advance_rows`,
+`_prehlad_quarter_inputs` and `_prehlad_form_facts` in their own tax/source hooks.
+
+Tick row 8b only for an actual reduction of this month's remittance by earlier
+over-remitted advances under section 40(8). This is a reviewed flag, not an
+automatic refund or payment calculation; an authority refund request does not
+set it. Row 1b is reserved for the statutory public/military employer profiles
+and remains blank for ordinary private employers.
+
+The [FS FAQ](https://podpora.financnasprava.sk/879943-Pod%C3%A1vanie-mesa%C4%8Dn%C3%BDch-preh%C4%BEadov)
+permits wire PREHLADv26 for 2026 and 2027. The published 2027 paper form and
+instructions are [MF/014307/2026-721](https://www.mfsr.sk/files/archiv/70/oznamenie_mfsr_mf_014307.zip).
+The actual [official eForm](https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/form.624.html)
+requires discovery for a corrective form even though the unchanged XSD allows
+an empty optional date. XSD success is not authority acceptance. Verified
+12 November 2026; no unpublished future wire edition is invented.
+
 ## Limitations {#limitations}
 
 - **Check the figures before filing.** The schema check proves the shape of
@@ -158,9 +194,7 @@ cancelling overview cannot be produced.
   corrections from the annual reconciliation (rows 02 and 03) have no source
   in the payroll and must be added by hand.
 - The **legal form** element of the header is the *Právna forma* recorded on the company's contact by `l10n_sk_trade_registry`; without that module, or with the field empty, the element stays empty.
-- The *opravný* overview leaves the date the correction was discovered
-  (*dátum zistenia*) empty.
-- The form vintage is picked by **today's date**, not by the period; an
-  overview for a 2025 month is produced on the 2026 vintage.
+- The form vintage is selected by the reporting period; unsupported historical
+  periods require their published edition.
 - Nothing is sent to the authority: *Mark Submitted* only records that you
   filed it.

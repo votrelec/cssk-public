@@ -455,3 +455,266 @@ msgstr "Príloha XML"
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__year
 msgid "Year"
 msgstr "Rok"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "A regular overview must leave the correction discovery date empty."
+msgstr "Riadny prehľad musí ponechať dátum zistenia chyby prázdny."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__correction_discovered_on
+msgid ""
+"Actual date the incorrect filed overview was discovered. Enter it from "
+"reviewed evidence; it is never inferred from the clock."
+msgstr ""
+"Skutočný dátum zistenia nesprávneho podaného prehľadu. Zadajte ho podľa "
+"overených podkladov; nikdy sa neodvodzuje zo systémového času."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_monthly_tax_overview.selection__l10n_sk_prehlad__foreign_advance_source__additional
+msgid "Additional to native payroll advances"
+msgstr "Navyše k natívnym mzdovým preddavkom"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_monthly_tax_overview.selection__l10n_sk_prehlad__foreign_advance_source__included
+msgid "Already included in native payroll advances"
+msgstr "Už zahrnutý v natívnych mzdových preddavkoch"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Conditional form facts"
+msgstr "Podmienené údaje formulára"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__correction_discovered_on
+msgid "Correction discovered on"
+msgstr "Dátum zistenia chyby"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prepared_on
+msgid "Date written in the overview. It is not the authority's filing date."
+msgstr "Dátum uvedený v prehľade. Nie je to dátum podania úradu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prior_advance_offset
+msgid "Earlier excess advances offset this month (row 8b)"
+msgstr "Započítanie skorších nadmerných odvodov v tomto mesiaci (riadok 8b)"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Enter the actual discovery date for the corrective overview."
+msgstr "Zadajte skutočný dátum zistenia chyby pre opravný prehľad."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_receipt_month
+msgid ""
+"Enter the first day of the month when the income document was received. The "
+"wire carries MM.YYYY."
+msgstr ""
+"Zadajte prvý deň mesiaca prijatia dokladu o príjme. XML uvádza MM.RRRR."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Enter the overview's preparation date."
+msgstr "Zadajte dátum vyhotovenia prehľadu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_fallback_reason
+msgid ""
+"Explain the reviewed correction of older payroll without recorded fund "
+"bases. Confirm it before generating the correction; do not recalculate filed"
+" payroll to create historical evidence."
+msgstr ""
+"Zdôvodnite overenú opravu starších miezd bez uchovaných poistných základov. "
+"Pred vytvorením opravy ju výslovne potvrďte; podané mzdy neprepočítavajte "
+"kvôli doplneniu historických údajov."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_source
+msgid "Foreign advance source"
+msgstr "Zdroj zahraničného preddavku"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_amount
+msgid "Foreign employment advance (row 1a)"
+msgstr "Preddavok zo zahraničného zamestnania (riadok 1a)"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_receipt_month
+msgid "Foreign income document received in"
+msgstr "Mesiac prijatia dokladu o zahraničnom príjme"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_digest
+msgid "Form Inputs Digest"
+msgstr "Odtlačok údajov formulára"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_evidence
+msgid "Form facts evidence"
+msgstr "Podklady údajov formulára"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_reviewed_by
+msgid "Form facts reviewed by"
+msgstr "Údaje formulára overil"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_reviewed_at
+msgid "Form facts reviewed on"
+msgstr "Údaje formulára overené dňa"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmed_by
+msgid "Legacy calculation confirmed by"
+msgstr "Pôvodný výpočet potvrdil"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmed_at
+msgid "Legacy calculation confirmed on"
+msgstr "Pôvodný výpočet potvrdený dňa"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_warning
+msgid ""
+"Payslips for which the declaration used the original gross-based calculation"
+" instead of recorded fund bases."
+msgstr ""
+"Pásky, pri ktorých výkaz použil pôvodný výpočet z hrubej odmeny namiesto "
+"uchovaných poistných základov."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prepared_on
+msgid "Prepared on"
+msgstr "Dátum vyhotovenia"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_fallback_reason
+msgid "Reason for using the original gross-based calculation"
+msgstr "Dôvod použitia pôvodného výpočtu z hrubej odmeny"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Record the evidence for the overview's conditional form facts."
+msgstr "Zaznamenajte podklady podmienených údajov prehľadu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Reset the overview to draft before editing its form facts."
+msgstr "Pred úpravou údajov formulára vráťte prehľad do návrhu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Review form facts"
+msgstr "Overiť údaje formulára"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts in an allowed company."
+msgstr "Údaje formulára overujte v povolenej spoločnosti."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts on a draft overview."
+msgstr "Údaje formulára overujte na prehľade v návrhu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts through the overview action."
+msgstr "Údaje formulára overte prostredníctvom akcie prehľadu."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review the current form facts before generating the overview."
+msgstr "Pred generovaním prehľadu overte aktuálne údaje formulára."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_amount
+msgid ""
+"Reviewed advance under section 5(4), without the child bonus. This is a "
+"reporting fact, not a second payroll calculation."
+msgstr ""
+"Overený preddavok podľa § 5 ods. 4 bez daňového bonusu na deti. Ide o údaj "
+"výkazu, nie ďalší výpočet mzdy."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmation_digest
+msgid "Reviewed payroll sources"
+msgstr "Overené mzdové podklady"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"Specify the foreign document receipt month (first day) and whether its "
+"advance is already included in payroll."
+msgstr ""
+"Uveďte mesiac prijatia zahraničného dokladu (prvý deň) a či je preddavok už "
+"zahrnutý v mzde."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"The discovery date must be between the reporting month's first day and the "
+"preparation date."
+msgstr ""
+"Dátum zistenia musí byť medzi prvým dňom vykazovaného mesiaca a dátumom "
+"vyhotovenia."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The foreign document receipt month cannot follow the preparation date."
+msgstr ""
+"Mesiac prijatia zahraničného dokladu nesmie nasledovať po dátume "
+"vyhotovenia."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The foreign employment advance must be a finite nonnegative amount."
+msgstr ""
+"Preddavok zo zahraničného zamestnania musí byť konečná nezáporná suma."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The reclassified foreign advance exceeds the native payroll advance."
+msgstr ""
+"Preklasifikovaný zahraničný preddavok presahuje natívny mzdový preddavok."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prior_advance_offset
+msgid ""
+"Tick only when this month's remittance is reduced by advances over-remitted "
+"in earlier months under section 40(8). A request for an authority refund is "
+"a different event and does not set this box."
+msgstr ""
+"Zaškrtnite len pri znížení odvodu za tento mesiac o nadmerné odvody z "
+"predchádzajúcich mesiacov podľa § 40 ods. 8. Žiadosť o vrátenie od úradu je "
+"odlišná udalosť a toto políčko nevyznačuje."
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_warning
+msgid "Unrecorded fund bases"
+msgstr "Chýbajúce zaznamenané základy fondov"
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"Report the foreign document receipt in the month following the reporting "
+"month."
+msgstr ""
+"Prijatie zahraničného dokladu vykážte v mesiaci nasledujúcom po vykazovanom "
+"mesiaci."

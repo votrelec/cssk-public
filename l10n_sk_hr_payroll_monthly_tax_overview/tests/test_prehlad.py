@@ -201,10 +201,123 @@ class TestPrehlad(TransactionCase):
 
         fix = self._prehlad(correction_type="corrective")
         self.assertTrue(fix.is_correction)
+        with self.assertRaisesRegex(UserError, "actual discovery date"):
+            fix.action_generate()
+        fix.write({"correction_discovered_on": "2026-04-17", "prepared_on": "2026-04-20",
+                   "form_inputs_evidence": "Synthetic reviewed discovery record"})
+        fix.action_review_form_inputs()
         fix.action_generate()
         xml = base64.b64decode(fix.xml_attachment_id.datas).decode("utf-8")
         self.assertIn("<riadny>0</riadny>", xml)
         self.assertIn("<opravny>1</opravny>", xml)
+        self.assertEqual(etree.fromstring(xml.encode()).findtext("hlavicka/datumZisteniaOP"), "17.04.2026")
+
+    def test_discovery_boundaries_canonical_type_and_review(self):
+        report = self._prehlad(correction_type="corrective", prepared_on="2026-04-20",
+                               form_inputs_evidence="Synthetic review")
+        for invalid in (False, "2026-02-28", "2026-04-21"):
+            report.correction_discovered_on = invalid
+            with self.assertRaises(UserError):
+                report.action_review_form_inputs()
+        for valid in ("2026-03-01", "2026-04-20"):
+            report.correction_discovered_on = valid
+            report.action_review_form_inputs()
+            report._prehlad_validate_form_facts()
+        report.write({"is_correction": False})
+        self.assertTrue(report._is_amending_declaration())
+        report.correction_type = "regular"
+        with self.assertRaisesRegex(UserError, "regular overview"):
+            report.action_review_form_inputs()
+        report.correction_discovered_on = False
+        report.action_review_form_inputs()
+
+    def test_form_review_api_defaults_and_stale_evidence(self):
+        for field in ("form_inputs_reviewed_by", "form_inputs_reviewed_at", "form_inputs_digest"):
+            with self.assertRaises(UserError):
+                self._prehlad(**{field: False})
+            with self.assertRaises(UserError):
+                self.env["l10n.sk.prehlad"].with_company(self.company).with_context(
+                    **{"default_" + field: False}).create({"year": "2026", "month": "3"})
+        report = self._prehlad(prior_advance_offset=True, form_inputs_evidence="Synthetic prior excess remittance")
+        with self.assertRaisesRegex(UserError, "Review the current"):
+            report._prehlad_validate_form_facts()
+        report.action_review_form_inputs()
+        report._prehlad_validate_form_facts()
+        report.form_inputs_evidence = "Changed source"
+        self.assertFalse(report.form_inputs_reviewed_by)
+        with self.assertRaises(UserError):
+            report._prehlad_validate_form_facts()
+
+    def test_foreign_classification_external_fact_and_row8b(self):
+        self._employee_payslip()
+        report = self._prehlad(prepared_on="2026-04-20", foreign_receipt_month="2026-04-01",
+            foreign_advance_amount=20, foreign_advance_source="included", prior_advance_offset=True,
+            form_inputs_evidence="Synthetic foreign income document and earlier excess advance offset")
+        report.action_review_form_inputs()
+        report.action_generate()
+        original = base64.b64decode(report.xml_attachment_id.datas)
+        root = etree.fromstring(original)
+        native = report._tax_advance(report._collect_payslip_totals(report._get_period_payslips())["aggregate"])
+        self.assertAlmostEqual(float(root.findtext("telo/cast1/r01/suma")), native - 20, 2)
+        self.assertEqual(root.findtext("telo/cast1/r01a/mesiacRok"), "04.2026")
+        self.assertEqual(float(root.findtext("telo/cast1/r01a/suma")), 20)
+        self.assertEqual(root.findtext("telo/cast1/r08b"), "1")
+        self.assertAlmostEqual(float(root.findtext("telo/cast1/r04")), native, 2)
+        self.assertFalse(root.findtext("telo/cast1/r01b"))
+        with self.assertRaises(UserError):
+            report.write({"prior_advance_offset": False})
+        report.action_submit()
+        filed = report.submitted_attachment_id
+        duplicate = report.copy()
+        self.assertEqual(duplicate.state, "draft")
+        self.assertFalse(duplicate.xml_attachment_id)
+        self.assertFalse(duplicate.foreign_receipt_month)
+        self.assertFalse(duplicate.form_inputs_reviewed_by)
+        report.action_reset_to_draft()
+        self.assertFalse(report.form_inputs_reviewed_by)
+        report.write({"foreign_advance_source": "additional", "prior_advance_offset": False})
+        report.action_review_form_inputs()
+        report.action_generate()
+        revised = etree.fromstring(base64.b64decode(report.xml_attachment_id.datas))
+        self.assertAlmostEqual(float(revised.findtext("telo/cast1/r04")), native + 20, 2)
+        self.assertEqual(revised.findtext("telo/cast1/r08b"), "0")
+        self.assertEqual(base64.b64decode(filed.datas), original)
+
+    def test_conditional_fact_negative_inputs(self):
+        report = self._prehlad(prepared_on="2026-04-20", foreign_advance_amount=20,
+                               form_inputs_evidence="Synthetic foreign income document")
+        with self.assertRaises(UserError):
+            report.action_review_form_inputs()
+        report.write({"foreign_receipt_month": "2026-04-02", "foreign_advance_source": "additional"})
+        with self.assertRaises(UserError):
+            report.action_review_form_inputs()
+        report.foreign_receipt_month = "2026-05-01"
+        with self.assertRaises(UserError):
+            report.action_review_form_inputs()
+        report.foreign_receipt_month = "2026-03-01"
+        with self.assertRaisesRegex(UserError, "following the reporting month"):
+            report.action_review_form_inputs()
+        report.write({"foreign_receipt_month": "2026-04-01", "foreign_advance_amount": -1})
+        with self.assertRaises(UserError):
+            report.action_review_form_inputs()
+        report.foreign_advance_amount = 20
+        report.foreign_advance_source = "included"
+        with self.assertRaisesRegex(UserError, "exceeds"):
+            report._prehlad_advance_rows(10)
+
+    def test_quarter_refund_reuses_reviewed_monthly_foreign_capacity_once(self):
+        difference = self._bonus_quarter()
+        january = self._prehlad(month="1", prepared_on="2026-02-20",
+            foreign_receipt_month="2026-02-01", foreign_advance_amount=20,
+            foreign_advance_source="additional", form_inputs_evidence="Synthetic January foreign income document")
+        january.action_review_form_inputs()
+        january.action_generate()
+        january.action_submit()
+        march = self._prehlad()
+        self.assertAlmostEqual(march._quarter_bonus_difference(), difference - 20, 2)
+        # A later unfiled draft is not a replacement for the completed month.
+        self._prehlad(month="1", foreign_advance_amount=90)
+        self.assertAlmostEqual(march._quarter_bonus_difference(), difference - 20, 2)
 
     def test_correction_needs_something_to_correct(self):
         """An opravný for a period never filed is a rejection at best and a

@@ -5,6 +5,12 @@ Changelog
 Unreleased
 ==========
 
+* 19.0.2.2.0: Native reviewed discovery/preparation dates and conditional
+  foreign-employment row 1a / prior excess-remittance row 8b inputs, UI and
+  signed wire mapping. Bind review to exact facts, clear it on edit/reset,
+  preserve filed bytes and reset copies. Expose cooperative advance and
+  quarterly/source hooks; keep payroll and accounting calculations native.
+
 * Emit the covered child bonus as a negative reduction on row 05. The
   published PREHLADv26 wire adds signed rows 05–07 to row 04; positive
   coverage made otherwise schema-valid XML disagree with row 08. Keep

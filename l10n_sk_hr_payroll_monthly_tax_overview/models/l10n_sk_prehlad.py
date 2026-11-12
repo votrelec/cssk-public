@@ -142,7 +142,8 @@ class L10nSkPrehlad(models.Model):
         r. 5 carries the § 33 bonus only up to r. 4; the poučenie has the
         employer pay the rest from its own money (II. časť, r. C).
         """
-        r04 = self._tax_advance(agg)
+        r01, r01a = self._prehlad_advance_rows(self._tax_advance(agg))
+        r04 = round(r01 + r01a, 2)
         bonus = abs(round(agg.get(BONUS_CODE, 0.0), 2))
         return r04, bonus, round(min(bonus, r04), 2)
 
@@ -166,7 +167,11 @@ class L10nSkPrehlad(models.Model):
                 ("state", "!=", "cancel"),
             ])
             agg = self._collect_payslip_totals(slips)["aggregate"]
-            _r04, bonus, r05 = self._bonus_split(agg)
+            # Prior months may carry reviewed foreign advances. Use the last
+            # locally filed overview, otherwise the last generated one; draft
+            # inputs are not a completed monthly reporting fact.
+            calculator = self._prehlad_quarter_month(month)
+            _r04, bonus, r05 = calculator._bonus_split(agg)
             total += bonus - r05
         return round(total, 2)
 
@@ -177,7 +182,7 @@ class L10nSkPrehlad(models.Model):
         payment = self.payment_date or self.date_to
 
         r00 = abs(round(agg.get("GROSS", 0.0), 2))
-        r01 = self._tax_advance(agg)
+        r01, r01a = self._prehlad_advance_rows(self._tax_advance(agg))
         r04, bonus, r05 = self._bonus_split(agg)
         r08 = round(r04 - r05, 2)
 
@@ -195,10 +200,12 @@ class L10nSkPrehlad(models.Model):
             # Riadny and opravný are mutually exclusive flags in the FS wire
             # format; both used to be hardcoded, so the form could only ever
             # emit a regular Prehľad.
-            "riadny": "0" if self.is_correction else "1",
-            "opravny": "1" if self.is_correction else "0",
+            "riadny": "0" if self._is_amending_declaration() else "1",
+            "opravny": "1" if self._is_amending_declaration() else "0",
             "mesiac": str(int(self.month)),
             "rok": str(int(self.year)),
+            "discovered_on": (self.correction_discovered_on.strftime("%d.%m.%Y")
+                              if self.correction_discovered_on else ""),
             # PO identification
             "nazov": (company.name or "")[:255],
             "pravna_forma": self._company_legal_form(company),
@@ -214,6 +221,10 @@ class L10nSkPrehlad(models.Model):
             "r00": "%.2f" % r00,
             "r01_datum": payment.strftime("%d.%m.%Y") if payment else "",
             "r01_suma": "%.2f" % r01,
+            "r01a_month": (self.foreign_receipt_month.strftime("%m.%Y")
+                           if self.foreign_receipt_month else ""),
+            "r01a_suma": "%.2f" % r01a if self.foreign_receipt_month else "",
+            "r08b": "1" if self.prior_advance_offset else "0",
             "r04": "%.2f" % r04,
             "r05": "%.2f" % r05,
             "r08": "%.2f" % r08,
@@ -231,7 +242,7 @@ class L10nSkPrehlad(models.Model):
             "iban": iban,
             # vyhotovil
             "zostavil": (self.env.user.name or "Odoo Payroll")[:255],
-            "datum_vyhotovenia": fields.Date.context_today(self).strftime(
+            "datum_vyhotovenia": (self.prepared_on or fields.Date.context_today(self)).strftime(
                 "%d.%m.%Y"),
         }
         return {"p": prehlad, "prehlad_reduction": self._wire_reduction_amount}

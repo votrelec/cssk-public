@@ -431,3 +431,243 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__year
 msgid "Year"
 msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "A regular overview must leave the correction discovery date empty."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__correction_discovered_on
+msgid ""
+"Actual date the incorrect filed overview was discovered. Enter it from "
+"reviewed evidence; it is never inferred from the clock."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_monthly_tax_overview.selection__l10n_sk_prehlad__foreign_advance_source__additional
+msgid "Additional to native payroll advances"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields.selection,name:l10n_sk_hr_payroll_monthly_tax_overview.selection__l10n_sk_prehlad__foreign_advance_source__included
+msgid "Already included in native payroll advances"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Conditional form facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__correction_discovered_on
+msgid "Correction discovered on"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prepared_on
+msgid "Date written in the overview. It is not the authority's filing date."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prior_advance_offset
+msgid "Earlier excess advances offset this month (row 8b)"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Enter the actual discovery date for the corrective overview."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_receipt_month
+msgid ""
+"Enter the first day of the month when the income document was received. The "
+"wire carries MM.YYYY."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Enter the overview's preparation date."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_fallback_reason
+msgid ""
+"Explain the reviewed correction of older payroll without recorded fund "
+"bases. Confirm it before generating the correction; do not recalculate filed"
+" payroll to create historical evidence."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_source
+msgid "Foreign advance source"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_amount
+msgid "Foreign employment advance (row 1a)"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_receipt_month
+msgid "Foreign income document received in"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_digest
+msgid "Form Inputs Digest"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_evidence
+msgid "Form facts evidence"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_reviewed_by
+msgid "Form facts reviewed by"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__form_inputs_reviewed_at
+msgid "Form facts reviewed on"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmed_by
+msgid "Legacy calculation confirmed by"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmed_at
+msgid "Legacy calculation confirmed on"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_warning
+msgid ""
+"Payslips for which the declaration used the original gross-based calculation"
+" instead of recorded fund bases."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prepared_on
+msgid "Prepared on"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_fallback_reason
+msgid "Reason for using the original gross-based calculation"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Record the evidence for the overview's conditional form facts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Reset the overview to draft before editing its form facts."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model_terms:ir.ui.view,arch_db:l10n_sk_hr_payroll_monthly_tax_overview.view_l10n_sk_prehlad_form
+msgid "Review form facts"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts in an allowed company."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts on a draft overview."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review form facts through the overview action."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "Review the current form facts before generating the overview."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__foreign_advance_amount
+msgid ""
+"Reviewed advance under section 5(4), without the child bonus. This is a "
+"reporting fact, not a second payroll calculation."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_confirmation_digest
+msgid "Reviewed payroll sources"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"Specify the foreign document receipt month (first day) and whether its "
+"advance is already included in payroll."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"The discovery date must be between the reporting month's first day and the "
+"preparation date."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The foreign document receipt month cannot follow the preparation date."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The foreign employment advance must be a finite nonnegative amount."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid "The reclassified foreign advance exceeds the native payroll advance."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,help:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__prior_advance_offset
+msgid ""
+"Tick only when this month's remittance is reduced by advances over-remitted "
+"in earlier months under section 40(8). A request for an authority refund is "
+"a different event and does not set this box."
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#: model:ir.model.fields,field_description:l10n_sk_hr_payroll_monthly_tax_overview.field_l10n_sk_prehlad__fund_bases_warning
+msgid "Unrecorded fund bases"
+msgstr ""
+
+#. module: l10n_sk_hr_payroll_monthly_tax_overview
+#. odoo-python
+#: code:addons/l10n_sk_hr_payroll_monthly_tax_overview/models/form_inputs.py:0
+msgid ""
+"Report the foreign document receipt in the month following the reporting "
+"month."
+msgstr ""
