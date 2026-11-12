@@ -11,12 +11,29 @@ def interval(kind, start, end=None):
 
 @tagged("post_install", "-at_install")
 class TestHealthCalendar(BaseCase):
+    def test_agreement_minimum_notice_does_not_create_op_eligibility(self):
+        for kind in ("2D", "2Y"):
+            with self.subTest(kind=kind):
+                facts = self.context(
+                    interval(kind, "2026-06-02", "2026-06-02"),
+                    interval("other_employment", "2026-06-01", "2026-06-30"),
+                )
+                self.assertTrue(facts["minimum_concurrent_other_employment"])
+                self.assertFalse(facts["concurrent_other_employment"])
+                self.assertEqual(facts["op_employment_days"], 0)
+                sequential = self.context(
+                    interval(kind, "2026-06-02", "2026-06-02"),
+                    interval("other_employment", "2026-06-03", "2026-06-30"),
+                )
+                self.assertFalse(sequential["minimum_concurrent_other_employment"])
+
     def test_same_employer_other_reason_is_not_another_employer_opt_out(self):
         facts = self.context(interval("2P", "2026-06-01", "2026-06-30"))
         self.assertEqual(facts["insured_days"], 30)
         self.assertEqual(facts["op_employment_days"], 30)
         self.assertTrue(facts["same_employer_other_reason"])
         self.assertFalse(facts["concurrent_other_employment"])
+        self.assertFalse(facts["minimum_concurrent_other_employment"])
         self.assertEqual(len(facts["same_employer_other_reason_dates"]), 30)
 
     def test_strike_retains_notice_facts_and_explicit_no_income_day_effects(self):

@@ -54,27 +54,77 @@ class TestHealthCalendarSource(TransactionCase):
         with self.assertRaisesRegex(UserError, "requires concurrent employers"):
             version._l10n_sk_health_calendar_context("2026-06-01")
 
-    def test_new_payroll_source_requires_ordinary_registration_even_with_empty_review(self):
+    def test_agreement_minimum_notice_preserves_retained_calendar_schema(self):
+        row = self.calendar(
+            [
+                ("2D", "2027-06-02", "2027-06-02"),
+                ("other_employment", "2027-06-01", "2027-06-30"),
+            ],
+            month="2027-06-01",
+        )
+        row.action_review()
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-01-01"})
+        version.write(
+            {
+                "l10n_sk_health_minimum_opt_out": True,
+                "l10n_sk_health_minimum_evidence": "Synthetic signed other-employer notice",
+            }
+        )
+        raw = row._calendar_context()
+        self.assertTrue(raw["minimum_concurrent_other_employment"])
+        retained = version._l10n_sk_health_calendar_context("2027-06-01")
+        self.assertEqual(
+            retained,
+            {
+                key: value
+                for key, value in raw.items()
+                if key != "minimum_concurrent_other_employment"
+            },
+        )
+        self.assertFalse(retained["concurrent_other_employment"])
+        self.assertEqual(
+            version.l10n_sk_health_calendar_minimum(
+                "2027-06-01",
+                295.22,
+                5,
+                11,
+            ),
+            0,
+        )
+
+    def test_new_payroll_source_requires_ordinary_registration_even_with_empty_review(
+        self,
+    ):
+        version = self.employee.version_id
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-01-01"}
+        )
         row = self.calendar()
         row.action_review()
         with self.assertRaisesRegex(UserError, self.employee.name):
             version._l10n_sk_validate_health_calendar_source("2026-06-01")
         # A historical reader retains its original factual/legacy policy.
-        self.assertEqual(version._l10n_sk_health_calendar_context("2026-06-01")["insured_days"], 0)
+        self.assertEqual(
+            version._l10n_sk_health_calendar_context("2026-06-01")["insured_days"], 0
+        )
 
     def test_benefit_days_can_be_zero_without_losing_ordinary_registration(self):
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-01-01"})
-        row = self.calendar([(kind, "2026-06-01", "2026-06-30") for kind in ("2", "benefit")])
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-01-01"}
+        )
+        row = self.calendar(
+            [(kind, "2026-06-01", "2026-06-30") for kind in ("2", "benefit")]
+        )
         row.action_review()
         facts = version._l10n_sk_validate_health_calendar_source("2026-06-01")
         self.assertEqual((facts["employment_days"], facts["insured_days"]), (30, 0))
 
     def test_explicit_full_month_2n_explains_ordinary_contract_exclusion(self):
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-01-01"})
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-01-01"}
+        )
         row = self.calendar([("2N", "2026-06-01", "2026-06-30")])
         row.action_review()
         facts = version._l10n_sk_validate_health_calendar_source("2026-06-01")
@@ -82,17 +132,26 @@ class TestHealthCalendarSource(TransactionCase):
 
     def test_partial_registration_needs_matching_contract_start(self):
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-06-16"})
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-06-16"}
+        )
         row = self.calendar([("2P", "2026-06-16", "2026-06-30")])
         row.action_review()
-        self.assertEqual(version._l10n_sk_validate_health_calendar_source("2026-06-01")["insured_days"], 15)
+        self.assertEqual(
+            version._l10n_sk_validate_health_calendar_source("2026-06-01")[
+                "insured_days"
+            ],
+            15,
+        )
         version.contract_date_start = "2026-06-01"
         with self.assertRaisesRegex(UserError, self.employee.name):
             version._l10n_sk_validate_health_calendar_source("2026-06-01")
 
     def test_calendar_cannot_add_pp_days_before_its_native_contract(self):
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-06-16"})
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-06-16"}
+        )
         row = self.calendar([("2", "2026-06-01", "2026-06-30")])
         row.action_review()
         with self.assertRaisesRegex(UserError, self.employee.name):
@@ -100,11 +159,24 @@ class TestHealthCalendarSource(TransactionCase):
 
     def test_wage_version_change_does_not_split_ordinary_registration(self):
         version = self.employee.version_id
-        version.write({"date_version": "2026-01-01", "contract_date_start": "2026-01-01"})
-        version.copy({"employee_id": self.employee.id, "date_version": "2026-06-16", "wage": 2300})
+        version.write(
+            {"date_version": "2026-01-01", "contract_date_start": "2026-01-01"}
+        )
+        version.copy(
+            {
+                "employee_id": self.employee.id,
+                "date_version": "2026-06-16",
+                "wage": 2300,
+            }
+        )
         row = self.calendar([("2", "2026-06-01", "2026-06-30")])
         row.action_review()
-        self.assertEqual(version._l10n_sk_validate_health_calendar_source("2026-06-01")["insured_days"], 30)
+        self.assertEqual(
+            version._l10n_sk_validate_health_calendar_source("2026-06-01")[
+                "insured_days"
+            ],
+            30,
+        )
 
     def test_opt_out_with_calendar_requires_notice_and_actual_other_employer(self):
         row = self.calendar(

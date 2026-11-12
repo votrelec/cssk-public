@@ -70,6 +70,17 @@ class HealthCalendarProfile(models.Model):
                 _("Finish reviewing the employee's health calendar before calculation.")
             )
         facts = calendar._calendar_context() if calendar else False
+        # This derived guard is not part of the retained payroll-profile
+        # schema. Keep that schema stable for already posted predecessors:
+        # a new guard must not make an unchanged month look like a different
+        # policy and charge OP/minimum independently again.
+        minimum_concurrent_other = bool(
+            facts
+            and facts.pop(
+                "minimum_concurrent_other_employment",
+                facts["concurrent_other_employment"],
+            )
+        )
         if (
             facts
             and (
@@ -85,7 +96,7 @@ class HealthCalendarProfile(models.Model):
             )
         if facts and self.l10n_sk_health_minimum_opt_out:
             self.l10n_sk_health_minimum_is_opted_out()
-            if not facts["concurrent_other_employment"]:
+            if not minimum_concurrent_other:
                 raise UserError(
                     _(
                         "A minimum opt-out requires concurrent employers in the reviewed health calendar."
@@ -120,21 +131,27 @@ class HealthCalendarProfile(models.Model):
             if index + 1 < len(versions):
                 end = min(end, versions[index + 1].date_version - timedelta(days=1))
             if start <= end and not version.l10n_sk_health_is_exempt():
-                expected.update(start + timedelta(days=offset)
-                                for offset in range((end - start).days + 1))
+                expected.update(
+                    start + timedelta(days=offset)
+                    for offset in range((end - start).days + 1)
+                )
         calendar = self.env["l10n.sk.health.calendar"].browse(facts["calendar_id"])
         registered, excluded = set(), set()
         for interval in calendar.interval_ids:
             if interval.kind not in {"2", "2P", "2N"}:
                 continue
             target = excluded if interval.kind == "2N" else registered
-            target.update(interval.date_start + timedelta(days=offset)
-                          for offset in range((interval.date_end - interval.date_start).days + 1))
+            target.update(
+                interval.date_start + timedelta(days=offset)
+                for offset in range((interval.date_end - interval.date_start).days + 1)
+            )
         if expected - registered - excluded or registered - expected:
-            raise UserError(_(
-                "Review the health calendar for '%(name)s': ordinary contract days must be "
-                "supported by employment (2/2P) or an explicit no-income exclusion (2N). "
-                "Benefit days do not end the employment registration.",
-                name=self.employee_id.display_name,
-            ))
+            raise UserError(
+                _(
+                    "Review the health calendar for '%(name)s': ordinary contract days must be "
+                    "supported by employment (2/2P) or an explicit no-income exclusion (2N). "
+                    "Benefit days do not end the employment registration.",
+                    name=self.employee_id.display_name,
+                )
+            )
         return facts

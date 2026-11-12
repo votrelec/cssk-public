@@ -5,6 +5,10 @@ Changelog
 Unreleased
 ----------
 
+* Accept a reviewed concurrent-employer minimum notice for insured agreements
+  without granting OP eligibility. Keep the retained calendar-profile schema
+  unchanged so older posted monthly sources remain valid predecessors.
+
 * Compare complete retained monthly relationship identities across native
   contract versions, preserving the same-version compatibility of older proofs.
 

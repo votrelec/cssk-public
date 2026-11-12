@@ -1,7 +1,7 @@
 ---
 title: Slovak Payroll
 summary: The Slovak payroll family in one place — the monthly payslip for a pracovný pomer and the three dohody on either Odoo Enterprise Payroll or the OCA payroll app, with dated statutory rates, leave, the annual tax reconciliation and posting to the general ledger.
-verified: 19.0.1.7.0
+verified: 19.0.1.10.2
 ---
 
 ## What it is for {#purpose}
@@ -514,6 +514,11 @@ silently treat an executive fee as OP-eligible employment income. This is not
 an implementation of those additional multi-source workflows.
 
 The existing premium rounding and other twelve fund formulas remain unchanged.
+Concurrent-employer minimum notices also apply to reviewed insured agreements;
+they do not grant OP eligibility. The derived minimum-only guard is excluded
+from the retained payroll-profile shape so sources posted before this addition
+remain exact monthly predecessors. Older payslips and their evidence are not
+rewritten to achieve compatibility.
 The charging rule retains actual OP/base facts and the bridge retains one
 shared health/calendar profile without birth numbers. Declaration consumers
 must use the same facts; this contribution does not implement the 514/601 codec.
