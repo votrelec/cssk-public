@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy
 summary: Celá skupina modulov slovenských miezd na jednom mieste — mesačná výplatná páska pre pracovný pomer a tri dohody v Odoo Enterprise Payroll alebo v aplikácii OCA payroll, s datovanými zákonnými sadzbami, voľnom, ročným zúčtovaním dane a zaúčtovaním do hlavnej knihy.
-verified: 19.0.1.7.0
+verified: 19.0.1.10.2
 ---
 
 ## Na čo slúži {#purpose}
@@ -519,6 +519,10 @@ nesmie potichu považovať za oprávnený pracovný príjem. Tieto ďalšie toky
 sú implementované týmto príspevkom.
 
 Pôvodné zaokrúhľovanie poistného a ostatných 12 fondových vzorcov sa nemenia.
+Overené oznámenie o súbehu zamestnávateľov sa uplatní aj pri poistenej
+dohode; nepriznáva jej OP. Nový odvodený údaj kontroly minima nevstupuje
+do zachovaného tvaru mzdového profilu. Pôvodné zaúčtované mesačné zdroje
+tak zostanú presnými predchodcami ďalšej odmeny bez prepisu starých dôkazov.
 Účtujúce pravidlo uchová skutočnú OP/základ; bridge uloží spoločný profil
 a kalendár iba raz, bez rodného čísla. Výkazy musia čítať rovnaké podklady;
 codec 514/601 je samostatná nadväzujúca implementácia. Podklady:

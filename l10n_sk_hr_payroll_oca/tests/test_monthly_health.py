@@ -8,15 +8,69 @@ from unittest.mock import patch
 from odoo import Command
 from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, tagged
+from odoo.addons.l10n_sk_hr_payroll_base.models import health_calendar as calendar_source
 
 
 @tagged("post_install", "-at_install")
 class TestMonthlyHealthNative(TransactionCase):
+    def test_older_calendar_profile_remains_an_exact_monthly_predecessor(self):
+        employee = self.employee()
+        calendar = (
+            self.env["l10n.sk.health.calendar"]
+            .with_company(self.company)
+            .create(
+                {
+                    "employee_id": employee.id,
+                    "company_id": self.company.id,
+                    "month": "2027-06-01",
+                    "complete": True,
+                    "evidence": "Synthetic unchanged ordinary employment before and after upgrade",
+                    "interval_ids": [
+                        Command.create(
+                            {
+                                "kind": "2",
+                                "date_start": "2027-06-01",
+                                "date_end": "2027-06-30",
+                            }
+                        )
+                    ],
+                }
+            )
+        )
+        calendar.action_review()
+        native_context = calendar_source.month_context
+
+        def older_context(*args, **kwargs):
+            # Older native calendar output predates this derived guard key.
+            facts = native_context(*args, **kwargs)
+            facts.pop("minimum_concurrent_other_employment", None)
+            return facts
+
+        with patch.object(calendar_source, "month_context", older_context):
+            first = self.slip(employee, start=date(2027, 6, 1), end=date(2027, 6, 30))
+        frozen = deepcopy(first.l10n_sk_fund_assessment)
+        salary = [(row.id, row.total) for row in first.line_ids]
+        second = self.slip(employee, start=date(2027, 6, 1), end=date(2027, 6, 30))
+        self.assertEqual(
+            self.health(first | second),
+            {
+                "HEALTH": -3,
+                "HEALTHEMPLOYER": 44,
+                "HEALTHDOPLATOK": -0.23,
+            },
+        )
+        self.assertFalse(second.l10n_sk_monthly_fund_warning)
+        self.assertEqual(first.l10n_sk_fund_assessment, frozen)
+        self.assertEqual([(row.id, row.total) for row in first.line_ids], salary)
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.env = cls.env(context={**cls.env.context, "lang": "en_US"})
-        values = {"name": "Synthetic monthly health", "country_id": cls.env.ref("base.sk").id}
+        values = {
+            "name": "Synthetic monthly health",
+            "country_id": cls.env.ref("base.sk").id,
+        }
         if "l10n_sk_health_insurer_code" in cls.env["res.company"]._fields:
             values.update(l10n_sk_health_insurer_code="24", l10n_sk_health_payer_number="9900112233")
         cls.company = cls.env["res.company"].create(values)
