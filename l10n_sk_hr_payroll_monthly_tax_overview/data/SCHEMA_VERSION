@@ -1,23 +1,44 @@
 prehlad2026.xsd  9fd86adf76c060e7d655ee822e4a2b70  12802
+SHA256 df44ab4383bf2900967eb57a2114622e6ec429bd828e1f7394292c0948dcc2ba
 
-Verified byte-identical to the published copy on 2026-10-27, fetched from
-https://ekr.financnasprava.sk/Formulare/XSD/prehlad2026.xsd, which answered HTTP 200.
+Verified byte-identical on 2026-11-12 to the published copy:
+https://ekr.financnasprava.sk/Formulare/XSD/prehlad2026.xsd
+The original schema bytes are unchanged by the wire-sign correction.
 
-Prehľad o zrazených a odvedených preddavkoch na daň (PREHLAD_2026). FS SR keeps one XSD per vzor and keeps the old ones, so a new vintage
-arrives as a NEW file name rather than as a change to this one. The probes
-made on 2026-10-27 for a newer vintage or a _v2 revision beside this name all
-returned 404.
+APPLICABILITY AND OUTPUT CONTRACT
+FS FAQ explicitly identifies PREHLADv26 for both 2026 and 2027:
+https://podpora.financnasprava.sk/879943-Pod%C3%A1vanie-mesa%C4%8Dn%C3%BDch-preh%C4%BEadov
+The actual XSD catalogue still lists PREHLADv26:
+https://www.financnasprava.sk/sk/danovi-a-colni-specialisti/technicke-informacie/podklady-pre-tvorcov-sw/xsd-schemy
+Its linked actual electronic form is:
+https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/form.624.html
+Fetched HTML SHA256 57e901f20bedcfcf48cb9466aaeb70ff28abbdad1d6b5425299b6cc790d4126b.
+Its observed linked serializer is:
+https://pfseform.financnasprava.sk/Formulare/eFormVzor/INE/Scripts/form.624.xmlfdf.js
+Fetched SHA256 ddab480d35ba1e23ffdfffa6cb417641490354a90878e8da1ba14c1ddcdec8b3.
 
-THE FILE CANNOT PROVE IT IS CURRENT. Its annotation stamps a vintage at most,
-not a revision, and nothing validates the annotation; a file revised in place
-validates exactly as before. That is why the digest is pinned here.
+The actual form's vypocet_t1r8_C1 adds signed rows 4+5+6+7. The serializer
+copies inputs 5/6/7 directly into XML, without a sign conversion. A paid,
+covered bonus is negative on rows 5-7, a recovered amount is positive;
+recap and internal funding figures retain their own positive convention.
+XSD alone cannot prove this arithmetic relation.
+
+The paper PREHLADv27 pattern and instructions were published 2026-09-29 in:
+https://www.mfsr.sk/files/archiv/70/oznamenie_mfsr_mf_014307.zip
+Archive SHA256 3b4fc1ebaff842556dd81c14c77edf62275287907c48ace32071312c5be3cde1.
+They retain the same row set and signed arithmetic. Paper 2027 broadens
+row 1b to signed parent-tax-share adjustments and professional-soldier
+employers. That special public-employer row is not used by an ordinary
+private employer. No paper label is used to invent or rename an XML schema.
 
 REFRESH PROCEDURE
-  1. Fetch the name above and compare md5 and size with the line here.
-  2. Check the STATUS CODE, not the size: a miss returns 404 with a
-     ~1 245-byte HTML error page, which is a perfectly plausible file size.
-  3. Probe for a newer vintage as well as a _v2 suffix on the existing name —
-     FS SR published a DPPO revision as dppo2025_v2.xsd beside an unchanged
-     dppo2025.xsd, and a digest comparison on a pinned name cannot see that.
-  4. A new vintage is a new cssk.payroll.declaration.version record with its
-     own template; update this file and re-run the module's tests.
+1. Download the exact official schema URL and compare hashes and size.
+2. Inspect the actual catalogue, linked electronic form, FS applicability
+   guidance and published MFSR notice/instructions together.
+3. A guessed newer URL returning 404 is not evidence of nonpublication.
+   Inspect effective intervals and the actual published schema/adapter.
+4. A materially changed published wire needs its own version record and
+   mapping. Preserve historical versions and retained filed XML bytes;
+   run shape, arithmetic, lifecycle and applicable source-consumer tests.
+5. Later legislation and form publications require the ordinary refresh.
+   No schema-valid file or local check implies authority acceptance.

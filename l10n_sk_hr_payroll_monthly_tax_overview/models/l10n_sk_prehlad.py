@@ -113,6 +113,16 @@ class L10nSkPrehlad(models.Model):
         return sum_concept(agg, "INCOME_TAX")
 
     @staticmethod
+    def _wire_reduction_amount(value):
+        """Internal paid/covered amounts are positive; FS rows5–7 are signed.
+
+        Keep recap, refund and accounting sources unchanged. A recovery is
+        negative internally and therefore positive on the wire. Normalise
+        zero so an unused reduction never produces a misleading '-0.00'.
+        """
+        return "%.2f" % (-float(value or 0) or 0.0)
+
+    @staticmethod
     def _company_legal_form(company):
         """The company's právna forma, or "" when nothing records it.
 
@@ -224,4 +234,4 @@ class L10nSkPrehlad(models.Model):
             "datum_vyhotovenia": fields.Date.context_today(self).strftime(
                 "%d.%m.%Y"),
         }
-        return {"p": prehlad}
+        return {"p": prehlad, "prehlad_reduction": self._wire_reduction_amount}

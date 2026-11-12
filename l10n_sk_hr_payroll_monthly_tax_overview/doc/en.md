@@ -1,7 +1,7 @@
 ---
 title: SK Monthly Tax Overview (Prehľad)
 summary: The monthly overview of income-tax advances withheld from employees and the child tax bonus paid, generated from the month's payslips as XML for the Slovak financial administration.
-verified: 19.0.2.1.2
+verified: 19.0.2.1.3
 ---
 
 ## What it is for {#purpose}
@@ -88,14 +88,29 @@ per-employee data.
 | r. 00 — úhrn zúčtovaných a vyplatených zdaniteľných príjmov | the sum of the `GROSS` rule over the month's payslips |
 | r. 01 — preddavky na daň (date and amount) | *Payment Date*, and the withheld advance before the bonus: `INCOMETAX19` + `INCOMETAX25` on Enterprise, `INCOMETAX` on the OCA engine |
 | r. 04 | equal to r. 01 (rows 02 and 03 are left empty) |
-| r. 05 — vyplatený daňový bonus | the sum of `CHILD_BONUS`, **capped at r. 04** |
-| r. 08 — odvodová povinnosť | r. 04 − r. 05 |
+| r. 05 — vyplatený daňový bonus | the sum of `CHILD_BONUS`, **capped at r. 04**, emitted as a negative reduction |
+| r. 08 — odvodová povinnosť | r. 04 + the signed wire rows 05, 06 and 07 |
 | Part II, r. A / B / C | the bonus paid in total / the part covered by r. 05 / the remainder |
 
 Rows 01a, 01b, 02, 03, 06, 07 and 08b, rows D–F of Part II and the Part III
 requests to remit the employee premium or the interest bonus are left empty
 or zero. The request to remit the child bonus is filled only when you ask for
 it — see below.
+
+The published eForm adds signed rows 05–07: a paid/covered bonus reduces
+the remittance and is negative; a recovery is positive. Internal covered
+amounts, positive Part II recap amounts and refund calculations keep their
+existing convention. Extensions serializing rows 06/07 can use the same
+`prehlad_reduction` template formatter. Already retained filed XML is not
+rewritten; any correction follows the existing native corrective workflow.
+
+The Financial Administration explicitly permits PREHLADv26 for both 2026
+and 2027. Its electronic schema already contains every row of the published
+PREHLADv27 paper pattern. The 2027 paper wording broadens row 1b to signed
+parent-tax adjustments by the special public employers; an ordinary private
+employer leaves that row unused. A different paper label does not rename
+the wire schema. Source links and exact hashes are recorded in
+`data/SCHEMA_VERSION`; later published changes require the normal refresh.
 
 ## Claiming the bonus difference back {#bonus-refund}
 

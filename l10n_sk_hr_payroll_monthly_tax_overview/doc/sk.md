@@ -1,7 +1,7 @@
 ---
 title: SK Prehľad o zrazených a odvedených preddavkoch na daň
 summary: Mesačný prehľad o preddavkoch na daň zrazených zamestnancom a o vyplatenom daňovom bonuse, zostavený z výplatných pások mesiaca ako XML pre finančnú správu.
-verified: 19.0.2.1.2
+verified: 19.0.2.1.3
 ---
 
 ## Na čo slúži {#purpose}
@@ -84,14 +84,29 @@ zamestnancoch neobsahuje.
 | r. 00 — úhrn zúčtovaných a vyplatených zdaniteľných príjmov | súčet pravidla `GROSS` z výplatných pások mesiaca |
 | r. 01 — preddavky na daň (dátum a suma) | *Dátum výplaty* a zrazený preddavok pred bonusom: `INCOMETAX19` + `INCOMETAX25` pri Enterprise, `INCOMETAX` pri jadre OCA |
 | r. 04 | rovná sa r. 01 (r. 02 a 03 zostanú prázdne) |
-| r. 05 — vyplatený daňový bonus | súčet `CHILD_BONUS`, **najviac do výšky r. 04** |
-| r. 08 — odvodová povinnosť | r. 04 − r. 05 |
+| r. 05 — vyplatený daňový bonus | súčet `CHILD_BONUS`, **najviac do výšky r. 04**, v XML ako záporné zníženie |
+| r. 08 — odvodová povinnosť | r. 04 + riadky 05, 06 a 07 so znamienkami XML |
 | II. časť, r. A / B / C | bonus vyplatený spolu / časť pokrytá v r. 05 / zvyšok |
 
 Riadky 01a, 01b, 02, 03, 06, 07 a 08b, riadky D – F II. časti a žiadosti
 III. časti o poukázanie zamestnaneckej prémie a daňového bonusu na zaplatené
 úroky zostanú prázdne alebo nulové. Žiadosť o poukázanie daňového bonusu sa
 vyplní len na požiadanie — pozri nižšie.
+
+Úradný elektronický formulár sčítava riadky 05–07 so znamienkami: vyplatený
+bonus znižuje odvod a je záporný; vybratá suma je kladná. Vnútorné sumy
+pokrytia, kladné rekapitulácie II. časti a výpočty žiadostí sa nemenia.
+Rozšírenia riadkov 06/07 môžu použiť rovnaký formátovač šablóny
+`prehlad_reduction`. Uchované podané XML sa neprepisuje; prípadná oprava
+použije existujúci natívny opravný postup.
+
+Finančná správa výslovne povoľuje PREHLADv26 pre roky 2026 aj 2027.
+Elektronická schéma už obsahuje všetky riadky publikovaného papierového
+vzoru PREHLADv27. Papierové znenie 2027 rozširuje riadok 1b na úpravy
+podielu dane pre rodičov so znamienkom pri osobitných verejných zamestnávateľoch;
+bežný súkromný zamestnávateľ ho nevyplní. Odlišné označenie papierového
+vzoru nemení názov XML schémy. Primárne zdroje a presné hashe obsahuje
+`data/SCHEMA_VERSION`; neskoršie publikované zmeny vyžadujú bežnú aktualizáciu.
 
 ## Vrátenie rozdielu daňového bonusu {#bonus-refund}
 

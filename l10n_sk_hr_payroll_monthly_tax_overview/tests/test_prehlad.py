@@ -154,10 +154,10 @@ class TestPrehlad(TransactionCase):
             float(root.findtext("telo/cast1/r01/suma")), tax, 2)
         self.assertAlmostEqual(
             float(root.findtext("telo/cast1/r04")), tax, 2)
-        # r08 = r04 - r05 (no children here -> equals the advance)
+        # The wire uses signed reductions: r08 = r04 + r05 (no children).
         r05 = float(root.findtext("telo/cast1/r05"))
         r08 = float(root.findtext("telo/cast1/r08"))
-        self.assertAlmostEqual(r08, round(tax - r05, 2), 2)
+        self.assertAlmostEqual(r08, round(tax + r05, 2), 2)
 
     def test_missing_dic_raises(self):
         self._employee_payslip()
@@ -323,6 +323,18 @@ class TestPrehlad(TransactionCase):
             "l10n_sk_hr_payroll_monthly_tax_overview/data/prehlad2026.xsd"))
         ).assertValid(root)
         return root.find("telo/cast3/poukazatBonus")
+
+    def test_computed_paid_bonus_uses_signed_wire_and_positive_recap(self):
+        self._bonus_quarter()
+        report = self.env["l10n.sk.prehlad"].with_company(self.company).create({
+            "company_id": self.company.id, "year": "2026", "month": "3"})
+        report.action_generate()
+        root = etree.fromstring(base64.b64decode(report.xml_attachment_id.datas))
+        paid = float(root.findtext("telo/cast1/r05"))
+        self.assertLess(paid, 0)
+        self.assertEqual(float(root.findtext("telo/cast1/r08")),
+                         float(root.findtext("telo/cast1/r04")) + paid)
+        self.assertEqual(float(root.findtext("telo/cast2/rB")), -paid)
 
     def test_bonus_difference_refund_is_claimed_for_the_quarter(self):
         """The bonus paid beyond the advances (r. C) was reported but could

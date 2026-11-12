@@ -72,7 +72,7 @@
                     <r02/>
                     <r03/>
                     <r04 t-out="p['r04']"/>
-                    <r05 t-out="p['r05']"/>
+                    <r05 t-out="prehlad_reduction(p['r05'])"/>
                     <r06/>
                     <r07/>
                     <r08 t-out="p['r08']"/>

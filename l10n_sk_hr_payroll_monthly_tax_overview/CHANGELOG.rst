@@ -5,6 +5,14 @@ Changelog
 Unreleased
 ==========
 
+* Emit the covered child bonus as a negative reduction on row 05. The
+  published PREHLADv26 wire adds signed rows 05–07 to row 04; positive
+  coverage made otherwise schema-valid XML disagree with row 08. Keep
+  internal coverage, positive recap amounts and refund calculations intact.
+  A shared output formatter also supports extensions supplying rows 06/07.
+  The FS explicitly permits this wire for both 2026 and 2027; no invented
+  new XML edition or changed official schema is supplied.
+
 * **Renamed from ``l10n_sk_hr_payroll_prehlad`` to ``l10n_sk_hr_payroll_monthly_tax_overview``.** The technical
   name is English now, like every other module here; the statutory form keeps its
   Slovak name in the module title, in the models and in the data files, exactly as
