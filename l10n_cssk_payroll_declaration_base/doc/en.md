@@ -1,7 +1,7 @@
 ---
 title: CZ/SK Payroll Declarations
 summary: The common ground of the Czech and Slovak payroll filings — the Payroll Declarations menu, the Generate / Mark Submitted workflow, corrections, form versions, and how payslips are read from either payroll engine.
-verified: 19.0.1.8.0
+verified: 19.0.1.9.3
 ---
 
 ## What it is for {#purpose}
@@ -194,6 +194,9 @@ Statutory Reports → Submissions*. See
 
 An insurance declaration names payslips whose detailed bases were not kept or
 no longer match the payroll. Read the warning in the form and its chatter.
+An unsaved preview/source calculation retains the same warning in its cache;
+chatter is written only for a saved business document. This does not change
+the original/corrective evidence policy.
 An original declaration can use the previous gross-based calculation; a
 correction normally stops until the precise payroll information is available.
 
@@ -211,3 +214,9 @@ changing them or the reason requires another confirmation. Repeating the same
 confirmation does not create another approval entry. The original filed copy
 is preserved. A payroll system that does not yet keep detailed bases uses its
 existing workflow without this warning or confirmation.
+
+
+Correction validation, legacy approval and template context derive from the
+constrained filing type. The stored is_correction field is a UI projection;
+direct ORM writes to that projection cannot turn a correction into a regular
+filing or bypass the requirement for precise fund evidence.

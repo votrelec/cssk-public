@@ -311,7 +311,16 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
     @api.depends("correction_type")
     def _compute_is_correction(self):
         for rec in self:
-            rec.is_correction = rec.correction_type in AMENDING_CORRECTION_TYPES
+            rec.is_correction = rec._is_amending_declaration()
+
+    def _is_amending_declaration(self):
+        """The stored UI projection is not authority for validation or XML.
+
+        ORM callers can write a readonly computed field. Derive the policy
+        from the constrained filing type, including during source review.
+        """
+        self.ensure_one()
+        return self.correction_type in AMENDING_CORRECTION_TYPES
 
     def _prior_submitted(self):
         """Filings for the same company and period that were already sent.
@@ -323,6 +332,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         found the regular one created in March, and was refused.
         """
         self.ensure_one()
+        self._check_period_projection()
         if not (self.company_id and self.date_from and self.date_to):
             return self.browse()
         domain = [
@@ -337,7 +347,9 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
             if self._fields[fname].type == "many2one":
                 value = value.id
             domain.append((fname, "=", value or False))
-        return self.search(domain)
+        prior = self.search(domain)
+        prior._check_period_projection()
+        return prior
 
     @api.constrains("correction_type")
     def _check_correction_type_supported(self):
@@ -362,7 +374,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         being finished.
         """
         for rec in self:
-            if not rec.is_correction:
+            if not rec._is_amending_declaration():
                 continue
             if not rec._prior_submitted():
                 raise UserError(_(
@@ -420,6 +432,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         is refused rather than rendered in the wrong vintage.
         """
         for rec in self:
+            rec._check_period_projection()
             ref = rec._version_reference_date()
             if rec.version_id and ref and (
                     rec.version_id.code == rec._report_code
@@ -475,6 +488,25 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
             else:
                 rec.date_from = rec.date_to = False
 
+    def _check_period_projection(self):
+        """Validate stored dates against the form's native period computation.
+
+        Annual forms override _compute_period, so replay that same method on
+        an unsaved record rather than assume every declaration is monthly.
+        Explicit inputs and computation also ignore forged context defaults.
+        """
+        for rec in self:
+            expected = rec.new({
+                "year": rec.year, "month": rec.month,
+                "company_id": rec.company_id.id,
+            })
+            expected._compute_period()
+            if (rec.date_from, rec.date_to) != (expected.date_from, expected.date_to):
+                raise UserError(_(
+                    "The stored declaration dates do not match its period inputs. "
+                    "Correct the period inputs before generating the declaration."
+                ))
+
     @api.depends("line_ids")
     def _compute_lines_count(self):
         for rec in self:
@@ -482,7 +514,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
 
     def _sheet_lines(self):
         self.ensure_one()
-        return self.line_ids.filtered(lambda l: l.res_model == self._name)
+        return self.line_ids.filtered(lambda line: line.res_model == self._name)
 
     # ------------------------------------------------------------------
     # Engine-neutral payslip adapter
@@ -687,6 +719,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
         """Master-data checks the XML template relies on. Concrete reports
         extend with form-specific checks (employer id, address …)."""
         self.ensure_one()
+        self._check_period_projection()
         self._check_amends_something()
         return True
 
@@ -770,7 +803,7 @@ class CSSKPayrollDeclarationMixin(models.AbstractModel):
             "declaration": self,
             # Templates emit the authority's own spelling from this.
             "correction_type": self.correction_type,
-            "is_correction": self.is_correction,
+            "is_correction": self._is_amending_declaration(),
             "correction_reference": self.correction_reference or "",
             "company": self.company_id,
             "aggregate": data["aggregate"],

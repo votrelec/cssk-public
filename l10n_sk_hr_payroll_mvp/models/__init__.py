@@ -1,2 +1,3 @@
 from . import res_company
 from . import l10n_sk_mvp
+from . import mvp_correction

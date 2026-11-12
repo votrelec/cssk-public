@@ -191,7 +191,7 @@ class DeclarationFundBases(models.AbstractModel):
                         "Use an allowed company when reviewing the declaration's legacy payroll."
                     )
                 )
-            if record.state != "draft" or not record.is_correction:
+            if record.state != "draft" or not record._is_amending_declaration():
                 raise UserError(
                     _(
                         "Confirm the legacy calculation on a draft corrective declaration."
@@ -320,7 +320,7 @@ class DeclarationFundBases(models.AbstractModel):
                     missing |= slip
         if (
             missing
-            and self.is_correction
+            and self._is_amending_declaration()
             and not self._legacy_fund_fallback_is_confirmed(slips)
         ):
             raise UserError(
@@ -333,9 +333,11 @@ class DeclarationFundBases(models.AbstractModel):
         warning = self._missing_fund_evidence_warning(missing) if missing else False
         if self.fund_bases_warning != warning:
             self.fund_bases_warning = warning
-            if warning:
+            if warning and self.id:
                 # Plain text goes through mail.thread's escaping. Do not make
                 # employee-supplied names into trusted markup.
+                # A virtual declaration retains its warning in cache; NewId
+                # is false and has no persistent business-document chatter.
                 self.message_post(body=warning)
         return result
 

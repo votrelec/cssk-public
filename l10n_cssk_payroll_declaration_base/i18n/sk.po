@@ -725,5 +725,21 @@ msgstr "Variabilný symbol ČSSZ (VS)"
 #. module: l10n_cssk_payroll_declaration_base
 #. odoo-python
 #: code:addons/l10n_cssk_payroll_declaration_base/models/fund_bases.py:0
-msgid "Monthly fund sources could not be reconciled for: %(slips)s. Recorded actual bases and charges are preserved. Review the original sources before claiming an exact monthly allocation."
-msgstr "Mesačné odvodové zdroje sa nepodarilo zosúladiť pre: %(slips)s. Zaznamenané skutočné základy a odvody ostávajú zachované. Pred použitím presného mesačného rozdelenia preskúmajte pôvodné zdroje."
+msgid ""
+"Monthly fund sources could not be reconciled for: %(slips)s. Recorded actual"
+" bases and charges are preserved. Review the original sources before "
+"claiming an exact monthly allocation."
+msgstr ""
+"Mesačné odvodové zdroje sa nepodarilo zosúladiť pre: %(slips)s. Zaznamenané "
+"skutočné základy a odvody ostávajú zachované. Pred použitím presného "
+"mesačného rozdelenia preskúmajte pôvodné zdroje."
+
+#. module: l10n_cssk_payroll_declaration_base
+#. odoo-python
+#: code:addons/l10n_cssk_payroll_declaration_base/models/hr_payroll_declaration.py:0
+msgid ""
+"The stored declaration dates do not match its period inputs. Correct the "
+"period inputs before generating the declaration."
+msgstr ""
+"Uložené dátumy výkazu nezodpovedajú jeho obdobiu. Pred generovaním opravte "
+"vstupné údaje obdobia."

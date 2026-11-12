@@ -1,7 +1,7 @@
 ---
 title: Mzdové hlásenia CZ/SK
 summary: Spoločný základ českých a slovenských mzdových hlásení — ponuka Mzdové hlásenia, postup Generovať / Označiť ako odoslané, opravné hlásenia, verzie tlačív a čítanie výplatných pások z oboch mzdových jadier.
-verified: 19.0.1.8.0
+verified: 19.0.1.9.3
 ---
 
 ## Na čo slúži {#purpose}
@@ -191,6 +191,10 @@ Zákonné výkazy → Doručenia*. Pozri
 
 ## Staršie mzdy bez uchovaných poistných základov {#recorded-funds}
 
+Neuložený náhľad alebo pomocný výpočet zachová rovnaké upozornenie vo svojej
+pracovnej pamäti. Do diskusie sa upozornenie zapíše až pri uloženom doklade.
+Pravidlá podkladov pôvodných a opravných výkazov sa tým nemenia.
+
 Poistný výkaz vymenuje pásky, pri ktorých chýbajú podrobné poistné základy
 alebo už nezodpovedajú mzde. Upozornenie je vo formulári aj v histórii
 komunikácie. Pôvodný výkaz môže použiť doterajší výpočet z hrubej odmeny;
@@ -210,3 +214,9 @@ alebo dôvodu treba nové potvrdenie. Opakovanie rovnakého potvrdenia nevytvor�
 ďalší záznam schválenia. Pôvodne podaná kópia zostáva zachovaná. Ak mzdový
 systém podrobné základy ešte neuchováva, používa doterajší postup bez tohto
 upozornenia a potvrdenia.
+
+
+Kontrola opravy, schválenie historických podkladov a kontext šablóny
+vychádzajú z typu podania. Uložené pole is_correction je projekciou pre UI;
+priamy ORM zápis do neho nemôže zmeniť opravu na riadny výkaz ani obísť
+požiadavku na presné fondové podklady.
