@@ -15,7 +15,7 @@ Unreleased
 * Validate reviewed health sources before salary-rule evaluation and new
   profile capture; freeze the source contract period independently of later
   wage versions and later changes to the employee card.
-- **19.0.1.27.0:** record medical PN identities and reviewed daily bases on
+* **19.0.1.27.0:** record medical PN identities and reviewed daily bases on
   native leave, distinguish new illnesses from continuation, and support
   calendar-only rest-day PN. Validate evidence before salary-rule evaluation
   and extend optional retained monthly sources cooperatively.
