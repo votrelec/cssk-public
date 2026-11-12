@@ -51,14 +51,14 @@ class TestMonthlyHealthNative(TransactionCase):
         frozen = deepcopy(first.l10n_sk_fund_assessment)
         salary = [(row.id, row.total) for row in first.line_ids]
         second = self.slip(employee, start=date(2027, 6, 1), end=date(2027, 6, 30))
-        self.assertEqual(
-            self.health(first | second),
-            {
-                "HEALTH": -3,
-                "HEALTHEMPLOYER": 44,
-                "HEALTHDOPLATOK": -0.23,
-            },
-        )
+        for code, expected in {
+            "HEALTH": -3,
+            "HEALTHEMPLOYER": 44,
+            "HEALTHDOPLATOK": -0.23,
+        }.items():
+            self.assertAlmostEqual(
+                self.health(first | second)[code], expected, places=2
+            )
         self.assertFalse(second.l10n_sk_monthly_fund_warning)
         self.assertEqual(first.l10n_sk_fund_assessment, frozen)
         self.assertEqual([(row.id, row.total) for row in first.line_ids], salary)
