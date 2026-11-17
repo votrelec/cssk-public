@@ -1,7 +1,7 @@
 ---
 title: Slovenské mzdy
 summary: Celá skupina modulov slovenských miezd na jednom mieste — mesačná výplatná páska pre pracovný pomer a tri dohody v Odoo Enterprise Payroll alebo v aplikácii OCA payroll, s datovanými zákonnými sadzbami, voľnom, ročným zúčtovaním dane a zaúčtovaním do hlavnej knihy.
-verified: 19.0.1.3.0
+verified: 19.0.1.3.1
 ---
 
 ## Na čo slúži {#purpose}
@@ -440,3 +440,29 @@ pri starších mzdách môžete porovnať pôvodné mzdy a podanie, zapísať d�
 a výslovne potvrdiť pôvodný postup. Formulár zaznamená kto a kedy ho potvrdil.
 Už podané mzdy neprepočítavajte iba kvôli doplneniu údajov. V systémoch,
 ktoré tieto údaje ešte neuchovávajú, pokračuje doterajší postup.
+
+## Vyňatie príjmu zo zdravotných odvodov {#health-exclusions}
+
+Príjem z DoBPŠ a zákonom určených dôchodcovských DoVP/DoPČ je vyňatý podľa
+§10b(1)(a) zákona580/2004. Profil `service_at_age` už zahŕňa overenú podmienku
+dôchodkového veku, neznamená ľubovoľný výsluhový dôchodok bez ohľadu na vek.
+Dôchodca v bežnom pracovnom pomere naďalej platí zdravotné odvody aj odvody
+zamestnávateľa. Samostatne má ako poistenec štátu úľavu od minimálneho doplatku
+podľa §11(7)(b) a16a(2).
+
+Individuálne vyňatie sa použije pre iný overený právny dôvod, napríklad
+príslušné zahraničné poistenie. Na dátumovej pracovnej verzii uchovajte právny
+dôvod a odkaz na podklad. Samotné označenie poistenca štátu nestačí na vyňatie
+bežnej mzdy. Starý checkbox sa nepovažuje za vymyslený doklad o zahraničnom
+poistení. Pri novom výpočte sa vyžaduje overenie; podaná a zaúčtovaná história
+sa rieši samostatným opravným postupom.
+
+Uznaná invalidita podľa §12(2), poznámky48 (zákony461/2003 a328/2002), tiež
+zakladá nárok na zníženú sadzbu bez ďalšieho checkboxu preukazu ŤZP. Dátumový
+invalidný profil je odlišný od samotného starobného či výsluhového dôchodku
+po dovŕšení veku. Výpočet manuálne pole zdravotného postihnutia neprepisuje.
+
+Spoločný base dodáva rozhodnutia obom enginom. OCA pravidlá ich používajú bez
+zmeny OP zaokrúhlenia, sadzieb, sociálnej OOP či kalendárového pomeru. Ostatné
+dňové výnimky a výstupné formáty sú samostatné príspevky.
+[Zákon580/2004 §10b,11,16a](https://static.slov-lex.sk/static/SK/ZZ/2004/580/20261231.html).

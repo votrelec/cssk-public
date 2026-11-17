@@ -422,7 +422,7 @@ if payslip._l10n_sk_is_recording_funds():
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-if contract.l10n_sk_ztp:
+if contract.l10n_sk_health_is_disabled():
     rate = payslip.rule_parameter('l10n_sk_health_rate_employee_ztp')
 else:
     rate = payslip.rule_parameter('l10n_sk_health_rate_employee')
@@ -443,13 +443,13 @@ if contract.l10n_sk_health_oop_claim and contract.l10n_sk_agreement_type == 'non
 # §19 z.580/2004: floor the health preddavok DOWN to the eurocent.
 result = -(int(round(base * rate, 4)) / 100.0)
 result_rate = 100
-# Štátny poistenec (student on DoBPŠ / working pensioner) pays no health
-# insurance on agreement income (z. 580/2004).
-if contract.l10n_sk_health_exempt:
+# Excluded student/pension agreement receipts follow section 10b(1)(a).
+# Ordinary employment pensioners still pay premiums.
+if contract.l10n_sk_health_is_exempt():
     result = 0.0
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
-        'health', 'employee', 0.0 if contract.l10n_sk_health_exempt else base, rate, -result,
+        'health', 'employee', 0.0 if contract.l10n_sk_health_is_exempt() else base, rate, -result,
         facts={"rule_code": 'HEALTH'})
         </field>
         <field name="appears_on_payslip" eval="True"/>
@@ -464,17 +464,17 @@ if payslip._l10n_sk_is_recording_funds():
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">
-if contract.l10n_sk_ztp:
+if contract.l10n_sk_health_is_disabled():
     rate = payslip.rule_parameter('l10n_sk_health_rate_employer_ztp')
 else:
     rate = payslip.rule_parameter('l10n_sk_health_rate_employer')
 result = int(round(categories.GROSS * rate, 4)) / 100.0
 result_rate = 100
-if contract.l10n_sk_health_exempt:
+if contract.l10n_sk_health_is_exempt():
     result = 0.0
 if payslip._l10n_sk_is_recording_funds():
     l10n_sk_fund_record = payslip.l10n_sk_fund_record(
-        'health', 'employer', 0.0 if contract.l10n_sk_health_exempt else categories.GROSS, rate, result,
+        'health', 'employer', 0.0 if contract.l10n_sk_health_is_exempt() else categories.GROSS, rate, result,
         facts={"rule_code": 'HEALTHEMPLOYER'})
         </field>
         <field name="appears_on_payslip" eval="False"/>
@@ -507,7 +507,7 @@ if payslip._l10n_sk_is_recording_funds():
 #   * PN days and days outside the contract shrink it proportionally.
 # The annual true-up is the insurer's (§ 13b, § 19); this is the monthly
 # advance only. A concurrent-employment opt-out (ods. 5) is not modelled.
-if contract.l10n_sk_health_exempt or contract.l10n_sk_ztp or contract.l10n_sk_agreement_type == 'dobps':
+if contract.l10n_sk_health_minimum_is_exempt():
     result = 0.0
 else:
   min_base = payslip.rule_parameter('l10n_sk_health_min_base')

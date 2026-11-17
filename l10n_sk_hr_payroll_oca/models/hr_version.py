@@ -66,8 +66,9 @@ class HrVersion(models.Model):
     # --- Health insurance ---------------------------------------------------
     l10n_sk_ztp = fields.Boolean(
         string="ZŤP / Disabled",
-        help="Person with a health disability (>=50% functional impairment). "
-        "Applies the halved health-insurance rate (2%/2.5% employee).",
+        help="Documented disability or severe disability under section 12(2). "
+        "Recognised invalidity-pension profiles also imply the reduced health "
+        "rate without this additional checkbox.",
         groups="payroll.group_payroll_user",
         tracking=True,
     )
@@ -83,12 +84,11 @@ class HrVersion(models.Model):
         tracking=True,
     )
     l10n_sk_health_exempt = fields.Boolean(
-        string="Health-insurance exempt (štátny poistenec)",
-        help="The worker is a state insuree (poistenec štátu) — typically a "
-        "student on a DoBPŠ agreement or a working pensioner — so the agreement "
-        "income carries no health insurance (employee, employer, or minimum-base "
-        "top-up), per z. 580/2004. Independent of the pension OOP: a student is "
-        "health-exempt even in a month where the OOP is not claimed.",
+        string="Individually reviewed health exemption",
+        help="Use only for a separately reviewed legal basis, such as applicable "
+        "foreign insurance, and retain its reference. State-insured status alone "
+        "does not exclude ordinary employment income. Statutory student and "
+        "pension agreement exclusions are derived automatically from the profile.",
         groups="payroll.group_payroll_user",
         tracking=True,
     )

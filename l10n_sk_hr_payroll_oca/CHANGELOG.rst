@@ -13,6 +13,8 @@ Carry-over to 18.0
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
+* Not yet ported. Mirror the shared predicates in the 18.0 and Enterprise rules.
+  This contribution does not change OP rounding, premium rates or social OOP.
 
 - **19.0.1.24.4 and 19.0.1.24.5 (2026-11-10), not yet on 18.0:** employer
   sick pay clipped to the employment and on the onset's terms
@@ -56,6 +58,27 @@ Carry-over to 18.0
   ``tests/test_parameters_2027.py``. Data only; the 18.0 parameters carry the
   same codes, so the records port as they are. Adapt the test to the 18.0
   contract (``contract_id``) and payslip states.
+
+[19.0.1.25.1] — 2026-11-11
+==========================
+
+Fixed
+~~~~~
+
+* Derive DoBPS student and statutory pensioner DoVP/DoPC exclusions in the
+  employee, employer and minimum rules, without a required manual checkbox.
+* Keep both premiums for ordinary pensioner employment while removing the
+  state-insuree minimum top-up. Other ordinary employees keep that top-up.
+* Relabel the separate manual exemption and expose its dated basis/reference.
+* Select the reduced rate for recognised invalidity without another checkbox;
+  preflight an unsupported manual exclusion before the salary-rule evaluator.
+
+Changed
+~~~~~~~
+
+* Preserve the original fifteen-formula reference unchanged. AST checks pin
+  the twelve unaffected formulas; independent profile/output cases verify the
+  three intentionally corrected health eligibility rules.
 
 [19.0.1.25.0] — 2026-11-11
 ==========================
