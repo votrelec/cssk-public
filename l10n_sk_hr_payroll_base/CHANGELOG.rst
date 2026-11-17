@@ -16,6 +16,34 @@ Carry-over to 18.0
 * Not yet ported: recorded fund evidence, engine-neutral missing-reader policy
   and explicitly reviewed legacy corrections. Adapt contract/engine adapters
   and rerun signed, optional-module, refund and legacy-review scenarios.
+* Not yet ported. Adapt the HR-version factual API to contracts and rerun the
+  engine-independent, access, revision, source-boundary and concurrency cases.
+
+[19.0.1.4.0] — 2026-11-11
+-------------------------
+
+Added
+~~~~~
+
+* Engine-neutral monthly health calendars with reviewed intervals, source
+  references, immutable revisions, company access rules and employee UI.
+* Separate same-employer 2P and strike 2S facts, alongside 2D/2Y days and
+  benefit, disability, state-insured and concurrent-employer facts.
+* Dated written minimum opt-out references and a shared factual calendar API.
+
+Changed
+~~~~~~~
+
+* This calendar contribution changes no salary-rule arithmetic or recorded
+  premium shape. Payroll and declaration consumers remain separate work.
+
+Fixed
+~~~~~
+
+* Reject incomplete calendar revisions, profile/calendar disability conflicts
+  and a minimum opt-out supported only by another role at the same employer.
+* Serialize review/revision against child changes and recheck child boundaries
+  when changing their parent. Retain strike facts without inventing no-income days.
 
 [19.0.1.3.0] — 2026-11-11
 -------------------------
